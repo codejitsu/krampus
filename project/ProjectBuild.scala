@@ -16,7 +16,7 @@ object ProjectBuild extends Build {
   lazy val krampusCommon = Project(
     id = "krampus-common",
     base = file("./krampus-common"),
-    settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusCommon)
+    settings = commonSettings ++ Seq(libraryDependencies ++= Dependencies.krampusCommon)
   )
 
   lazy val krampusMetrics = Project(
@@ -61,6 +61,7 @@ object Dependencies {
     val jodaConvert   = "org.joda"                 % "joda-convert"             % JodaTimeConvertVer
     val akkaStreams   = "com.typesafe.akka"       %% "akka-stream-experimental" % AkkaStreamsVer
     val jackson       = "org.json4s"              %% "json4s-jackson"           % Jackson4sVer
+    val avro          = "org.apache.avro"          % "avro"                     % AvroVer
   }
 
   object Test {
@@ -74,7 +75,7 @@ object Dependencies {
 
   /** Module deps */
 
-  val krampusCommon = Seq(config, joda, jodaConvert) ++ test
+  val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
   val krampusMetrics = Seq(config) ++ test
   val krampusProcessor = Seq(config) ++ test
   val krampusProducer = Seq(config, akkaStreams, jackson) ++ test

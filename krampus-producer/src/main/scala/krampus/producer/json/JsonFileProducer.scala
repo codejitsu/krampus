@@ -2,13 +2,17 @@
 
 package krampus.producer.json
 
+import java.io.ByteArrayOutputStream
 import java.net.URL
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import com.typesafe.config.{Config, ConfigFactory}
+import krampus.avro.WikiChangeEntryAvro
 import krampus.entity.WikiChangeEntry
+import org.apache.avro.io.EncoderFactory
+import org.apache.avro.specific.SpecificDatumWriter
 import org.joda.time.DateTime
 import org.json4s.JsonAST.{JBool, JInt, JString}
 import org.json4s.jackson.JsonMethods._
@@ -38,7 +42,7 @@ object JsonFileProducer {
         val broadcast = builder.add(Broadcast[Option[WikiChangeEntry]](2))
 
         entries ~> broadcast ~> logEveryNSink(logElements(config))
-                   broadcast ~> toAvro() ~> writeToKafka() ~> out
+                   broadcast ~> toAvro() ~> serialize() ~> writeToKafka() ~> out
       }
     }
 
@@ -108,13 +112,54 @@ object JsonFileProducer {
     x + 1
   }
 
-  def count: Sink[Option[WikiChangeEntry], Future[Int]] = Sink.fold(0) {
+  def count: Sink[Unit, Future[Int]] = Sink.fold(0) {
     case (c, _) => c + 1
   }
 
-  def toAvro(): Flow[Option[WikiChangeEntry], Option[WikiChangeEntry], Unit] = Flow[Option[WikiChangeEntry]]
-    .map(x => x)
+  def writeToKafka(): Flow[Option[(CharSequence, Array[Byte])], Unit, Unit] =
+    Flow[Option[(CharSequence, Array[Byte])]].map {
+      case Some((key, bytes)) => ()
+      case None => ()
+    }
 
-  def writeToKafka(): Flow[Option[WikiChangeEntry], Option[WikiChangeEntry], Unit] = Flow[Option[WikiChangeEntry]]
-    .map(x => x)
+  def toAvro(): Flow[Option[WikiChangeEntry], Option[WikiChangeEntryAvro], Unit] =
+    Flow[Option[WikiChangeEntry]].map { entryOpt =>
+      entryOpt.map { entry =>
+        import entry._
+
+        val avroVal = new WikiChangeEntryAvro()
+
+        avroVal.setIsRobot(isRobot)
+        avroVal.setChannel(channel)
+        avroVal.setTimestamp(timestamp.toString)
+        avroVal.setFlags(flags.mkString(","))
+        avroVal.setIsUnpatrolled(isUnpatrolled)
+        avroVal.setPage(page)
+        avroVal.setDiffUrl(diffUrl.toString)
+        avroVal.setAdded(added)
+        avroVal.setDeleted(deleted)
+        avroVal.setComment(comment)
+        avroVal.setIsNew(isNew)
+        avroVal.setIsMinor(isMinor)
+        avroVal.setDelta(delta)
+        avroVal.setUser(user)
+        avroVal.setNamespace(namespace)
+
+        avroVal
+      }
+    }
+
+  def serialize(): Flow[Option[WikiChangeEntryAvro], Option[(CharSequence, Array[Byte])], Unit] =
+    Flow[Option[WikiChangeEntryAvro]].map { avroValOpt =>
+      avroValOpt.map { avroVal =>
+        val out = new ByteArrayOutputStream()
+        val encoder = EncoderFactory.get().binaryEncoder(out, null)
+        val writer = new SpecificDatumWriter[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
+
+        writer.write(avroVal, encoder)
+        encoder.flush()
+        out.close()
+        (avroVal.getChannel(), out.toByteArray())
+      }
+    }
 }

@@ -1,0 +1,22 @@
+{
+    "namespace": "krampus.avro",
+    "type": "record",
+    "name": "WikiChangeEntryAvro",
+    "fields": [
+         {"name": "isRobot", "type": "boolean"},
+         {"name": "channel",  "type": "string"},
+         {"name": "timestamp", "type": "string"},
+         {"name": "flags", "type": "string"},
+         {"name": "isUnpatrolled", "type": "boolean"},
+         {"name": "page", "type": "string"},
+         {"name": "diffUrl", "type": "string"},
+         {"name": "added", "type": "int"},
+         {"name": "deleted", "type": "int"},
+         {"name": "comment", "type": "string"},
+         {"name": "isNew", "type": "boolean"},
+         {"name": "isMinor", "type": "boolean"},
+         {"name": "delta", "type": "int"},
+         {"name": "user", "type": "string"},
+         {"name": "namespace", "type": "string"}
+     ]
+}

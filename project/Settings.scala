@@ -40,6 +40,8 @@ object Settings extends Build {
     ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
   )
 
+  lazy val commonSettings = defaultSettings ++ sbtavro.SbtAvro.avroSettings
+
   val tests = inConfig(Test)(Defaults.testTasks) ++ inConfig(IntegrationTest)(Defaults.itSettings)
 
   val testOptionSettings = Seq(

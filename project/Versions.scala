@@ -14,5 +14,7 @@ object Versions {
   val AkkaStreamsVer        = "1.0-RC4"
   val Jackson4sVer          = "3.2.11"
 
+  val AvroVer               = "1.7.7"
+
   val LogbackVer            = "1.1.2"
 }
