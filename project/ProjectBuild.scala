@@ -55,10 +55,12 @@ object Dependencies {
   import Versions._
 
   object Compile {
-    val config        = "com.typesafe"             % "config"               % TypesafeConfigVer
-    val logback       = "ch.qos.logback"           % "logback-classic"      % LogbackVer
-    val joda          = "joda-time"                % "joda-time"            % JodaTimeVer
-    val jodaConvert   = "org.joda"                 % "joda-convert"         % JodaTimeConvertVer
+    val config        = "com.typesafe"             % "config"                   % TypesafeConfigVer
+    val logback       = "ch.qos.logback"           % "logback-classic"          % LogbackVer
+    val joda          = "joda-time"                % "joda-time"                % JodaTimeVer
+    val jodaConvert   = "org.joda"                 % "joda-convert"             % JodaTimeConvertVer
+    val akkaStreams   = "com.typesafe.akka"       %% "akka-stream-experimental" % AkkaStreamsVer
+    val jackson       = "org.json4s"              %% "json4s-jackson"           % Jackson4sVer
   }
 
   object Test {
@@ -75,7 +77,7 @@ object Dependencies {
   val krampusCommon = Seq(config, joda, jodaConvert) ++ test
   val krampusMetrics = Seq(config) ++ test
   val krampusProcessor = Seq(config) ++ test
-  val krampusProducer = Seq(config) ++ test
+  val krampusProducer = Seq(config, akkaStreams, jackson) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
 }
