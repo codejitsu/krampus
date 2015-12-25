@@ -13,7 +13,7 @@ import org.joda.time.DateTime
 import org.json4s.JsonAST.{JBool, JInt, JString}
 import org.json4s.jackson.JsonMethods._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 object JsonFileProducer {
@@ -29,7 +29,7 @@ object JsonFileProducer {
 
     val config = ConfigFactory.load()
 
-    val entries = source(input(args)).via(parseJson())
+    val entries = source(input(args)).via(parseJson(config))
 
     val graph = FlowGraph.closed(count) { implicit builder =>
       out => {
@@ -38,17 +38,18 @@ object JsonFileProducer {
         val broadcast = builder.add(Broadcast[Option[WikiChangeEntry]](2))
 
         entries ~> broadcast ~> logEveryNSink(logElements(config))
-                   broadcast ~> check() ~> out
+                   broadcast ~> toAvro() ~> writeToKafka() ~> out
       }
     }
 
-    graph.run().onComplete { x =>
-      x match {
+    graph.run().onComplete { res =>
+      res match {
         case Success(c) => println(s"Completed: $c items processed")
         case Failure(_) => println("Something went wrong")
       }
       system.shutdown()
     }
+
     0
   }
 
@@ -62,13 +63,14 @@ object JsonFileProducer {
     Source(() => source.getLines())
   }
 
-  def parseJson(): Flow[String, Option[WikiChangeEntry], Unit] = Flow[String].map(parseItem).collect {
-    case Success(e) => Some(e)
-    case Failure(f) => {
-      println(s"Exception: ${f.getMessage}\n")
-      None
+  def parseJson(config: Config)(implicit ec: ExecutionContext): Flow[String, Option[WikiChangeEntry], Unit] =
+    Flow[String].mapAsync(config.getInt("krampus.producer.json.parallelizm"))(line => Future(parseItem(line))).collect {
+      case Success(e) => Some(e)
+      case Failure(f) => {
+        println(s"Exception: ${f.getMessage}\n")
+        None
+      }
     }
-  }
 
   def parseItem(line: String): Try[WikiChangeEntry] = Try {
     val json = parse(line)
@@ -110,6 +112,9 @@ object JsonFileProducer {
     case (c, _) => c + 1
   }
 
-  def check(): Flow[Option[WikiChangeEntry], Option[WikiChangeEntry], Unit] = Flow[Option[WikiChangeEntry]]
+  def toAvro(): Flow[Option[WikiChangeEntry], Option[WikiChangeEntry], Unit] = Flow[Option[WikiChangeEntry]]
+    .map(x => x)
+
+  def writeToKafka(): Flow[Option[WikiChangeEntry], Option[WikiChangeEntry], Unit] = Flow[Option[WikiChangeEntry]]
     .map(x => x)
 }
