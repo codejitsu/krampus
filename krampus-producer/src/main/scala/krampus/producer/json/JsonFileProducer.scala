@@ -4,21 +4,22 @@ package krampus.producer.json
 
 import java.io.ByteArrayOutputStream
 import java.net.URL
-import java.util.Properties
 import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
+import com.softwaremill.react.kafka.{ProducerProperties, ReactiveKafka}
 import com.typesafe.config.{Config, ConfigFactory}
+import kafka.serializer.Encoder
 import krampus.avro.WikiChangeEntryAvro
 import krampus.entity.WikiChangeEntry
 import org.apache.avro.io.EncoderFactory
 import org.apache.avro.specific.SpecificDatumWriter
-import org.apache.kafka.clients.producer.{RecordMetadata, Callback, ProducerRecord, KafkaProducer}
 import org.joda.time.DateTime
 import org.json4s.JsonAST.{JBool, JInt, JString}
 import org.json4s.jackson.JsonMethods._
+import org.reactivestreams.Subscriber
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -39,17 +40,16 @@ object JsonFileProducer {
 
     val entries = source(input(args)).via(parseJson(config))
 
-    val producer = getProducer(config, args)
-    val topic = config.getString("krampus.producer.kafka.topic")
-
+    val kafka = new ReactiveKafka()
     val graph = FlowGraph.closed(count) { implicit builder =>
       out => {
         import FlowGraph.Implicits._
 
-        val broadcast = builder.add(Broadcast[Option[WikiChangeEntry]](2))
+        val broadcast = builder.add(Broadcast[Option[WikiChangeEntry]](3))
 
         entries ~> broadcast ~> logEveryNSink(logElements(config))
-                   broadcast ~> toAvro() ~> serialize() ~> writeToKafka(producer, topic) ~> out
+                   broadcast ~> toAvro() ~> serialize() ~> writeToKafka() ~> out
+                   broadcast ~> toAvro() ~> serialize() ~> Sink(getSubscriber(config, args, kafka))
       }
     }
 
@@ -59,25 +59,21 @@ object JsonFileProducer {
         case Failure(_) => println("Something went wrong")
       }
       system.shutdown()
-      producer.close()
     }
 
     0
   }
 
-  def getProducer(config: Config, args: Array[String]): KafkaProducer[String, Array[Byte]] = {
-    val props = new Properties()
-
-    props.put("bootstrap.servers", args(1))
-    props.put("acks", config.getString("krampus.producer.kafka.acks"))
-    props.put("retries", config.getString("krampus.producer.kafka.retries"))
-    props.put("batch.size", config.getString("krampus.producer.kafka.batch-size"))
-    props.put("linger.ms", config.getString("krampus.producer.kafka.linger-ms"))
-    props.put("buffer.memory", config.getString("krampus.producer.kafka.buffer-memory"))
-    props.put("key.serializer", config.getString("krampus.producer.kafka.key-serializer"))
-    props.put("value.serializer", config.getString("krampus.producer.kafka.value-serializer"))
-
-    new KafkaProducer[String, Array[Byte]](props)
+  def getSubscriber(config: Config, args: Array[String],
+                    kafka: ReactiveKafka)(implicit system: ActorSystem): Subscriber[(CharSequence, Array[Byte])] = {
+    println(args(1))
+    kafka.publish(ProducerProperties(
+      brokerList = args(1),
+      topic = config.getString("krampus.producer.kafka.topic"),
+      encoder = new Encoder[(CharSequence, Array[Byte])]() {
+        override def toBytes(t: (CharSequence, Array[Byte])): Array[Byte] = t._2
+      }
+    ))
   }
 
   def input(args: Array[String]): String = args.head
@@ -139,30 +135,9 @@ object JsonFileProducer {
     case (c, _) => c + 1
   }
 
-  def writeToKafka(producer: KafkaProducer[String, Array[Byte]], topic: String): Flow[Option[(CharSequence, Array[Byte])], Unit, Unit] =
-    Flow[Option[(CharSequence, Array[Byte])]].map {
-      case Some((key, bytes)) =>
-        try {
-          println(s"Writing msg to kafka ($key, bytes[${bytes.length}]), ts=${System.currentTimeMillis()}")
-
-          val msg = new ProducerRecord[String, Array[Byte]](topic, key.toString, bytes)
-          producer.send(msg, new Callback {
-            override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
-              if (Option(exception).isEmpty) {
-                println(exception.getMessage)
-              } else {
-                println(s"Msg written (${msg.key()}, bytes[${msg.value().length}])")
-              }
-            }
-          })
-          println(s"After Writing msg to kafka ($key, bytes[${bytes.length}]), ts=${System.currentTimeMillis()}")
-        } catch {
-          case th: Throwable => println(th.getMessage)
-        }
-
-        ()
-
-      case None => ()
+  def writeToKafka(): Flow[(CharSequence, Array[Byte]), Unit, Unit] =
+    Flow[(CharSequence, Array[Byte])].map {
+      case _ => ()
     }
 
   def toAvro(): Flow[Option[WikiChangeEntry], Option[WikiChangeEntryAvro], Unit] =
@@ -192,7 +167,7 @@ object JsonFileProducer {
       }
     }
 
-  def serialize(): Flow[Option[WikiChangeEntryAvro], Option[(CharSequence, Array[Byte])], Unit] =
+  def serialize(): Flow[Option[WikiChangeEntryAvro], (CharSequence, Array[Byte]), Unit] =
     Flow[Option[WikiChangeEntryAvro]].map { avroValOpt =>
       avroValOpt.map { avroVal =>
         val out = new ByteArrayOutputStream()
@@ -203,6 +178,6 @@ object JsonFileProducer {
         encoder.flush()
         out.close()
         (avroVal.getChannel(), out.toByteArray())
-      }
+      }.get
     }
 }
