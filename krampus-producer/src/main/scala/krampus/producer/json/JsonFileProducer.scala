@@ -4,6 +4,7 @@ package krampus.producer.json
 
 import java.io.ByteArrayOutputStream
 import java.net.URL
+import java.util.UUID
 import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
@@ -40,7 +41,6 @@ object JsonFileProducer {
 
     val entries = source(input(args)).via(parseJson(config))
 
-    val kafka = new ReactiveKafka()
     val graph = FlowGraph.closed(count) { implicit builder =>
       out => {
         import FlowGraph.Implicits._
@@ -48,8 +48,10 @@ object JsonFileProducer {
         val broadcast = builder.add(Broadcast[Option[WikiChangeEntry]](3))
 
         entries ~> broadcast ~> logEveryNSink(logElements(config))
-                   broadcast ~> toAvro() ~> serialize() ~> writeToKafka() ~> out
-                   broadcast ~> toAvro() ~> serialize() ~> Sink(getSubscriber(config, args, kafka))
+                   broadcast ~> out
+                   broadcast ~> avro ~> serialize.collect {
+                     case Some(msg) => msg
+                   } ~> Sink(kafkaSink(config, args, new ReactiveKafka()))
       }
     }
 
@@ -64,15 +66,17 @@ object JsonFileProducer {
     0
   }
 
-  def getSubscriber(config: Config, args: Array[String],
-                    kafka: ReactiveKafka)(implicit system: ActorSystem): Subscriber[(CharSequence, Array[Byte])] = {
+  def kafkaSink(config: Config, args: Array[String],
+                kafka: ReactiveKafka)(implicit system: ActorSystem): Subscriber[(CharSequence, Array[Byte])] = {
     println(args(1))
     kafka.publish(ProducerProperties(
       brokerList = args(1),
       topic = config.getString("krampus.producer.kafka.topic"),
+      clientId = UUID.randomUUID().toString,
       encoder = new Encoder[(CharSequence, Array[Byte])]() {
         override def toBytes(t: (CharSequence, Array[Byte])): Array[Byte] = t._2
-      }
+      },
+      partitionizer = msg => Option(msg._1.toString.toCharArray.map(_.toByte))
     ))
   }
 
@@ -131,7 +135,7 @@ object JsonFileProducer {
     x + 1
   }
 
-  def count: Sink[Unit, Future[Int]] = Sink.fold(0) {
+  def count: Sink[Option[WikiChangeEntry], Future[Int]] = Sink.fold(0) {
     case (c, _) => c + 1
   }
 
@@ -140,7 +144,7 @@ object JsonFileProducer {
       case _ => ()
     }
 
-  def toAvro(): Flow[Option[WikiChangeEntry], Option[WikiChangeEntryAvro], Unit] =
+  def avro: Flow[Option[WikiChangeEntry], Option[WikiChangeEntryAvro], Unit] =
     Flow[Option[WikiChangeEntry]].map { entryOpt =>
       entryOpt.map { entry =>
         import entry._
@@ -167,7 +171,7 @@ object JsonFileProducer {
       }
     }
 
-  def serialize(): Flow[Option[WikiChangeEntryAvro], (CharSequence, Array[Byte]), Unit] =
+  def serialize: Flow[Option[WikiChangeEntryAvro], Option[(CharSequence, Array[Byte])], Unit] =
     Flow[Option[WikiChangeEntryAvro]].map { avroValOpt =>
       avroValOpt.map { avroVal =>
         val out = new ByteArrayOutputStream()
@@ -178,6 +182,6 @@ object JsonFileProducer {
         encoder.flush()
         out.close()
         (avroVal.getChannel(), out.toByteArray())
-      }.get
+      }
     }
 }
