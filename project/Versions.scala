@@ -16,5 +16,7 @@ object Versions {
 
   val AvroVer               = "1.7.7"
 
+  val KafkaClientsVer       = "0.8.2.0"
+
   val LogbackVer            = "1.1.2"
 }

@@ -4,6 +4,8 @@ package krampus.producer.json
 
 import java.io.ByteArrayOutputStream
 import java.net.URL
+import java.util.Properties
+import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
@@ -13,6 +15,7 @@ import krampus.avro.WikiChangeEntryAvro
 import krampus.entity.WikiChangeEntry
 import org.apache.avro.io.EncoderFactory
 import org.apache.avro.specific.SpecificDatumWriter
+import org.apache.kafka.clients.producer.{RecordMetadata, Callback, ProducerRecord, KafkaProducer}
 import org.joda.time.DateTime
 import org.json4s.JsonAST.{JBool, JInt, JString}
 import org.json4s.jackson.JsonMethods._
@@ -26,14 +29,18 @@ object JsonFileProducer {
   }
 
   def run(args: Array[String]): Int = {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    val config = ConfigFactory.load()
+
+    implicit val ec = ExecutionContext
+      .fromExecutor(Executors.newFixedThreadPool(config.getInt("krampus.producer.json.pool-size")))
 
     implicit val system = ActorSystem("krampus-json-producer")
     implicit val materializer = ActorMaterializer()
 
-    val config = ConfigFactory.load()
-
     val entries = source(input(args)).via(parseJson(config))
+
+    val producer = getProducer(config, args)
+    val topic = config.getString("krampus.producer.kafka.topic")
 
     val graph = FlowGraph.closed(count) { implicit builder =>
       out => {
@@ -42,7 +49,7 @@ object JsonFileProducer {
         val broadcast = builder.add(Broadcast[Option[WikiChangeEntry]](2))
 
         entries ~> broadcast ~> logEveryNSink(logElements(config))
-                   broadcast ~> toAvro() ~> serialize() ~> writeToKafka() ~> out
+                   broadcast ~> toAvro() ~> serialize() ~> writeToKafka(producer, topic) ~> out
       }
     }
 
@@ -52,9 +59,25 @@ object JsonFileProducer {
         case Failure(_) => println("Something went wrong")
       }
       system.shutdown()
+      producer.close()
     }
 
     0
+  }
+
+  def getProducer(config: Config, args: Array[String]): KafkaProducer[String, Array[Byte]] = {
+    val props = new Properties()
+
+    props.put("bootstrap.servers", args(1))
+    props.put("acks", config.getString("krampus.producer.kafka.acks"))
+    props.put("retries", config.getString("krampus.producer.kafka.retries"))
+    props.put("batch.size", config.getString("krampus.producer.kafka.batch-size"))
+    props.put("linger.ms", config.getString("krampus.producer.kafka.linger-ms"))
+    props.put("buffer.memory", config.getString("krampus.producer.kafka.buffer-memory"))
+    props.put("key.serializer", config.getString("krampus.producer.kafka.key-serializer"))
+    props.put("value.serializer", config.getString("krampus.producer.kafka.value-serializer"))
+
+    new KafkaProducer[String, Array[Byte]](props)
   }
 
   def input(args: Array[String]): String = args.head
@@ -116,9 +139,29 @@ object JsonFileProducer {
     case (c, _) => c + 1
   }
 
-  def writeToKafka(): Flow[Option[(CharSequence, Array[Byte])], Unit, Unit] =
+  def writeToKafka(producer: KafkaProducer[String, Array[Byte]], topic: String): Flow[Option[(CharSequence, Array[Byte])], Unit, Unit] =
     Flow[Option[(CharSequence, Array[Byte])]].map {
-      case Some((key, bytes)) => ()
+      case Some((key, bytes)) =>
+        try {
+          println(s"Writing msg to kafka ($key, bytes[${bytes.length}]), ts=${System.currentTimeMillis()}")
+
+          val msg = new ProducerRecord[String, Array[Byte]](topic, key.toString, bytes)
+          producer.send(msg, new Callback {
+            override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
+              if (Option(exception).isEmpty) {
+                println(exception.getMessage)
+              } else {
+                println(s"Msg written (${msg.key()}, bytes[${msg.value().length}])")
+              }
+            }
+          })
+          println(s"After Writing msg to kafka ($key, bytes[${bytes.length}]), ts=${System.currentTimeMillis()}")
+        } catch {
+          case th: Throwable => println(th.getMessage)
+        }
+
+        ()
+
       case None => ()
     }
 
