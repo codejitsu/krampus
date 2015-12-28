@@ -33,6 +33,9 @@ object JsonFileProducer {
   def run(args: Array[String]): Int = {
     val config = ConfigFactory.load()
 
+    println(s"Brokers: ${args(1)}")
+    println(s"File: ${args.head}")
+
     implicit val ec = ExecutionContext
       .fromExecutor(Executors.newFixedThreadPool(config.getInt("krampus.producer.json.pool-size")))
 
@@ -68,8 +71,7 @@ object JsonFileProducer {
 
   def kafkaSink(config: Config, args: Array[String],
                 kafka: ReactiveKafka)(implicit system: ActorSystem): Subscriber[(CharSequence, Array[Byte])] = {
-    println(args(1))
-    kafka.publish(ProducerProperties(
+    val properties: ProducerProperties[(CharSequence, Array[Byte])] = ProducerProperties(
       brokerList = args(1),
       topic = config.getString("krampus.producer.kafka.topic"),
       clientId = UUID.randomUUID().toString,
@@ -77,7 +79,9 @@ object JsonFileProducer {
         override def toBytes(t: (CharSequence, Array[Byte])): Array[Byte] = t._2
       },
       partitionizer = msg => Option(msg._1.toString.toCharArray.map(_.toByte))
-    ))
+    )
+
+    kafka.publish(properties.requestRequiredAcks(config.getInt("krampus.producer.kafka.acks")))
   }
 
   def input(args: Array[String]): String = args.head
