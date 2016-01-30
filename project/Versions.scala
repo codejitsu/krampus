@@ -11,12 +11,12 @@ object Versions {
   val ScalaTestVer          = "2.1.7"
   val ScalaCheckVer         = "1.11.4"
 
-  val AkkaStreamsVer        = "1.0-RC4"
+  val AkkaStreamsVer        = "1.0"
   val Jackson4sVer          = "3.2.11"
 
   val AvroVer               = "1.7.7"
 
-  val KafkaClientsVer       = "0.8.2.0"
+  val KafkaClientsVer       = "0.8.2.2"
   val ReactiveKafkaVer      = "0.8.3"
 
   val LogbackVer            = "1.1.2"
