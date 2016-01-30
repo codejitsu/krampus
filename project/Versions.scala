@@ -5,6 +5,8 @@ object Versions {
   val JDKVer                = "1.7"
 
   val TypesafeConfigVer     = "1.2.1"
+  val TypesafeLoggingVer    = "3.1.0"
+
   val JodaTimeVer           = "2.9.1"
   val JodaTimeConvertVer    = "1.2"
 

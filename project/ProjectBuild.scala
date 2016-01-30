@@ -57,6 +57,7 @@ object Dependencies {
   object Compile {
     val config        = "com.typesafe"                    % "config"                   % TypesafeConfigVer
     val logback       = "ch.qos.logback"                  % "logback-classic"          % LogbackVer
+    val logging       = "com.typesafe.scala-logging"     %% "scala-logging"            % TypesafeLoggingVer
     val joda          = "joda-time"                       % "joda-time"                % JodaTimeVer
     val jodaConvert   = "org.joda"                        % "joda-convert"             % JodaTimeConvertVer
     val akkaStreams   = "com.typesafe.akka"              %% "akka-stream-experimental" % AkkaStreamsVer
@@ -80,7 +81,7 @@ object Dependencies {
   val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
   val krampusMetrics = Seq(config) ++ test
   val krampusProcessor = Seq(config) ++ test
-  val krampusProducer = Seq(config, akkaStreams, jackson, kafkaClients, reactiveKafka) ++ test
+  val krampusProducer = Seq(config, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
 }

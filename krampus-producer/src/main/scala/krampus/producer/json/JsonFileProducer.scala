@@ -12,6 +12,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import com.softwaremill.react.kafka.{ProducerProperties, ReactiveKafka}
 import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Encoder
 import krampus.avro.WikiChangeEntryAvro
 import krampus.entity.WikiChangeEntry
@@ -25,7 +26,7 @@ import org.reactivestreams.Subscriber
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-object JsonFileProducer {
+object JsonFileProducer extends LazyLogging {
   def main(args: Array[String]): Unit = {
     sys.exit(run(args))
   }
@@ -33,8 +34,8 @@ object JsonFileProducer {
   def run(args: Array[String]): Int = {
     val config = ConfigFactory.load()
 
-    println(s"Brokers: ${args(1)}")
-    println(s"File: ${args.head}")
+    logger.info(s"Brokers: ${args(1)}")
+    logger.info(s"File: ${args.head}")
 
     implicit val ec = ExecutionContext
       .fromExecutor(Executors.newFixedThreadPool(config.getInt("krampus.producer.json.pool-size")))
@@ -60,8 +61,8 @@ object JsonFileProducer {
 
     graph.run().onComplete { res =>
       res match {
-        case Success(c) => println(s"Completed: $c items processed")
-        case Failure(_) => println("Something went wrong")
+        case Success(c) => logger.info(s"Completed: $c items processed")
+        case Failure(_) => logger.info("Something went wrong")
       }
       system.shutdown()
     }
@@ -98,7 +99,7 @@ object JsonFileProducer {
     Flow[String].mapAsync(config.getInt("krampus.producer.json.parallelizm"))(line => Future(parseItem(line))).collect {
       case Success(e) => Some(e)
       case Failure(f) => {
-        println(s"Exception: ${f.getMessage}\n")
+        logger.error(s"Exception: ${f.getMessage}\n")
         None
       }
     }
@@ -133,7 +134,7 @@ object JsonFileProducer {
 
   def logEveryNSink[T](n: Int): Sink[T, Future[Int]] = Sink.fold(0) { (x, y: T) =>
     if (x % n == 0) {
-      println(s"element #$x -> $y\n")
+      logger.info(s"element #$x -> $y\n")
     }
 
     x + 1
