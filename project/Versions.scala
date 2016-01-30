@@ -22,4 +22,6 @@ object Versions {
   val ReactiveKafkaVer      = "0.8.3"
 
   val LogbackVer            = "1.1.2"
+
+  val WikitickerVer         = "0.2"
 }
