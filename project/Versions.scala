@@ -13,7 +13,7 @@ object Versions {
   val ScalaTestVer          = "2.1.7"
   val ScalaCheckVer         = "1.11.4"
 
-  val AkkaStreamsVer        = "1.0"
+  val AkkaStreamsVer        = "2.0.2"
   val Jackson4sVer          = "3.2.11"
 
   val AvroVer               = "1.7.7"

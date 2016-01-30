@@ -8,7 +8,7 @@ import java.util.UUID
 import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.{ClosedShape, ActorMaterializer}
 import akka.stream.scaladsl._
 import com.softwaremill.react.kafka.{ProducerProperties, ReactiveKafka}
 import com.typesafe.config.{Config, ConfigFactory}
@@ -43,9 +43,9 @@ abstract class WikiProducer extends LazyLogging {
 
     val entries = source(args).via(parseJson(config))
 
-    val graph = FlowGraph.closed(count) { implicit builder =>
+    val graph = GraphDSL.create(count) { implicit builder =>
       out => {
-        import FlowGraph.Implicits._
+        import GraphDSL.Implicits._
 
         val broadcast = builder.add(Broadcast[Option[WikiChangeEntry]](3))
 
@@ -53,11 +53,13 @@ abstract class WikiProducer extends LazyLogging {
         broadcast ~> out
         broadcast ~> avro ~> serialize.collect {
           case Some(msg) => msg
-        } ~> Sink(kafkaSink(config, args, new ReactiveKafka()))
+        } ~> Sink.fromSubscriber(kafkaSink(config, args, new ReactiveKafka()))
+
+        ClosedShape
       }
     }
 
-    graph.run().onComplete { res =>
+    RunnableGraph.fromGraph(graph).run().onComplete { res =>
       res match {
         case Success(c) => logger.info(s"Completed: $c items processed")
         case Failure(_) => logger.info("Something went wrong")

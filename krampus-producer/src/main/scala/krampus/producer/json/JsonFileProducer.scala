@@ -14,6 +14,6 @@ object JsonFileProducer extends WikiProducer {
     import scala.io.{Source => ioSource}
 
     val source = ioSource.fromFile(args.head)
-    Source(() => source.getLines())
+    Source.fromIterator(() => source.getLines())
   }
 }
