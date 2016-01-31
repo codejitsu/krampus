@@ -2,37 +2,38 @@
 
 package krampus.producer.irc
 
-import akka.actor.{Props, ActorSystem, Actor}
+import akka.actor.{Actor, Props}
 import akka.stream.actor.ActorPublisher
 import akka.stream.actor.ActorPublisherMessage.{Cancel, Request}
 import akka.stream.scaladsl.Source
 import com.metamx.common.lifecycle.Lifecycle
 import com.metamx.common.scala.Jackson
-import io.imply.wikiticker.ConsoleTicker._
+import com.metamx.common.scala.lifecycle._
 import io.imply.wikiticker.{IrcTicker, Message, MessageListener}
 import krampus.producer.WikiProducer
-import com.metamx.common.scala.lifecycle._
 import krampus.producer.irc.IrcPublisher.Publish
 
-class IrcPublisher extends ActorPublisher[String] {
+class IrcPublisher() extends ActorPublisher[String] {
   import scala.collection._
 
   var queue: mutable.Queue[String] = mutable.Queue()
 
   override def receive: Actor.Receive = {
     case Publish(s) =>
+      println(s"->MSG, isActive = $isActive, totalDemand = $totalDemand")
       queue.enqueue(s)
       publishIfNeeded()
 
     case Request(cnt) =>
       println("Request: " + cnt)
-
       publishIfNeeded()
 
     case Cancel =>
+      println("Cancel")
       context.stop(self)
 
     case _ =>
+      println("Hm...")
   }
 
   def publishIfNeeded(): Unit = {
@@ -55,19 +56,16 @@ object IrcProducer extends WikiProducer {
     sys.exit(run(args))
   }
 
-  override def source(args: Array[String]): Source[String, Unit] = {
-    implicit val system = ActorSystem()
-
-    val dataPublisherRef = system.actorOf(Props[IrcPublisher])
-    val dataPublisher = ActorPublisher[String](dataPublisherRef)
-
-    val wikipedias = args.head.split(",")
-
-    val listener = new MessageListener {
-      override def process(message: Message) = {
-        dataPublisherRef ! Publish(Jackson.generate(message.toMap))
-      }
+  val dataPublisherRef = system.actorOf(Props[IrcPublisher])
+  val dataPublisher = ActorPublisher[String](dataPublisherRef)
+  val listener = new MessageListener {
+    override def process(message: Message) = {
+      dataPublisherRef ! Publish(Jackson.generate(message.toMap))
     }
+  }
+
+  override def source(args: Array[String]): Source[String, Unit] = {
+    val wikipedias = args.head.split(",")
 
     val ticker = new IrcTicker(
       "irc.wikimedia.org",
@@ -89,7 +87,7 @@ object IrcProducer extends WikiProducer {
       lifecycle.join()
     } catch {
       case e: Throwable =>
-        log.error(e, "Failed to start up, stopping and exiting.")
+        logger.error("Failed to start up, stopping and exiting.")
         lifecycle.stop()
     }
 
