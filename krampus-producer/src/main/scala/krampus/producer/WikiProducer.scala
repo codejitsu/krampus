@@ -30,7 +30,7 @@ import scala.util.{Failure, Success, Try}
   * Abstract wikipedia entry producer.
   */
 abstract class WikiProducer extends LazyLogging {
-  implicit val system = ActorSystem("krampus-json-producer")
+  implicit val system = ActorSystem("krampus-producer")
   implicit val materializer = ActorMaterializer()
 
   def run(args: Array[String]): Int = {

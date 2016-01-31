@@ -6,9 +6,7 @@ import akka.actor.{Actor, Props}
 import akka.stream.actor.ActorPublisher
 import akka.stream.actor.ActorPublisherMessage.{Cancel, Request}
 import akka.stream.scaladsl.Source
-import com.metamx.common.lifecycle.Lifecycle
 import com.metamx.common.scala.Jackson
-import com.metamx.common.scala.lifecycle._
 import io.imply.wikiticker.{IrcTicker, Message, MessageListener}
 import krampus.producer.WikiProducer
 import krampus.producer.irc.IrcPublisher.Publish
@@ -74,22 +72,8 @@ object IrcProducer extends WikiProducer {
       Seq(listener)
     )
 
-    val lifecycle = new Lifecycle
-
-    lifecycle onStart {
-      ticker.start()
-    } onStop {
-      ticker.stop()
-    }
-
-    try {
-      lifecycle.start()
-      lifecycle.join()
-    } catch {
-      case e: Throwable =>
-        logger.error("Failed to start up, stopping and exiting.")
-        lifecycle.stop()
-    }
+    ticker.start()
+    Thread.currentThread().join()
 
     Source.fromPublisher(dataPublisher)
   }
