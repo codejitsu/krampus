@@ -53,10 +53,10 @@ abstract class WikiProducer extends LazyLogging {
         val broadcast = builder.add(Broadcast[Option[WikiChangeEntry]](3))
 
         entries ~> broadcast ~> logEveryNSink(logElements(config))
-        broadcast ~> out
-        broadcast ~> avro ~> serialize.collect {
-          case Some(msg) => msg
-        } ~> Sink.fromSubscriber(kafkaSink(config, args, new ReactiveKafka()))
+                   broadcast ~> out
+                   broadcast ~> avro ~> serialize.collect {
+                     case Some(msg) => msg
+                   } ~> Sink.fromSubscriber(kafkaSink(config, args, new ReactiveKafka()))
 
         ClosedShape
       }

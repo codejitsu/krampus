@@ -2,28 +2,32 @@
 
 package krampus.producer.irc
 
-import akka.actor.{ActorRef, Actor, Props}
+import akka.actor.{Actor, Props}
 import akka.stream.actor.ActorPublisher
 import akka.stream.actor.ActorPublisherMessage.{Cancel, Request}
 import akka.stream.scaladsl.Source
+import com.metamx.common.lifecycle.Lifecycle
+import com.metamx.common.scala.lifecycle._
 import com.metamx.common.scala.Jackson
+import com.typesafe.scalalogging.LazyLogging
+import io.imply.wikiticker.ConsoleTicker._
 import io.imply.wikiticker.{IrcTicker, Message, MessageListener}
 import krampus.producer.WikiProducer
 import krampus.producer.irc.IrcPublisher.Publish
 
-class IrcPublisher() extends ActorPublisher[String] {
+class IrcPublisher() extends ActorPublisher[String] with LazyLogging {
   import scala.collection._
 
-  var queue: mutable.Queue[String] = mutable.Queue()
+  val queue: mutable.Queue[String] = mutable.Queue()
 
   override def receive: Actor.Receive = {
     case Publish(s) =>
-      println("Push msg in the queue.")
+      logger.info("Push msg in the queue.")
       queue.enqueue(s)
       publishIfNeeded()
 
     case Request(cnt) =>
-      println("Request: " + cnt)
+      logger.info("Request: " + cnt)
       publishIfNeeded()
 
     case Cancel =>
@@ -34,7 +38,7 @@ class IrcPublisher() extends ActorPublisher[String] {
 
   def publishIfNeeded(): Unit = {
     while (queue.nonEmpty && isActive && totalDemand > 0) {
-      println("msg -> flow")
+      logger.info("msg -> flow")
       onNext(queue.dequeue())
     }
   }
@@ -42,30 +46,6 @@ class IrcPublisher() extends ActorPublisher[String] {
 
 object IrcPublisher {
   case class Publish(data: String)
-}
-
-class WikiRun(wikis: Seq[String], actor: ActorRef) extends Runnable {
-  val listener = new MessageListener {
-    override def process(message: Message) = {
-      actor ! Publish(Jackson.generate(message.toMap))
-    }
-  }
-
-  val ticker = new IrcTicker(
-    "irc.wikimedia.org",
-    "imply",
-    wikis map (x => s"#$x.wikipedia"),
-    Seq(listener)
-  )
-
-  ticker.start()
-  Thread.sleep(30000)
-
-  override def run(): Unit = {
-    while(true) {
-      Thread.sleep(10)
-    }
-  }
 }
 
 /**
@@ -76,11 +56,38 @@ object IrcProducer extends WikiProducer {
   val dataPublisher = ActorPublisher[String](dataPublisherRef)
 
   def main(args: Array[String]): Unit = {
-    val wikipedias = args.head.split(",")
+    val wikis = args.head.split(",")
 
-    val ircThread = new Thread(new WikiRun(wikipedias.toSeq, dataPublisherRef))
+    val listener = new MessageListener {
+      override def process(message: Message) = {
+        dataPublisherRef ! Publish(Jackson.generate(message.toMap))
+      }
+    }
 
-    ircThread.start()
+    val ticker = new IrcTicker(
+      "irc.wikimedia.org",
+      "imply",
+      wikis map (x => s"#$x.wikipedia"),
+      Seq(listener)
+    )
+
+    val lifecycle = new Lifecycle
+
+    lifecycle onStart {
+      ticker.start()
+    } onStop {
+      ticker.stop()
+    }
+
+    try {
+      lifecycle.start()
+    } catch {
+      case e: Throwable =>
+        log.error(e, "Failed to start up, stopping and exiting.")
+        lifecycle.stop()
+    }
+
+    Thread.sleep(30000)
 
     sys.exit(run(args))
   }
