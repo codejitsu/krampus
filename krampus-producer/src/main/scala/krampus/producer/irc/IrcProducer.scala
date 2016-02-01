@@ -2,7 +2,7 @@
 
 package krampus.producer.irc
 
-import akka.actor.{Actor, Props}
+import akka.actor.{ActorRef, Actor, Props}
 import akka.stream.actor.ActorPublisher
 import akka.stream.actor.ActorPublisherMessage.{Cancel, Request}
 import akka.stream.scaladsl.Source
@@ -18,7 +18,7 @@ class IrcPublisher() extends ActorPublisher[String] {
 
   override def receive: Actor.Receive = {
     case Publish(s) =>
-      println(s"->MSG, isActive = $isActive, totalDemand = $totalDemand")
+      println("Push msg in the queue.")
       queue.enqueue(s)
       publishIfNeeded()
 
@@ -27,16 +27,14 @@ class IrcPublisher() extends ActorPublisher[String] {
       publishIfNeeded()
 
     case Cancel =>
-      println("Cancel")
       context.stop(self)
 
     case _ =>
-      println("Hm...")
   }
 
   def publishIfNeeded(): Unit = {
     while (queue.nonEmpty && isActive && totalDemand > 0) {
-      println("onNext")
+      println("msg -> flow")
       onNext(queue.dequeue())
     }
   }
@@ -46,35 +44,48 @@ object IrcPublisher {
   case class Publish(data: String)
 }
 
+class WikiRun(wikis: Seq[String], actor: ActorRef) extends Runnable {
+  val listener = new MessageListener {
+    override def process(message: Message) = {
+      actor ! Publish(Jackson.generate(message.toMap))
+    }
+  }
+
+  val ticker = new IrcTicker(
+    "irc.wikimedia.org",
+    "imply",
+    wikis map (x => s"#$x.wikipedia"),
+    Seq(listener)
+  )
+
+  ticker.start()
+  Thread.sleep(30000)
+
+  override def run(): Unit = {
+    while(true) {
+      Thread.sleep(10)
+    }
+  }
+}
+
 /**
   * IRC based wikipedia entry producer.
   */
 object IrcProducer extends WikiProducer {
+  val dataPublisherRef = system.actorOf(Props[IrcPublisher])
+  val dataPublisher = ActorPublisher[String](dataPublisherRef)
+
   def main(args: Array[String]): Unit = {
+    val wikipedias = args.head.split(",")
+
+    val ircThread = new Thread(new WikiRun(wikipedias.toSeq, dataPublisherRef))
+
+    ircThread.start()
+
     sys.exit(run(args))
   }
 
-  val dataPublisherRef = system.actorOf(Props[IrcPublisher])
-  val dataPublisher = ActorPublisher[String](dataPublisherRef)
-  val listener = new MessageListener {
-    override def process(message: Message) = {
-      dataPublisherRef ! Publish(Jackson.generate(message.toMap))
-    }
-  }
-
   override def source(args: Array[String]): Source[String, Unit] = {
-    val wikipedias = args.head.split(",")
-
-    val ticker = new IrcTicker(
-      "irc.wikimedia.org",
-      "imply",
-      wikipedias map (x => s"#$x.wikipedia"),
-      Seq(listener)
-    )
-
-    ticker.start()
-    Thread.currentThread().join()
-
     Source.fromPublisher(dataPublisher)
   }
 }

@@ -30,16 +30,19 @@ import scala.util.{Failure, Success, Try}
   * Abstract wikipedia entry producer.
   */
 abstract class WikiProducer extends LazyLogging {
+  val config = ConfigFactory.load()
+
+  implicit val ec = ExecutionContext
+      .fromExecutor(Executors.newFixedThreadPool(config.getInt("krampus.producer.json.pool-size")))
+
   implicit val system = ActorSystem("krampus-producer")
-  implicit val materializer = ActorMaterializer()
+
+  implicit val materializer = ActorMaterializer.create(system)
 
   def run(args: Array[String]): Int = {
-    val config = ConfigFactory.load()
 
     args.map(logger.info(_))
 
-    implicit val ec = ExecutionContext
-      .fromExecutor(Executors.newFixedThreadPool(config.getInt("krampus.producer.json.pool-size")))
 
     val entries = source(args).via(parseJson(config))
 
