@@ -65,8 +65,6 @@ object Dependencies {
     val avro          = "org.apache.avro"                 % "avro"                     % AvroVer
     val kafkaClients  = "org.apache.kafka"                % "kafka-clients"            % KafkaClientsVer
     val reactiveKafka = "com.softwaremill.reactivekafka" %% "reactive-kafka-core"      % ReactiveKafkaVer
-    val wikiticker    = "io.imply"                       %% "wikiticker"               % WikitickerVer
-
   }
 
   object Test {
@@ -83,7 +81,7 @@ object Dependencies {
   val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
   val krampusMetrics = Seq(config) ++ test
   val krampusProcessor = Seq(config) ++ test
-  val krampusProducer = Seq(config, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback, wikiticker) ++ test
+  val krampusProducer = Seq(config, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
 }
