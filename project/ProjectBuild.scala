@@ -1,4 +1,4 @@
-// Copyright (C) 2015, codejitsu.
+// Copyright (C) 2016, codejitsu.
 
 import sbt._
 import sbt.Keys._
@@ -61,6 +61,7 @@ object Dependencies {
     val joda          = "joda-time"                       % "joda-time"                % JodaTimeVer
     val jodaConvert   = "org.joda"                        % "joda-convert"             % JodaTimeConvertVer
     val akkaStreams   = "com.typesafe.akka"              %% "akka-stream-experimental" % AkkaStreamsVer
+    val akka          = "com.typesafe.akka"              %% "akka-actor"               % AkkaVer
     val jackson       = "org.json4s"                     %% "json4s-jackson"           % Jackson4sVer
     val avro          = "org.apache.avro"                 % "avro"                     % AvroVer
     val kafkaClients  = "org.apache.kafka"                % "kafka-clients"            % KafkaClientsVer
@@ -79,7 +80,7 @@ object Dependencies {
   /** Module deps */
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
-  val krampusMetrics = Seq(config) ++ test
+  val krampusMetrics = Seq(config, akka) ++ test
   val krampusProcessor = Seq(config) ++ test
   val krampusProducer = Seq(config, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test

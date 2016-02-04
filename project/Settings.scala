@@ -1,4 +1,4 @@
-// Copyright (C) 2015, codejitsu.
+// Copyright (C) 2016, codejitsu.
 
 import de.johoop.jacoco4sbt.JacocoPlugin.jacoco
 import de.johoop.jacoco4sbt.Thresholds

@@ -1,4 +1,4 @@
-// Copyright (C) 2015, codejitsu.
+// Copyright (C) 2016, codejitsu.
 
 package krampus.producer
 
@@ -178,7 +178,7 @@ abstract class WikiProducer extends LazyLogging {
     Flow[Option[WikiChangeEntryAvro]].map { avroValOpt =>
       avroValOpt.map { avroVal =>
         val out = new ByteArrayOutputStream()
-        val encoder = EncoderFactory.get().binaryEncoder(out, null)
+        val encoder = EncoderFactory.get().binaryEncoder(out, null) // scalastyle:ignore
         val writer = new SpecificDatumWriter[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
 
         writer.write(avroVal, encoder)

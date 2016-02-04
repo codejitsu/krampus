@@ -1,4 +1,4 @@
-// Copyright (C) 2015, codejitsu.
+// Copyright (C) 2016, codejitsu.
 
 package krampus.producer.json
 

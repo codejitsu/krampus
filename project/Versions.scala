@@ -1,4 +1,4 @@
-// Copyright (C) 2015, codejitsu.
+// Copyright (C) 2016, codejitsu.
 
 object Versions {
   val ScalaVer              = "2.11.6"
@@ -14,6 +14,7 @@ object Versions {
   val ScalaCheckVer         = "1.11.4"
 
   val AkkaStreamsVer        = "2.0.2"
+  val AkkaVer               = "2.4.1"
   val Jackson4sVer          = "3.2.11"
 
   val AvroVer               = "1.7.7"
