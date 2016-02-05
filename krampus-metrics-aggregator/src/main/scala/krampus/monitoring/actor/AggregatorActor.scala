@@ -2,7 +2,7 @@
 
 package krampus.monitoring.actor
 
-import akka.actor.Actor
+import akka.actor.{Props, Actor}
 
 /**
   * Makes some aggregates from raw events.
@@ -11,4 +11,8 @@ class AggregatorActor extends Actor {
   override def receive: Receive = {
     case _ =>
   }
+}
+
+object AggregatorActor {
+  def props(): Props = Props(new AggregatorActor)
 }

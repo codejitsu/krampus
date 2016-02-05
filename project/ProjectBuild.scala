@@ -80,7 +80,7 @@ object Dependencies {
   /** Module deps */
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
-  val krampusMetrics = Seq(config, akka) ++ test
+  val krampusMetrics = Seq(config, akka, reactiveKafka, logging, logback) ++ test
   val krampusProcessor = Seq(config) ++ test
   val krampusProducer = Seq(config, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
