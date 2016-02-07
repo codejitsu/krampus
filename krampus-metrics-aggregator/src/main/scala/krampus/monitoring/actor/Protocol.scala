@@ -2,7 +2,7 @@
 
 package krampus.monitoring.actor
 
-trait Protocol {
-  case object InitializeReader
-  case object ReaderInitialized
-}
+sealed trait Protocol
+
+case object InitializeReader extends Protocol
+case object ReaderInitialized extends Protocol

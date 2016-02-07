@@ -8,17 +8,18 @@ import akka.stream.scaladsl.Source
 import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
 import com.softwaremill.react.kafka.{PublisherWithCommitSink, ConsumerProperties, ReactiveKafka}
 import com.typesafe.config.Config
+import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Decoder
 import scala.concurrent.duration._
 
 /**
   * Actor to read all kafka events and propagate them to aggregate actors.
   */
-class KafkaListenerActor(config: Config) extends Actor with ActorLogging with Protocol {
+class KafkaListenerActor(config: Config) extends Actor with LazyLogging {
   import context.system
   implicit val materializer = ActorMaterializer.create(context.system)
 
-  var consumerWithOffsetSink: PublisherWithCommitSink[Array[Byte]] = _
+  var consumerWithOffsetSink: Option[PublisherWithCommitSink[Array[Byte]]] = None
 
   // consumer
   val consumerProperties = ConsumerProperties(
@@ -31,40 +32,44 @@ class KafkaListenerActor(config: Config) extends Actor with ActorLogging with Pr
     }
   ).commitInterval(1200 milliseconds)
 
-  def receive: Receive = {
+  override def receive: Receive = {
     case InitializeReader =>
-      log.info("Got InitializeReader message...")
-
       initListener()
       context.parent ! ReaderInitialized
 
     case Terminated(_) =>
-      log.error("The consumer has been terminated, restarting the whole stream...")
+      logger.error("The consumer has been terminated, restarting the whole stream...")
       initListener()
 
-    case _ =>
+    case msg =>
+      logger.error(s"Unexpected message: $msg")
   }
 
   def initListener(): Unit = {
-    consumerWithOffsetSink = new ReactiveKafka().consumeWithOffsetSink(consumerProperties)
+    consumerWithOffsetSink = Option(new ReactiveKafka().consumeWithOffsetSink(consumerProperties))
 
-    log.debug("Starting the kafka listener...")
+    consumerWithOffsetSink.foreach { consumer =>
+      logger.info("Starting the kafka listener...")
 
-    context.watch(consumerWithOffsetSink.publisherActor)
+      context.watch(consumer.publisherActor)
 
-    Source.fromPublisher(consumerWithOffsetSink.publisher)
-      .map(processMessage)
-      .to(consumerWithOffsetSink.offsetCommitSink).run()
+      Source.fromPublisher(consumer.publisher)
+        .map(processMessage)
+        .to(consumer.offsetCommitSink).run()
+    }
   }
 
   private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
-    log.info("Msg.")
+    logger.info("Msg.")
 
     msg
   }
 
   override def postStop(): Unit = {
-    consumerWithOffsetSink.cancel()
+    consumerWithOffsetSink.foreach { consumer =>
+      consumer.cancel()
+    }
+
     super.postStop()
   }
 }
