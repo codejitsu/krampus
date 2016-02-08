@@ -10,6 +10,7 @@ import com.softwaremill.react.kafka.{PublisherWithCommitSink, ConsumerProperties
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Decoder
+import krampus.monitoring.util.RawKafkaMessage
 import scala.concurrent.duration._
 
 /**
@@ -19,10 +20,12 @@ class KafkaListenerActor(config: Config) extends Actor with LazyLogging {
   import context.system
   implicit val materializer = ActorMaterializer.create(context.system)
 
-  var consumerWithOffsetSink: Option[PublisherWithCommitSink[Array[Byte]]] = None
+  private[this] var consumerWithOffsetSink: Option[PublisherWithCommitSink[Array[Byte]]] = None
+
+  private[this] lazy val reactiveKafka: ReactiveKafka = new ReactiveKafka()
 
   // consumer
-  val consumerProperties = ConsumerProperties(
+  private[this] lazy val consumerProperties = ConsumerProperties(
     brokerList = config.getString("broker-list"),
     zooKeeperHost = config.getString("zookeeper-host"),
     topic = config.getString("topic"),
@@ -32,10 +35,14 @@ class KafkaListenerActor(config: Config) extends Actor with LazyLogging {
     }
   ).commitInterval(1200 milliseconds)
 
+  private[this] lazy val avroConverter = context.actorOf(AvroConverterActor.props())
+
   override def receive: Receive = {
     case InitializeReader =>
       initListener()
       context.parent ! ReaderInitialized
+
+    case MessageConverted => // avro converter successfully converted message
 
     case Terminated(_) =>
       logger.error("The consumer has been terminated, restarting the whole stream...")
@@ -46,7 +53,7 @@ class KafkaListenerActor(config: Config) extends Actor with LazyLogging {
   }
 
   def initListener(): Unit = {
-    consumerWithOffsetSink = Option(new ReactiveKafka().consumeWithOffsetSink(consumerProperties))
+    consumerWithOffsetSink = Option(reactiveKafka.consumeWithOffsetSink(consumerProperties))
 
     consumerWithOffsetSink.foreach { consumer =>
       logger.info("Starting the kafka listener...")
@@ -60,7 +67,7 @@ class KafkaListenerActor(config: Config) extends Actor with LazyLogging {
   }
 
   private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
-    logger.info("Msg.")
+    avroConverter ! RawKafkaMessage(msg.key(), msg.message())
 
     msg
   }

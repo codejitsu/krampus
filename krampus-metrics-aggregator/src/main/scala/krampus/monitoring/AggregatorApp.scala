@@ -4,7 +4,8 @@ package krampus.monitoring
 
 import akka.actor.{PoisonPill, ActorSystem}
 import com.typesafe.scalalogging.LazyLogging
-import krampus.monitoring.actor.NodeGuardianActor
+import krampus.monitoring.actor.{InitReader, NodeGuardianActor}
+import krampus.monitoring.util.AppConfig
 
 /**
   * Read Kafka Events and push all aggregated data into graphite.
@@ -14,9 +15,12 @@ object AggregatorApp extends LazyLogging {
   def main(args: Array[String]): Unit = {
     logger.info("Starting krampus aggregator app...")
 
-    val system = ActorSystem("Krampus-System")
+    val appConfig = new AppConfig()
+    val system = ActorSystem(appConfig.systemName)
 
-    val guardian = system.actorOf(NodeGuardianActor.props(), "node-guardian")
+    val guardian = system.actorOf(NodeGuardianActor.props(appConfig), "node-guardian")
+
+    guardian ! InitReader
 
     system.registerOnTermination {
       guardian ! PoisonPill

@@ -6,5 +6,7 @@ import com.typesafe.config.{ConfigFactory, Config}
 
 class AppConfig() {
   lazy val config: Config = ConfigFactory.load()
-  def kafkaConfig(): Config = config.getConfig("krampus.metrics-aggregator-app.kafka")
+
+  lazy val kafkaConfig: Config = config.getConfig("krampus.metrics-aggregator-app.kafka")
+  lazy val systemName: String = config.getString("krampus.metrics-aggregator-app.system-name")
 }
