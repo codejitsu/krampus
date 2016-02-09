@@ -2,4 +2,4 @@
 
 package krampus.monitoring.util
 
-case class RawKafkaMessage(key: Array[Byte], msg: Array[Byte])
+final case class RawKafkaMessage(key: Array[Byte], msg: Array[Byte])
