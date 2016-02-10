@@ -10,7 +10,7 @@ import krampus.monitoring.util.AppConfig
   * Root actor node.
   */
 class NodeGuardianActor(appConfig: AppConfig) extends Actor with LazyLogging {
-  val kafkaListener = context.actorOf(KafkaListenerActor.props(appConfig.kafkaConfig), "kafka-listener")
+  val kafkaListener = context.actorOf(KafkaListenerActor.props(appConfig), "kafka-listener")
 
   override def receive: Receive = {
     case InitReader =>

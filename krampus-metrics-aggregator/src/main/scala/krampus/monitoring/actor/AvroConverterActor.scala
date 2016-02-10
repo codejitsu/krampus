@@ -5,20 +5,36 @@ package krampus.monitoring.actor
 import akka.actor.{Props, Actor}
 import com.typesafe.scalalogging.LazyLogging
 import krampus.avro.WikiChangeEntryAvro
-import krampus.monitoring.util.RawKafkaMessage
+import krampus.entity.WikiChangeEntry
+import krampus.monitoring.util.{AggregationMessage, AppConfig, RawKafkaMessage}
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.specific.SpecificDatumReader
+import krampus.monitoring.util.AppConfig.ConfigDuration
 
 /**
   * Bytes to Avro converter actor.
   */
-class AvroConverterActor extends Actor with LazyLogging {
+class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
   private[this] lazy val reader =
     new SpecificDatumReader[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
 
+  private[this] var counter: Int = 0
+
+  private[this] lazy val aggregatorCounter =
+    context.actorOf(AggregatorActor.props(config.aggregationConfig.getMillis("flush-interval-ms"),
+      _ => counter = counter + 1,
+      {
+        logger.info(s"Processed # $counter entries.")
+        counter = 0
+      }
+    ))
+
   override def receive: Receive = {
     case msg @ RawKafkaMessage(_, _) =>
-      convert(msg)
+      val entryAvro = convert(msg)
+      val entry = fromAvro(entryAvro)
+
+      aggregatorCounter ! AggregationMessage(entry)
       context.parent ! MessageConverted
   }
 
@@ -30,8 +46,10 @@ class AvroConverterActor extends Actor with LazyLogging {
 
     wikiChangeEntryAvro
   }
+
+  def fromAvro(entryAvro: WikiChangeEntryAvro): WikiChangeEntry = WikiChangeEntry(entryAvro)
 }
 
 object AvroConverterActor {
-  def props(): Props = Props(new AvroConverterActor)
+  def props(config: AppConfig): Props = Props(new AvroConverterActor(config))
 }

@@ -4,6 +4,7 @@ package krampus.entity
 
 import java.net.URL
 
+import krampus.avro.WikiChangeEntryAvro
 import org.joda.time.DateTime
 
 /*
@@ -41,3 +42,24 @@ final case class WikiChangeEntry( isRobot: Boolean,
                                   delta: Int,
                                   user: String,
                                   namespace: String )
+
+object WikiChangeEntry {
+  def apply(avro: WikiChangeEntryAvro): WikiChangeEntry =
+    WikiChangeEntry(
+      avro.getIsRobot(),
+      avro.getChannel().toString(),
+      DateTime.parse(avro.getTimestamp().toString()),
+      avro.getFlags().toString().split(",").toList,
+      avro.getIsUnpatrolled(),
+      avro.getPage().toString(),
+      new URL(avro.getDiffUrl().toString()),
+      avro.getAdded(),
+      avro.getDeleted(),
+      avro.getComment().toString(),
+      avro.getIsNew(),
+      avro.getIsMinor(),
+      avro.getDelta(),
+      avro.getUser().toString(),
+      avro.getNamespace().toString()
+    )
+}

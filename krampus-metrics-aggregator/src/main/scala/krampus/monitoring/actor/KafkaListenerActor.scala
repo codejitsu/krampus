@@ -7,16 +7,15 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
 import com.softwaremill.react.kafka.{PublisherWithCommitSink, ConsumerProperties, ReactiveKafka}
-import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Decoder
-import krampus.monitoring.util.RawKafkaMessage
+import krampus.monitoring.util.{AppConfig, RawKafkaMessage}
 import scala.concurrent.duration._
 
 /**
   * Actor to read all kafka events and propagate them to aggregate actors.
   */
-class KafkaListenerActor(config: Config) extends Actor with LazyLogging {
+class KafkaListenerActor(config: AppConfig) extends Actor with LazyLogging {
   import context.system
   implicit val materializer = ActorMaterializer.create(context.system)
 
@@ -26,16 +25,16 @@ class KafkaListenerActor(config: Config) extends Actor with LazyLogging {
 
   // consumer
   private[this] lazy val consumerProperties = ConsumerProperties(
-    brokerList = config.getString("broker-list"),
-    zooKeeperHost = config.getString("zookeeper-host"),
-    topic = config.getString("topic"),
-    groupId = config.getString("group-id"),
+    brokerList = config.kafkaConfig.getString("broker-list"),
+    zooKeeperHost = config.kafkaConfig.getString("zookeeper-host"),
+    topic = config.kafkaConfig.getString("topic"),
+    groupId = config.kafkaConfig.getString("group-id"),
     decoder = new Decoder[Array[Byte]] {
       override def fromBytes(bytes: Array[Byte]): Array[Byte] = bytes
     }
   ).commitInterval(1200 milliseconds)
 
-  private[this] lazy val avroConverter = context.actorOf(AvroConverterActor.props())
+  private[this] lazy val avroConverter = context.actorOf(AvroConverterActor.props(config))
 
   override def receive: Receive = {
     case InitializeReader =>
@@ -82,5 +81,5 @@ class KafkaListenerActor(config: Config) extends Actor with LazyLogging {
 }
 
 object KafkaListenerActor {
-  def props(config: Config): Props = Props(new KafkaListenerActor(config))
+  def props(config: AppConfig): Props = Props(new KafkaListenerActor(config))
 }

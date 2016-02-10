@@ -11,6 +11,8 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 /**
   * Makes some aggregates from raw events.
   */
+
+//TODO add specific aggregators like CounterAggregatorActor, etc...
 class AggregatorActor(flushInterval: FiniteDuration,
                       agg: WikiChangeEntry => Unit,
                       flush: => Unit) extends Actor {
