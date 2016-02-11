@@ -18,23 +18,16 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
   private[this] lazy val reader =
     new SpecificDatumReader[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
 
-  private[this] var counter: Int = 0
-
-  private[this] lazy val aggregatorCounter =
-    context.actorOf(AggregatorActor.props(config.aggregationConfig.getMillis("flush-interval-ms"),
-      _ => counter = counter + 1,
-      {
-        logger.info(s"Processed # $counter entries.")
-        counter = 0
-      }
-    ))
+  private[this] lazy val allCounter =
+    context.actorOf(CounterActor.props[AggregationMessage]("all-messages",
+      config.aggregationConfig.getMillis("flush-interval-ms"), _ => true))
 
   override def receive: Receive = {
     case msg @ RawKafkaMessage(_, _) =>
       val entryAvro = convert(msg)
       val entry = fromAvro(entryAvro)
 
-      aggregatorCounter ! AggregationMessage(entry)
+      allCounter ! AggregationMessage(entry)
       context.parent ! MessageConverted
   }
 
