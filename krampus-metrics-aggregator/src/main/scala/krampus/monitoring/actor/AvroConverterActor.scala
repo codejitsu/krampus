@@ -2,7 +2,7 @@
 
 package krampus.monitoring.actor
 
-import akka.actor.{Props, Actor}
+import akka.actor.{ActorRef, Props, Actor}
 import com.typesafe.scalalogging.LazyLogging
 import krampus.avro.WikiChangeEntryAvro
 import krampus.entity.WikiChangeEntry
@@ -15,6 +15,8 @@ import krampus.monitoring.util.AppConfig.ConfigDuration
   * Bytes to Avro converter actor.
   */
 class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
+  import scala.collection._
+
   private[this] lazy val reader =
     new SpecificDatumReader[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
 
@@ -22,12 +24,22 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
     context.actorOf(CounterActor.props[AggregationMessage]("all-messages",
       config.aggregationConfig.getMillis("flush-interval-ms"), _ => true))
 
+  private[this] lazy val counters: mutable.Map[String, ActorRef] = mutable.Map.empty
+
   override def receive: Receive = {
     case msg @ RawKafkaMessage(_, _) =>
       val entryAvro = convert(msg)
       val entry = fromAvro(entryAvro)
 
-      allCounter ! AggregationMessage(entry)
+      val aggMsg = AggregationMessage(entry)
+
+      val channelCounter = counters.getOrElseUpdate(entry.channel,
+        context.actorOf(CounterActor.props[AggregationMessage](entry.channel,
+        config.aggregationConfig.getMillis("flush-interval-ms"), e => e.msg.channel == entry.channel)))
+
+      allCounter ! aggMsg
+      channelCounter ! aggMsg
+
       context.parent ! MessageConverted
   }
 
@@ -35,7 +47,7 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
     val decoder = DecoderFactory.get().binaryDecoder(msg.msg, null) //scalastyle:ignore
     val wikiChangeEntryAvro = reader.read(null, decoder) //scalastyle:ignore
 
-    logger.info(s"${wikiChangeEntryAvro.getChannel()}: ${wikiChangeEntryAvro.getPage()}")
+    logger.debug(s"${wikiChangeEntryAvro.getChannel()}: ${wikiChangeEntryAvro.getPage()}")
 
     wikiChangeEntryAvro
   }
