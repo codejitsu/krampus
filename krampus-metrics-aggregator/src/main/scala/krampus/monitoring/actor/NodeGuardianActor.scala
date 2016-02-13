@@ -13,10 +13,10 @@ class NodeGuardianActor(appConfig: AppConfig) extends Actor with LazyLogging {
   val kafkaListener = context.actorOf(KafkaListenerActor.props(appConfig), "kafka-listener")
 
   override def receive: Receive = {
-    case InitReader =>
-      kafkaListener ! InitializeReader
+    case StartListener =>
+      kafkaListener ! InitializeListener
 
-    case ReaderInitialized =>
+    case ListenerInitialized =>
       logger.info("Kafka listener initialized.")
   }
 }

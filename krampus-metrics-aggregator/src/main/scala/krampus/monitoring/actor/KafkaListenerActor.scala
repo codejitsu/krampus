@@ -34,12 +34,12 @@ class KafkaListenerActor(config: AppConfig) extends Actor with LazyLogging {
     }
   ).commitInterval(1200 milliseconds)
 
-  private[this] lazy val avroConverter = context.actorOf(AvroConverterActor.props(config))
+  private[this] lazy val avroConverter = context.actorOf(AvroConverterActor.props(config), "avro-converter")
 
   override def receive: Receive = {
-    case InitializeReader =>
+    case InitializeListener =>
       initListener()
-      context.parent ! ReaderInitialized
+      context.parent ! ListenerInitialized
 
     case MessageConverted => // avro converter successfully converted message
 

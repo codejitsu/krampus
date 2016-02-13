@@ -4,7 +4,7 @@ package krampus.monitoring
 
 import akka.actor.{PoisonPill, ActorSystem}
 import com.typesafe.scalalogging.LazyLogging
-import krampus.monitoring.actor.{InitReader, NodeGuardianActor}
+import krampus.monitoring.actor.{StartListener, NodeGuardianActor}
 import krampus.monitoring.util.AppConfig
 
 /**
@@ -20,7 +20,7 @@ object AggregatorApp extends LazyLogging {
 
     val guardian = system.actorOf(NodeGuardianActor.props(appConfig), "node-guardian")
 
-    guardian ! InitReader
+    guardian ! StartListener
 
     system.registerOnTermination {
       guardian ! PoisonPill

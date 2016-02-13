@@ -22,7 +22,7 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
 
   private[this] lazy val allCounter =
     context.actorOf(CounterActor.props[AggregationMessage]("all-messages",
-      config.aggregationConfig.getMillis("flush-interval-ms"), _ => true))
+      config.aggregationConfig.getMillis("flush-interval-ms"), _ => true), "all-messages-counter")
 
   private[this] lazy val counters: mutable.Map[String, ActorRef] = mutable.Map.empty
 
@@ -35,7 +35,8 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
 
       val channelCounter = counters.getOrElseUpdate(entry.channel,
         context.actorOf(CounterActor.props[AggregationMessage](entry.channel,
-        config.aggregationConfig.getMillis("flush-interval-ms"), e => e.msg.channel == entry.channel)))
+        config.aggregationConfig.getMillis("flush-interval-ms"), e => e.msg.channel == entry.channel),
+        s"${entry.channel}-counter"))
 
       allCounter ! aggMsg
       channelCounter ! aggMsg

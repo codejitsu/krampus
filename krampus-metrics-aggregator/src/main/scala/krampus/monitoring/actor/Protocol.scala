@@ -4,8 +4,8 @@ package krampus.monitoring.actor
 
 sealed trait Protocol
 
-case object InitReader extends Protocol
-case object InitializeReader extends Protocol
-case object ReaderInitialized extends Protocol
+case object StartListener extends Protocol
+case object InitializeListener extends Protocol
+case object ListenerInitialized extends Protocol
 case object MessageConverted extends Protocol
 case object Flush extends Protocol
