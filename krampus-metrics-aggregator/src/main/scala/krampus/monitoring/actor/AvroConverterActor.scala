@@ -36,7 +36,7 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
       val channelCounter = counters.getOrElseUpdate(entry.channel,
         context.actorOf(CounterActor.props[AggregationMessage](entry.channel,
         config.aggregationConfig.getMillis("flush-interval-ms"), e => e.msg.channel == entry.channel),
-        s"${entry.channel}-counter"))
+        s"${entry.channel.drop(1)}-counter"))
 
       allCounter ! aggMsg
       channelCounter ! aggMsg
