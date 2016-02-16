@@ -20,9 +20,15 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
   private[this] lazy val reader =
     new SpecificDatumReader[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
 
+  private[this] lazy val statsdConnection =
+    (config.aggregationConfig.getString("statsd.host"), config.aggregationConfig.getInt("statsd.port"))
+
+  private[this] val statsdGateway = new StatsD(context, statsdConnection._1, statsdConnection._2)
+
   private[this] lazy val allCounter =
     context.actorOf(CounterActor.props[AggregationMessage]("all-messages",
-      config.aggregationConfig.getMillis("flush-interval-ms"), _ => true), "all-messages-counter")
+      config.aggregationConfig.getMillis("flush-interval-ms"),
+      _ => true, statsdGateway), "all-messages-counter")
 
   private[this] lazy val counters: mutable.Map[String, ActorRef] = mutable.Map.empty
 
@@ -35,8 +41,8 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
 
       val channelCounter = counters.getOrElseUpdate(entry.channel,
         context.actorOf(CounterActor.props[AggregationMessage](entry.channel,
-        config.aggregationConfig.getMillis("flush-interval-ms"), e => e.msg.channel == entry.channel),
-        s"${entry.channel.drop(1)}-counter"))
+          config.aggregationConfig.getMillis("flush-interval-ms"),
+        e => e.msg.channel == entry.channel, statsdGateway), s"${entry.channel.drop(1)}-counter"))
 
       allCounter ! aggMsg
       channelCounter ! aggMsg

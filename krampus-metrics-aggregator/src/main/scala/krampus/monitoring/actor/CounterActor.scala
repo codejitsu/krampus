@@ -8,7 +8,10 @@ import com.typesafe.scalalogging.LazyLogging
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.reflect.ClassTag
 
-class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration, filter: T => Boolean, startValue: Int = 0) extends Actor with LazyLogging {
+class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
+                                 filter: T => Boolean,
+                                 statsd: StatsD,
+                                 startValue: Int = 0) extends Actor with LazyLogging {
   private[this] var counter: Int = startValue
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -24,6 +27,7 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration, fi
 
     case msg : T if filter(msg) =>
       counter = counter + 1
+      statsd.increment(name)
 
     case x =>
       logger.error(s"Unexpected message: $x")
@@ -36,6 +40,9 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration, fi
 }
 
 object CounterActor {
-  def props[T : ClassTag](name: String, flushInterval: FiniteDuration, filter: T => Boolean, startValue: Int = 0): Props =
-    Props(new CounterActor[T](name, flushInterval, filter, startValue))
+  def props[T : ClassTag](name: String, flushInterval: FiniteDuration,
+                          filter: T => Boolean,
+                          statsd: StatsD,
+                          startValue: Int = 0): Props =
+    Props(new CounterActor[T](name, flushInterval, filter, statsd, startValue))
 }
