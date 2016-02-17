@@ -67,7 +67,7 @@ abstract class WikiProducer extends LazyLogging {
         case Success(c) => logger.info(s"Completed: $c items processed")
         case Failure(_) => logger.info("Something went wrong")
       }
-      system.shutdown()
+      system.terminate()
     }
 
     0

@@ -2,7 +2,7 @@
 
 object Versions {
   val ScalaVer              = "2.11.6"
-  val JDKVer                = "1.7"
+  val JDKVer                = "1.8"
 
   val TypesafeConfigVer     = "1.2.1"
   val TypesafeLoggingVer    = "3.1.0"
@@ -20,7 +20,7 @@ object Versions {
   val AvroVer               = "1.7.7"
 
   val KafkaClientsVer       = "0.8.2.2"
-  val ReactiveKafkaVer      = "0.8.3"
+  val ReactiveKafkaVer      = "0.8.3" //TODO -> 0.9.0
 
   val LogbackVer            = "1.1.2"
 }
