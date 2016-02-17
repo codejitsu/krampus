@@ -48,7 +48,7 @@ class StatsD(context: ActorContext,
              host: String,
              port: Int,
              multiMetrics: Boolean = true,
-             packetBufferSize: Int = 1024) {
+             packetBufferSize: Int) {
 
   private val rand = new Random()
 
@@ -206,20 +206,17 @@ private class StatsDActor(host: String,
     try {
       val sizeOfBuffer = sendBuffer.position()
 
-      if (sizeOfBuffer <= 0) {
-        // empty buffer
-        return
-      }
+      if (sizeOfBuffer > 0) {
+        // send and reset the buffer
+        sendBuffer.flip()
+        val nbSentBytes = channel.send(sendBuffer, address)
+        sendBuffer.limit(sendBuffer.capacity())
+        sendBuffer.rewind()
 
-      // send and reset the buffer
-      sendBuffer.flip()
-      val nbSentBytes = channel.send(sendBuffer, address)
-      sendBuffer.limit(sendBuffer.capacity())
-      sendBuffer.rewind()
-
-      if (sizeOfBuffer != nbSentBytes) {
-        log.error("Could not send entirely stat {} to host {}:{}. Only sent {} bytes out of {} bytes", sendBuffer.toString(),
-          address.getHostName(), address.getPort().toString, nbSentBytes.toString, sizeOfBuffer.toString)
+        if (sizeOfBuffer != nbSentBytes) {
+          log.error("Could not send entirely stat {} to host {}:{}. Only sent {} bytes out of {} bytes", sendBuffer.toString(),
+            address.getHostName(), address.getPort().toString, nbSentBytes.toString, sizeOfBuffer.toString)
+        }
       }
     } catch {
       case e: IOException => {

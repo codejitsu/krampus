@@ -23,7 +23,9 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
   private[this] lazy val statsdConnection =
     (config.aggregationConfig.getString("statsd.host"), config.aggregationConfig.getInt("statsd.port"))
 
-  private[this] val statsdGateway = new StatsD(context, statsdConnection._1, statsdConnection._2)
+  private[this] val statsdGateway =
+    new StatsD(context, statsdConnection._1, statsdConnection._2,
+      packetBufferSize = config.aggregationConfig.getInt("statsd.packet-buffer-size"))
 
   private[this] lazy val allCounter =
     context.actorOf(CounterActor.props[AggregationMessage]("all-messages",
