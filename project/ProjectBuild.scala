@@ -1,5 +1,6 @@
 // Copyright (C) 2016, codejitsu.
 
+import play.sbt.PlayScala
 import sbt._
 import sbt.Keys._
 
@@ -10,7 +11,8 @@ object ProjectBuild extends Build {
     id = "root",
     base = file("."),
     settings = parentSettings,
-    aggregate = Seq(krampusCommon, krampusMetrics, krampusProcessor, krampusProducer, krampusScoreApp, krampusSparkApp)
+    aggregate = Seq(krampusCommon, krampusMetrics, krampusProcessor, krampusProducer, krampusScoreApp, krampusSparkApp,
+      krampusWebApp)
   )
 
   lazy val krampusCommon = Project(
@@ -48,8 +50,13 @@ object ProjectBuild extends Build {
     base = file("./krampus-spark-app"),
     settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusSparkApp)
   ).dependsOn(krampusCommon)
-}
 
+  lazy val krampusWebApp = Project(
+    id = "krampus-web-app",
+    base = file("./krampus-web-app"),
+    settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusWebApp)
+  ).enablePlugins(PlayScala)
+}
 
 object Dependencies {
   import Versions._
@@ -88,4 +95,5 @@ object Dependencies {
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
+  val krampusWebApp = Seq.empty
 }
