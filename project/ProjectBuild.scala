@@ -55,7 +55,7 @@ object ProjectBuild extends Build {
     id = "krampus-web-app",
     base = file("./krampus-web-app"),
     settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusWebApp)
-  ).enablePlugins(PlayScala)
+  ).enablePlugins(PlayScala).dependsOn(krampusCommon)
 }
 
 object Dependencies {
@@ -78,6 +78,7 @@ object Dependencies {
       (ExclusionRule(organization = "com.typesafe.akka"))
 
     val playExtras    = "com.typesafe.play.extras"       %% "iteratees-extras"         % PlayExtras
+    val playStreams   = "com.typesafe.play"              %% "play-streams-experimental" % PlayStreams
   }
 
   object Test {
@@ -97,5 +98,5 @@ object Dependencies {
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
-  val krampusWebApp = Seq(playExtras, akkaStreams, reactiveKafka, logging, logback)
+  val krampusWebApp = Seq(playExtras, playStreams, akkaStreams, reactiveKafka, logging, logback)
 }

@@ -2,22 +2,22 @@
 
 package controllers
 
-import akka.actor.{Actor, Props, ActorSystem}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import com.softwaremill.react.kafka.KafkaMessages.{StringKafkaMessage, KafkaMessage}
+import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
+import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink, ReactiveKafka}
 import com.typesafe.scalalogging.LazyLogging
-import org.reactivestreams.Publisher
-import play.api.Logger
-import play.api.libs.iteratee.{Enumerator, Concurrent, Iteratee}
-import scala.concurrent.duration._
-import com.softwaremill.react.kafka.{PublisherWithCommitSink, ConsumerProperties, ReactiveKafka}
-import kafka.serializer.{StringDecoder, Decoder}
-import play.api.mvc.{WebSocket, AnyContent, Action, Controller}
-import play.api.libs.concurrent.Execution.Implicits._
+import kafka.serializer.Decoder
 import play.api.libs.iteratee.Concurrent.Channel
-
+import play.api.libs.iteratee.{Concurrent, Enumerator, Iteratee}
+import play.api.libs.json.{Json, JsValue}
+import play.api.mvc.{Action, AnyContent, Controller, WebSocket}
+import play.api.Play.current
 import utils.AppConfig
+
+import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.duration._
 
 class WebsocketPublisherActor(channel: Channel[String]) extends Actor with LazyLogging {
   override def receive: Receive = {
@@ -40,26 +40,63 @@ class ApplicationController extends Controller with LazyLogging {
     zooKeeperHost = config.kafkaConfig.getString("zookeeper-host"),
     topic = config.kafkaConfig.getString("topic"),
     groupId = config.kafkaConfig.getString("group-id"),
-//    decoder = new Decoder[Array[Byte]] {
-//      override def fromBytes(bytes: Array[Byte]): Array[Byte] = bytes
-//    }
-    decoder = new StringDecoder()
+    decoder = new Decoder[Array[Byte]] {
+      override def fromBytes(bytes: Array[Byte]): Array[Byte] = bytes
+    }
   ).commitInterval(1200 milliseconds)
 
-  private[this] val publisher: Publisher[StringKafkaMessage] = reactiveKafka.consume(consumerProperties)
+  private[this] val publisher: PublisherWithCommitSink[Array[Byte]] = reactiveKafka.consumeWithOffsetSink(consumerProperties)
+
+  Source.fromPublisher(publisher.publisher)
+    .map(processMessage)
+    .to(publisher.offsetCommitSink).run()
 
   def all: WebSocket[String, String] = {
     val (publicOut, publicChannel) = Concurrent.broadcast[String]
     val websocketActor = actorSystem.actorOf(Props(new WebsocketPublisherActor(publicChannel)))
+    val avroConverter = actorSystem.actorOf(AvroConverterActor.props(config, websocketActor))
 
-    Source.fromPublisher(publisher).runForeach { m => websocketActor ! m.message() }
+    Source.fromPublisher(publisher.publisher)
+      .map(processMessage(avroConverter))
+      .to(publisher.offsetCommitSink).run()
 
     WebSocket.using[String] {
       request =>
         val (privateOut, _) = Concurrent.broadcast[String]
-        // val outEnumerator: Enumerator[String] = Streams.publisherToEnumerator(publisher).map(_.message())
         val out = Enumerator.interleave(publicOut, privateOut)
         (Iteratee.ignore[String], out)
     }
+  }
+
+  private def processMessage(avroConverter: ActorRef)(msg: KafkaMessage[Array[Byte]]) = {
+    logger.debug("Raw avro message: {}", new String(msg.message()))
+
+    avroConverter ! RawKafkaMessage(msg.key(), msg.message())
+
+    msg
+  }
+
+  def index: Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.index("Tweets"))
+  }
+
+  def wiki: WebSocket[String, JsValue] = WebSocket.acceptWithActor[String, JsValue] { request => out =>
+    KafkaStreamer.props(out, publisher)
+  }
+
+  private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
+    val subscribers = KafkaActor.subs()
+
+    //avroConverter ! RawKafkaMessage(msg.key(), msg.message())
+
+    subscribers.foreach { sub =>
+      sub ! Json.obj("text" -> "Hello, world!")
+    }
+
+    msg
+  }
+
+  def stream: WebSocket[String, JsValue] = WebSocket.acceptWithActor[String, JsValue] { request => out =>
+    KafkaActor.props(out)
   }
 }

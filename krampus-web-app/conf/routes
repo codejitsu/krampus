@@ -1,4 +1,9 @@
-GET  /all  @controllers.ApplicationController.all
+
+# Home page
+GET  /              @controllers.ApplicationController.index
+GET  /all           @controllers.ApplicationController.all
+GET  /wiki          @controllers.ApplicationController.wiki
+GET  /stream          @controllers.ApplicationController.stream
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET  /assets/*file  controllers.Assets.at(path="/public", file)

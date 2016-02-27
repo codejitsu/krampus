@@ -25,4 +25,5 @@ object Versions {
   val LogbackVer            = "1.1.2"
 
   val PlayExtras            = "1.4.0"
+  val PlayStreams           = "2.4.6"
 }
