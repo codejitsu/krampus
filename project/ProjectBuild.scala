@@ -76,6 +76,8 @@ object Dependencies {
     val kafkaClients  = "org.apache.kafka"                % "kafka-clients"            % KafkaClientsVer
     val reactiveKafka = "com.softwaremill.reactivekafka" %% "reactive-kafka-core"      % ReactiveKafkaVer excludeAll
       (ExclusionRule(organization = "com.typesafe.akka"))
+
+    val playExtras    = "com.typesafe.play.extras"       %% "iteratees-extras"         % PlayExtras
   }
 
   object Test {
@@ -95,5 +97,5 @@ object Dependencies {
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
-  val krampusWebApp = Seq(akkaStreams, reactiveKafka, logging, logback)
+  val krampusWebApp = Seq(playExtras, akkaStreams, reactiveKafka, logging, logback)
 }
