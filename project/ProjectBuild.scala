@@ -95,5 +95,5 @@ object Dependencies {
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
-  val krampusWebApp = Seq.empty
+  val krampusWebApp = Seq(akkaStreams, reactiveKafka, logging, logback)
 }
