@@ -2,21 +2,19 @@
 
 package controllers
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, ActorSystem}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
 import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink, ReactiveKafka}
 import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Decoder
-import play.api.libs.iteratee.Concurrent.Channel
-import play.api.libs.iteratee.{Concurrent, Enumerator, Iteratee}
-import play.api.libs.json.{Json, JsValue}
-import play.api.mvc.{Action, AnyContent, Controller, WebSocket}
 import play.api.Play.current
+import play.api.libs.iteratee.Concurrent.Channel
+import play.api.libs.json.JsValue
+import play.api.mvc.{Action, AnyContent, Controller, WebSocket}
 import utils.AppConfig
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 
 class WebsocketPublisherActor(channel: Channel[String]) extends Actor with LazyLogging {
@@ -47,56 +45,23 @@ class ApplicationController extends Controller with LazyLogging {
 
   private[this] val publisher: PublisherWithCommitSink[Array[Byte]] = reactiveKafka.consumeWithOffsetSink(consumerProperties)
 
+  private[this] val avroConverter = actorSystem.actorOf(AvroConverterActor.props(config))
+
   Source.fromPublisher(publisher.publisher)
     .map(processMessage)
     .to(publisher.offsetCommitSink).run()
 
-  def all: WebSocket[String, String] = {
-    val (publicOut, publicChannel) = Concurrent.broadcast[String]
-    val websocketActor = actorSystem.actorOf(Props(new WebsocketPublisherActor(publicChannel)))
-    val avroConverter = actorSystem.actorOf(AvroConverterActor.props(config, websocketActor))
-
-    Source.fromPublisher(publisher.publisher)
-      .map(processMessage(avroConverter))
-      .to(publisher.offsetCommitSink).run()
-
-    WebSocket.using[String] {
-      request =>
-        val (privateOut, _) = Concurrent.broadcast[String]
-        val out = Enumerator.interleave(publicOut, privateOut)
-        (Iteratee.ignore[String], out)
-    }
-  }
-
-  private def processMessage(avroConverter: ActorRef)(msg: KafkaMessage[Array[Byte]]) = {
-    logger.debug("Raw avro message: {}", new String(msg.message()))
-
-    avroConverter ! RawKafkaMessage(msg.key(), msg.message())
-
-    msg
-  }
-
   def index: Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.index("Tweets"))
-  }
-
-  def wiki: WebSocket[String, JsValue] = WebSocket.acceptWithActor[String, JsValue] { request => out =>
-    KafkaStreamer.props(out, publisher)
-  }
-
-  private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
-    val subscribers = KafkaActor.subs()
-
-    //avroConverter ! RawKafkaMessage(msg.key(), msg.message())
-
-    subscribers.foreach { sub =>
-      sub ! Json.obj("text" -> "Hello, world!")
-    }
-
-    msg
+    Ok(views.html.index("Wikipedia Stream"))
   }
 
   def stream: WebSocket[String, JsValue] = WebSocket.acceptWithActor[String, JsValue] { request => out =>
     KafkaActor.props(out)
+  }
+
+  private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
+    avroConverter ! KMessage(msg.key(), msg.message())
+
+    msg
   }
 }

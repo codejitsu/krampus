@@ -38,7 +38,9 @@ object Settings extends Build {
     parallelExecution   in ThisBuild  := false,
     parallelExecution   in Global     := false,
     ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
-    resolvers += "Typesafe private" at "https://private-repo.typesafe.com/typesafe/maven-releases"
+    resolvers += "Typesafe private" at "https://private-repo.typesafe.com/typesafe/maven-releases",
+    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+    resolvers += "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/"
   )
 
   lazy val commonSettings = defaultSettings ++ sbtavro.SbtAvro.avroSettings

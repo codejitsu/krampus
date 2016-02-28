@@ -1,8 +1,6 @@
 
 # Home page
 GET  /              @controllers.ApplicationController.index
-GET  /all           @controllers.ApplicationController.all
-GET  /wiki          @controllers.ApplicationController.wiki
 GET  /stream          @controllers.ApplicationController.stream
 
 # Map static resources from the /public folder to the /assets URL path

@@ -23,7 +23,4 @@ object Versions {
   val ReactiveKafkaVer      = "0.8.3" //TODO -> 0.9.0
 
   val LogbackVer            = "1.1.2"
-
-  val PlayExtras            = "1.4.0"
-  val PlayStreams           = "2.4.6"
 }

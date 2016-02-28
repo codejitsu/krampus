@@ -1,34 +1,34 @@
 @(message: String)(implicit request: RequestHeader)
 
 @main(message) {
-
-    <div id="tweets"></div>
+    <div id="stream"></div>
 
     <script type="text/javascript">
-
-        function appendTweet(text) {
-            var tweet = document.createElement("p");
-            var message = document.createTextNode(text);
-            tweet.appendChild(message);
-            document.getElementById("tweets").appendChild(tweet);
+        function appendWikiMessage(data) {
+            var p = document.createElement("p");
+            var message = document.createTextNode(data.channel + " : " + data.page);
+            p.appendChild(message);
+            document.getElementById("stream").appendChild(p);
         }
 
         function connect(attempt) {
             var connectionAttempt = attempt;
-            var tweetSocket = new WebSocket("@routes.ApplicationController.stream().webSocketURL()");
-            tweetSocket.onmessage = function (event) {
+            var wikiSocket = new WebSocket("@routes.ApplicationController.stream().webSocketURL()");
+
+            wikiSocket.onmessage = function(event) {
                 console.log(event);
                 var data = JSON.parse(event.data);
-                appendTweet(data.text);
+                appendWikiMessage(data);
             };
-            tweetSocket.onopen = function() {
-                console.log("onopen");
+
+            wikiSocket.onopen = function() {
                 connectionAttempt = 1;
-                tweetSocket.send("subscribe");
+                wikiSocket.send("subscribe");
             };
-            tweetSocket.onclose = function() {
+
+            wikiSocket.onclose = function() {
                 if (connectionAttempt <= 3) {
-                    appendTweet("WARNING: Connection with the server lost, attempting to reconnect. Attempt number " + connectionAttempt);
+                    console.log("WARNING: Connection with the server lost, attempting to reconnect. Attempt number " + connectionAttempt);
                     setTimeout(function() {
                         connect(connectionAttempt + 1);
                     }, 5000);
@@ -40,5 +40,4 @@
 
         connect(1);
     </script>
-
 }

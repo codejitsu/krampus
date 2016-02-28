@@ -4,7 +4,7 @@ package controllers
 
 import java.net.URL
 
-import akka.actor.{ActorRef, Actor, Props}
+import akka.actor.{Actor, Props}
 import com.typesafe.scalalogging.LazyLogging
 import krampus.avro.WikiChangeEntryAvro
 import krampus.entity.WikiChangeEntry
@@ -15,12 +15,12 @@ import utils.AppConfig
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-final case class RawKafkaMessage(key: Array[Byte], msg: Array[Byte])
+final case class KMessage(key: Array[Byte], msg: Array[Byte])
 
 /**
   * Bytes to Avro converter actor.
   */
-class AvroConverterActor(config: AppConfig, to: ActorRef) extends Actor with LazyLogging {
+class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
   implicit val urlWrites = new Writes[URL] {
     def writes(url: URL) = Json.toJson(url.toString)
   }
@@ -44,20 +44,25 @@ class AvroConverterActor(config: AppConfig, to: ActorRef) extends Actor with Laz
   )(unlift(WikiChangeEntry.unapply))
 
   private[this] lazy val reader =
-    new SpecificDatumReader[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
+    new SpecificDatumReader[WikiChangeEntryAvro](classOf[WikiChangeEntryAvro])
 
   override def receive: Receive = {
-    case msg @ RawKafkaMessage(_, _) =>
-      logger.debug(s"WebApp: AvroActor - msg: key(${msg.key.length} bytes), msg(${msg.msg.length} bytes).")
+    case msg @ KMessage(_, _) =>
 
       val entryAvro = convert(msg)
       val entry = fromAvro(entryAvro)
 
       val json = Json.toJson(entry)
-      to ! json.toString()
+
+      KafkaActor.subs().foreach { to =>
+        val jsonStr = json.toString()
+
+        logger.debug(s"json: $jsonStr")
+        to ! json
+      }
   }
 
-  def convert(msg: RawKafkaMessage): WikiChangeEntryAvro = {
+  def convert(msg: KMessage): WikiChangeEntryAvro = {
     val decoder = DecoderFactory.get().binaryDecoder(msg.msg, null) //scalastyle:ignore
     val wikiChangeEntryAvro = reader.read(null, decoder) //scalastyle:ignore
 
@@ -70,5 +75,5 @@ class AvroConverterActor(config: AppConfig, to: ActorRef) extends Actor with Laz
 }
 
 object AvroConverterActor {
-  def props(config: AppConfig, to: ActorRef): Props = Props(new AvroConverterActor(config, to))
+  def props(config: AppConfig): Props = Props(new AvroConverterActor(config))
 }
