@@ -76,7 +76,12 @@ object Dependencies {
     val kafkaClients  = "org.apache.kafka"                % "kafka-clients"            % KafkaClientsVer
     val reactiveKafka = "com.softwaremill.reactivekafka" %% "reactive-kafka-core"      % ReactiveKafkaVer excludeAll
       (ExclusionRule(organization = "com.typesafe.akka"))
+
+    //TODO clean up!
     val akkaLogging   = "com.typesafe.akka"              %% "akka-slf4j" % "2.4.0"
+    val webjarsPlay = "org.webjars" %% "webjars-play" % "2.4.0-2"
+    val webjarsAngular = "org.webjars" % "angularjs" % "1.1.5-1"
+    val webjarsBootstrap = "org.webjars" % "bootstrap" % "2.3.2"
   }
 
   object Test {
@@ -96,5 +101,6 @@ object Dependencies {
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
-  val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging, logback, akkaLogging) ++ test
+  val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging, logback, akkaLogging,
+    webjarsPlay, webjarsAngular, webjarsBootstrap) ++ test
 }

@@ -1,0 +1,53 @@
+body {
+    font-family: helvetica;
+    color: #333;
+    background: #CCC;
+}
+
+#channel {
+    min-height: 500px;
+    right: 10px;
+    left: 30px;
+    background: #AAA;
+    width: 420px;
+}
+
+.msg {
+    padding: 10px;
+    width: 400px;
+    background: #FF9966;
+}
+
+.msg1 {
+    background: #e6e6e6;
+}
+
+.msg2 {
+    background: #CCC;
+}
+
+#header {
+    color: #EEE;
+    width: 400px;
+    height: 34px;
+    font-weight: bold;
+    padding: 10px;
+    background: #666;
+    flow: left;
+}
+
+#footer {
+    color: #EEE;
+    width: 400px;
+    height: 34px;
+    font-weight: bold;
+    padding: 10px;
+    background: #666;
+}
+
+#channelSelect {
+    width: 100px;
+    position: relative;
+    top: 3px;
+    left: 10px;
+}

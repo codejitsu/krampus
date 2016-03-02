@@ -1,7 +1,9 @@
 
 # Home page
-GET  /              @controllers.ApplicationController.index
-GET  /stream          @controllers.ApplicationController.stream
+GET     /                  controllers.ApplicationController.index
+GET     /stream            controllers.ApplicationController.stream
+GET     /app               controllers.ApplicationController.app
 
 # Map static resources from the /public folder to the /assets URL path
-GET  /assets/*file  controllers.Assets.at(path="/public", file)
+GET     /assets/*file      controllers.Assets.at(path="/public", file)
+GET     /webjars/*file     controllers.WebJarAssets.at(file)

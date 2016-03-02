@@ -25,7 +25,7 @@ class WebsocketPublisherActor(channel: Channel[String]) extends Actor with LazyL
   }
 }
 
-class ApplicationController extends Controller with LazyLogging {
+object ApplicationController extends Controller with LazyLogging {
   private[this] val config = new AppConfig()
   private[this] lazy val reactiveKafka: ReactiveKafka = new ReactiveKafka()
 
@@ -43,9 +43,9 @@ class ApplicationController extends Controller with LazyLogging {
     }
   ).commitInterval(1200 milliseconds)
 
-  private[this] val publisher: PublisherWithCommitSink[Array[Byte]] = reactiveKafka.consumeWithOffsetSink(consumerProperties)
+  private[this] lazy val publisher: PublisherWithCommitSink[Array[Byte]] = reactiveKafka.consumeWithOffsetSink(consumerProperties)
 
-  private[this] val avroConverter = actorSystem.actorOf(AvroConverterActor.props(config))
+  private[this] lazy val avroConverter = actorSystem.actorOf(AvroConverterActor.props(config))
 
   Source.fromPublisher(publisher.publisher)
     .map(processMessage)
@@ -64,4 +64,6 @@ class ApplicationController extends Controller with LazyLogging {
 
     msg
   }
+
+  def app: Action[AnyContent] = Action { Ok(views.html.app("WikiWatch")) }
 }
