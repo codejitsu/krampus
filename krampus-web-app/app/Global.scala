@@ -6,7 +6,7 @@ object Global extends GlobalSettings {
 
   override def onStart(application: play.api.Application) {
   }
-  
+
   override def onStop(application: play.api.Application) {
   }
 }

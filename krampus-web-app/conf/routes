@@ -1,8 +1,7 @@
 
 # Home page
-GET     /                  controllers.ApplicationController.index
-GET     /stream            controllers.ApplicationController.stream
-GET     /app               controllers.ApplicationController.app
+GET     /stream/:channel   controllers.ApplicationController.stream(channel: String)
+GET     /wikiwatch         controllers.ApplicationController.wikiwatch
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file      controllers.Assets.at(path="/public", file)

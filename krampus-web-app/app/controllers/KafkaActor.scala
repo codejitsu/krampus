@@ -2,7 +2,7 @@
 
 package controllers
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{PoisonPill, Actor, ActorRef, Props}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.mutable.ArrayBuffer
@@ -12,6 +12,10 @@ class KafkaActor(out: ActorRef) extends Actor with LazyLogging {
     case "subscribe" =>
       logger.info("Received subscription from a client")
       KafkaActor.subscribe(out)
+
+    case "unsubscribe" =>
+      logger.info("Received unsubscribe message from a client")
+      self ! PoisonPill
   }
 
   override def postStop(): Unit = {

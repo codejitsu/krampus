@@ -2,7 +2,7 @@
 
 package controllers
 
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
@@ -10,20 +10,11 @@ import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink
 import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Decoder
 import play.api.Play.current
-import play.api.libs.iteratee.Concurrent.Channel
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, Controller, WebSocket}
 import utils.AppConfig
 
 import scala.concurrent.duration._
-
-class WebsocketPublisherActor(channel: Channel[String]) extends Actor with LazyLogging {
-  override def receive: Receive = {
-    case str: String =>
-      logger.info(s"PublisherActor msg: $str")
-      channel.push(str)
-  }
-}
 
 object ApplicationController extends Controller with LazyLogging {
   private[this] val config = new AppConfig()
@@ -51,11 +42,8 @@ object ApplicationController extends Controller with LazyLogging {
     .map(processMessage)
     .to(publisher.offsetCommitSink).run()
 
-  def index: Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.index("Wikipedia Stream"))
-  }
-
-  def stream: WebSocket[String, JsValue] = WebSocket.acceptWithActor[String, JsValue] { request => out =>
+  def stream(channel: String): WebSocket[String, JsValue] = WebSocket.acceptWithActor[String, JsValue] { request => out =>
+    logger.debug("Try to connect to the wiki channel '{}'", channel)
     KafkaActor.props(out)
   }
 
@@ -65,5 +53,5 @@ object ApplicationController extends Controller with LazyLogging {
     msg
   }
 
-  def app: Action[AnyContent] = Action { Ok(views.html.app("WikiWatch")) }
+  def wikiwatch: Action[AnyContent] = Action { Ok(views.html.wikiwatch("WikiWatch")) }
 }
