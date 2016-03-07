@@ -6,7 +6,7 @@
         controller('WikiCtrl', function ($scope, $http, wikiModel) {
             $scope.channels = wikiModel.getChannels();
             $scope.currentChannel = $scope.channels[0];
-            $scope.msgs = [{user: 'alex', text: 'hi'}, {user: 'bob', text: 'hi there'}, {user: 'alice', text: 'ola'}];
+            $scope.msgs = [];
             $scope.connectionAttempt = 0;
             $scope.wikiStream = null;
 
@@ -19,7 +19,14 @@
 
             /** handle incoming messages: add to messages array */
             $scope.addMsg = function (msg) {
-                $scope.$apply(function () { $scope.msgs.push(JSON.parse(msg.data)); });
+                $scope.$apply(function () {
+                    $scope.msgs.push(
+                        {
+                            user: msg.user,
+                            text: msg.page
+                        }
+                    );
+                });
             };
 
             /** start listening on messages from selected channel */
@@ -46,7 +53,7 @@
                 $scope.wikiStream.onmessage = function(event) {
                     console.log(event);
                     var data = JSON.parse(event.data);
-                  //  appendWikiMessage(data);
+                    $scope.addMsg(data);
                 };
 
                 $scope.wikiStream.onopen = function() {

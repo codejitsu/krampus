@@ -42,7 +42,7 @@ object WikiwatchController extends Controller with LazyLogging {
     .map(processMessage)
     .to(publisher.offsetCommitSink).run()
 
-  def stream(channel: String): WebSocket[String, JsValue] = WebSocket.acceptWithActor[String, JsValue] { request => out =>
+  def stream(channel: String): WebSocket[String, String] = WebSocket.acceptWithActor[String, String] { request => out =>
     logger.debug("Try to connect to the wiki channel '{}'", channel)
     RecipientActor.props(out, s"#$channel.wikipedia")
   }
