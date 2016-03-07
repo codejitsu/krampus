@@ -16,7 +16,7 @@ import utils.AppConfig
 
 import scala.concurrent.duration._
 
-object ApplicationController extends Controller with LazyLogging {
+object WikiwatchController extends Controller with LazyLogging {
   private[this] val config = new AppConfig()
   private[this] lazy val reactiveKafka: ReactiveKafka = new ReactiveKafka()
 
@@ -44,7 +44,7 @@ object ApplicationController extends Controller with LazyLogging {
 
   def stream(channel: String): WebSocket[String, JsValue] = WebSocket.acceptWithActor[String, JsValue] { request => out =>
     logger.debug("Try to connect to the wiki channel '{}'", channel)
-    KafkaActor.props(out)
+    RecipientActor.props(out, s"#$channel.wikipedia")
   }
 
   private def processMessage(msg: KafkaMessage[Array[Byte]]) = {

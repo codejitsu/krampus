@@ -15,7 +15,11 @@ import utils.AppConfig
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
+import scala.util.control.NonFatal
+import scala.util.{Failure, Success, Try}
+
 final case class KMessage(key: Array[Byte], msg: Array[Byte])
+final case class ChannelMessage(channel: String, json: String)
 
 /**
   * Bytes to Avro converter actor.
@@ -52,13 +56,21 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
       val entryAvro = convert(msg)
       val entry = fromAvro(entryAvro)
 
-      val json = Json.toJson(entry)
+      val json = Try(Json.toJson(entry))
 
-      KafkaActor.subs().foreach { to =>
-        val jsonStr = json.toString()
+      RecipientActor.subs().foreach { to =>
+        val jsonStr = json.map(_.toString)
 
         logger.debug(s"json: $jsonStr")
-        to ! json
+
+        jsonStr match {
+          case Failure(f) => logger.error(f.getMessage)
+          case _ =>
+        }
+
+        jsonStr.foreach { js =>
+          to ! ChannelMessage(entry.channel, js)
+        }
       }
   }
 
