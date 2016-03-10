@@ -7,6 +7,7 @@
             $scope.channels = wikiModel.getChannels();
             $scope.currentChannel = $scope.channels[0];
             $scope.msgs = [];
+            $scope.counter = 0;
             $scope.connectionAttempt = 0;
             $scope.wikiStream = null;
 
@@ -14,6 +15,7 @@
             $scope.setCurrentChannel = function (channel) {
                 $scope.currentChannel = channel;
                 $scope.msgs = [];
+                $scope.counter = 0;
                 $scope.listen(1);
             };
 
@@ -23,10 +25,15 @@
                     $scope.msgs.push(
                         {
                             user: msg.user,
-                            text: msg.page
+                            text: msg.page,
+                            timestamp: $scope.time(msg.timestamp)
                         }
                     );
                 });
+            };
+
+            $scope.time = function (ms) {
+                return new Date(ms).toString();
             };
 
             /** start listening on messages from selected channel */
@@ -54,6 +61,7 @@
                     console.log(event);
                     var data = JSON.parse(event.data);
                     $scope.addMsg(data);
+                    $scope.counter = $scope.counter + 1;
                 };
 
                 $scope.wikiStream.onopen = function() {

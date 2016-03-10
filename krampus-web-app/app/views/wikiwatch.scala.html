@@ -25,14 +25,14 @@
     </div>
 
     <div id="channel">
-        <div class="{{msg.who}} msg" ng-repeat="msg in msgs | limitTo:-4"
-             ng-class-odd="'msg1'" ng-class-even="'msg2'">{{msg.time}}<br/>
+        <div class="{{msg.who}} msg" ng-repeat="msg in msgs | limitTo:-8"
+             ng-class-odd="'msg1'" ng-class-even="'msg2'">{{msg.timestamp}}<br/>
             <strong>{{msg.user}}: </strong>{{msg.text}}<br/>
         </div>
     </div>
 
     <div id="footer">
-        <!-- place message counter here -->
+        <span ng-model="counter"># messages: {{counter}}</span>
     </div>
 </div>
 </body>
