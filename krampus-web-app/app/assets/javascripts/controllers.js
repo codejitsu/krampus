@@ -29,6 +29,7 @@
                             timestamp: $scope.time(msg.timestamp)
                         }
                     );
+                    $scope.counter = $scope.counter + 1;
                 });
             };
 
@@ -61,7 +62,6 @@
                     console.log(event);
                     var data = JSON.parse(event.data);
                     $scope.addMsg(data);
-                    $scope.counter = $scope.counter + 1;
                 };
 
                 $scope.wikiStream.onopen = function() {
