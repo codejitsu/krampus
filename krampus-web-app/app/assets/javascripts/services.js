@@ -5,6 +5,7 @@
     angular.module('wikiWatch.services', []).service('wikiModel', function () {
         var getChannels = function() {
             return [
+                  { name: "ALL", value: "all" },
                   { name: "en", value: "en" },
                   { name: "sv", value: "sv" },
                   { name: "de", value: "de" },
