@@ -4,6 +4,7 @@ package actors
 
 import java.net.URL
 
+import actors.Messages.{ChannelMessage, KafkaRawDataMessage}
 import akka.actor.{Actor, Props}
 import com.typesafe.scalalogging.LazyLogging
 import krampus.avro.WikiChangeEntryAvro
@@ -16,9 +17,6 @@ import play.api.libs.json._
 import utils.AppConfig
 
 import scala.util.{Failure, Try}
-
-final case class KMessage(key: Array[Byte], msg: Array[Byte])
-final case class ChannelMessage(channel: String, json: String)
 
 /**
   * Bytes to Avro converter actor.
@@ -50,10 +48,9 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
     new SpecificDatumReader[WikiChangeEntryAvro](classOf[WikiChangeEntryAvro])
 
   override def receive: Receive = {
-    case msg @ KMessage(_, _) =>
-
-      val entryAvro = convert(msg)
-      val entry = fromAvro(entryAvro)
+    case kafkaData @ KafkaRawDataMessage(_) =>
+      val entryAvro = readAvro(kafkaData)
+      val entry = convertFromAvro(entryAvro)
 
       val json = Try(Json.toJson(entry))
 
@@ -73,8 +70,8 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
       }
   }
 
-  def convert(msg: KMessage): WikiChangeEntryAvro = {
-    val decoder = DecoderFactory.get().binaryDecoder(msg.msg, null) //scalastyle:ignore
+  private def readAvro(msg: KafkaRawDataMessage): WikiChangeEntryAvro = {
+    val decoder = DecoderFactory.get().binaryDecoder(msg.data, null) //scalastyle:ignore
     val wikiChangeEntryAvro = reader.read(null, decoder) //scalastyle:ignore
 
     logger.debug(s"${wikiChangeEntryAvro.getChannel()}: ${wikiChangeEntryAvro.getPage()}")
@@ -82,7 +79,7 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
     wikiChangeEntryAvro
   }
 
-  def fromAvro(entryAvro: WikiChangeEntryAvro): WikiChangeEntry = WikiChangeEntry(entryAvro)
+  private def convertFromAvro(entryAvro: WikiChangeEntryAvro): WikiChangeEntry = WikiChangeEntry(entryAvro)
 }
 
 object AvroConverterActor {

@@ -2,7 +2,8 @@
 
 package controllers
 
-import actors.{AvroConverterActor, KMessage, RecipientActor}
+import actors.Messages.KafkaRawDataMessage
+import actors.{AvroConverterActor, RecipientActor}
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
@@ -11,7 +12,6 @@ import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink
 import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Decoder
 import play.api.Play.current
-import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, Controller, WebSocket}
 import utils.AppConfig
 
@@ -49,7 +49,7 @@ object WikiwatchController extends Controller with LazyLogging {
   }
 
   private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
-    avroConverter ! KMessage(msg.key(), msg.message())
+    avroConverter ! KafkaRawDataMessage(msg.message())
 
     msg
   }
