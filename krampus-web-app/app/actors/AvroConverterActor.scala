@@ -1,6 +1,6 @@
 // Copyright (C) 2016, codejitsu.
 
-package controllers
+package actors
 
 import java.net.URL
 
@@ -11,12 +11,11 @@ import krampus.entity.WikiChangeEntry
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.specific.SpecificDatumReader
 import org.joda.time.DateTime
-import utils.AppConfig
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import utils.AppConfig
 
-import scala.util.control.NonFatal
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 final case class KMessage(key: Array[Byte], msg: Array[Byte])
 final case class ChannelMessage(channel: String, json: String)

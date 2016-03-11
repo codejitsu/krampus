@@ -1,9 +1,10 @@
 // Copyright (C) 2016, codejitsu.
 
-package controllers
+package actors
 
 import akka.actor._
 import com.typesafe.scalalogging.LazyLogging
+
 import scala.collection.mutable.ArrayBuffer
 
 class ChannelListenerActor(out: ActorRef, channel: String) extends Actor with LazyLogging {
