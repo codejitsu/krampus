@@ -36,6 +36,17 @@ body {
     flow: left;
 }
 
+#change-channel-form {
+    margin: 0;
+    padding: 0;
+    float: right;
+    padding-top: 4px;
+}
+
+#change-channel {
+    display: inline;
+}
+
 #footer {
     color: #EEE;
     width: 400px;

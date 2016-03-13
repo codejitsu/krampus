@@ -11,9 +11,13 @@
             $scope.connectionAttempt = 0;
             $scope.wikiStream = null;
 
-            /** change current channel, restart websocket connection */
+            /** change current channel */
             $scope.setCurrentChannel = function (channel) {
                 $scope.currentChannel = channel;
+            };
+
+            /** change current channel, restart websocket connection */
+            $scope.changeChannel = function () {
                 $scope.msgs = [];
                 $scope.counter = 0;
                 $scope.listen(1);
@@ -26,7 +30,8 @@
                         {
                             user: msg.user,
                             text: msg.page,
-                            timestamp: $scope.time(msg.timestamp)
+                            timestamp: $scope.time(msg.timestamp),
+                            diffUrl: msg.diffUrl
                         }
                     );
                     $scope.counter = $scope.counter + 1;
