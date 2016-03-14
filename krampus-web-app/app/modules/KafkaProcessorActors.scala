@@ -19,7 +19,7 @@ import scala.concurrent.duration._
 
 trait ApplicationActors
 
-class Actors @Inject()(system: ActorSystem) extends ApplicationActors {
+class KafkaProcessorActors @Inject()(system: ActorSystem) extends ApplicationActors {
   private[this] val config = new AppConfig()
 
   implicit val materializer = ActorMaterializer.create(system)
@@ -56,7 +56,7 @@ class Actors @Inject()(system: ActorSystem) extends ApplicationActors {
 class ActorsModule extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[ApplicationActors])
-      .to(classOf[Actors])
+      .to(classOf[KafkaProcessorActors])
       .asEagerSingleton()
   }
 }

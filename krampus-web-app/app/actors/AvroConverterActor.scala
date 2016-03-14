@@ -54,20 +54,23 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
 
       val json = Try(Json.toJson(entry))
 
-      RecipientActor.subs().foreach { to =>
-        val jsonStr = json.map(_.toString)
+      val jsonStr = json.map(_.toString)
 
-        logger.debug(s"json: $jsonStr")
+      logger.debug(s"json: $jsonStr")
 
-        jsonStr match {
-          case Failure(f) => logger.error(f.getMessage)
-          case _ =>
-        }
+      jsonStr match {
+        case Failure(f) => logger.error(f.getMessage)
+        case _ =>
+      }
 
+      //TODO use some kind of broadcast here
+      RecipientActor.subs.foreach { to =>
         jsonStr.foreach { js =>
           to ! ChannelMessage(entry.channel, js)
         }
       }
+
+    case msg => logger.error(s"Unexpected message '$msg'")
   }
 
   private def readAvro(msg: KafkaRawDataMessage): WikiChangeEntryAvro = {
