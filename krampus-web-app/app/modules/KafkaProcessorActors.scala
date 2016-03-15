@@ -35,7 +35,7 @@ class KafkaProcessorActors @Inject()(system: ActorSystem) extends ApplicationAct
     decoder = new Decoder[Array[Byte]] {
       override def fromBytes(bytes: Array[Byte]): Array[Byte] = bytes
     }
-  ).commitInterval(1200 milliseconds)
+  ).commitInterval(1200 milliseconds).readFromEndOfStream()
 
   private[this] val publisher: PublisherWithCommitSink[Array[Byte]] =
     reactiveKafka.consumeWithOffsetSink(consumerProperties)(system)
