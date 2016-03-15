@@ -15,6 +15,7 @@ object Versions {
 
   val AkkaStreamsVer        = "2.0.2"
   val AkkaVer               = "2.4.1"
+  val AkkaLoggingVer        = "2.4.0"
   val Jackson4sVer          = "3.2.11"
 
   val AvroVer               = "1.7.7"
@@ -23,4 +24,8 @@ object Versions {
   val ReactiveKafkaVer      = "0.8.3" //TODO -> 0.9.0
 
   val LogbackVer            = "1.1.2"
+
+  val WebjarsPlayVer        = "2.4.0-2"
+  val WebjarsAngularVer     = "1.1.5-1"
+  val WebjarsBootstrapVer   = "2.3.2"
 }

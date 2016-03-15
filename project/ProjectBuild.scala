@@ -77,11 +77,10 @@ object Dependencies {
     val reactiveKafka = "com.softwaremill.reactivekafka" %% "reactive-kafka-core"      % ReactiveKafkaVer excludeAll
       (ExclusionRule(organization = "com.typesafe.akka"))
 
-    //TODO clean up!
-    val akkaLogging   = "com.typesafe.akka"              %% "akka-slf4j" % "2.4.0"
-    val webjarsPlay = "org.webjars" %% "webjars-play" % "2.4.0-2"
-    val webjarsAngular = "org.webjars" % "angularjs" % "1.1.5-1"
-    val webjarsBootstrap = "org.webjars" % "bootstrap" % "2.3.2"
+    val akkaLogging   =     "com.typesafe.akka"           %% "akka-slf4j"              % AkkaLoggingVer
+    val webjarsPlay =       "org.webjars"                 %% "webjars-play"            % WebjarsPlayVer
+    val webjarsAngular =    "org.webjars"                  % "angularjs"               % WebjarsAngularVer
+    val webjarsBootstrap =  "org.webjars"                  % "bootstrap"               % WebjarsBootstrapVer
   }
 
   object Test {
