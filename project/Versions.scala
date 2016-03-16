@@ -26,6 +26,6 @@ object Versions {
   val LogbackVer            = "1.1.2"
 
   val WebjarsPlayVer        = "2.4.0-2"
-  val WebjarsAngularVer     = "1.1.5-1"
+  val WebjarsAngularVer     = "1.5.0"
   val WebjarsBootstrapVer   = "2.3.2"
 }
