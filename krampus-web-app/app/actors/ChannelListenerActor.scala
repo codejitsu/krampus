@@ -20,6 +20,10 @@ class ChannelListenerActor(out: ActorRef, channel: String) extends Actor with La
 
     case _ =>
   }
+
+  override def preStart(): Unit = {
+    context.system.eventStream.subscribe(self, classOf[ChannelMessage])
+  }
 }
 
 object ChannelListenerActor {

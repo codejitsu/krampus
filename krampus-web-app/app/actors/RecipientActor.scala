@@ -37,6 +37,4 @@ object RecipientActor extends LazyLogging {
   def subscribe(out: ActorRef): Unit = {
     subscribers = out :: subscribers
   }
-
-  def subs: List[ActorRef] = subscribers
 }

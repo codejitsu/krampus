@@ -63,11 +63,8 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
         case _ =>
       }
 
-      //TODO use some kind of broadcast here
-      RecipientActor.subs.foreach { to =>
-        jsonStr.foreach { js =>
-          to ! ChannelMessage(entry.channel, js)
-        }
+      jsonStr.foreach { js =>
+        context.system.eventStream.publish(ChannelMessage(entry.channel, js))
       }
 
     case msg => logger.error(s"Unexpected message '$msg'")
