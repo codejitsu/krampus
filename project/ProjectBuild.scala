@@ -77,10 +77,11 @@ object Dependencies {
     val reactiveKafka = "com.softwaremill.reactivekafka" %% "reactive-kafka-core"      % ReactiveKafkaVer excludeAll
       (ExclusionRule(organization = "com.typesafe.akka"))
 
-    val akkaLogging   =     "com.typesafe.akka"           %% "akka-slf4j"              % AkkaLoggingVer
-    val webjarsPlay =       "org.webjars"                 %% "webjars-play"            % WebjarsPlayVer
-    val webjarsAngular =    "org.webjars"                  % "angularjs"               % WebjarsAngularVer
-    val webjarsBootstrap =  "org.webjars"                  % "bootstrap"               % WebjarsBootstrapVer
+    val akkaLogging  =        "com.typesafe.akka"        %% "akka-slf4j"              % AkkaLoggingVer
+    val webjarsPlay =         "org.webjars"              %% "webjars-play"            % WebjarsPlayVer
+    val webjarsAngular =      "org.webjars"               % "angularjs"               % WebjarsAngularVer
+    val webjarsAngularRoute = "org.webjars"               % "angular-ui-router"       % WebjarsAngularRouteVer
+    val webjarsBootstrap =    "org.webjars"               % "bootstrap"               % WebjarsBootstrapVer
   }
 
   object Test {
@@ -101,5 +102,5 @@ object Dependencies {
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
   val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging, logback, akkaLogging,
-    webjarsPlay, webjarsAngular, webjarsBootstrap) ++ test
+    webjarsPlay, webjarsAngular, webjarsAngularRoute, webjarsBootstrap) ++ test
 }
