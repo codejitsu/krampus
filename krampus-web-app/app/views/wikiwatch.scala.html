@@ -16,25 +16,6 @@
     <script src="@routes.Assets.at("javascripts/controllers.js")"></script>
 </head>
 <body ng-app="wikiWatch">
-    <div ng-controller="WikiCtrl">
-        <div id="header">
-            Channels: <select ng-model="currentChannel" ng-change="setCurrentChannel(currentChannel)"
-                    ng-options="ch.name for ch in channels" id="channelSelect"></select>
-            <form ng-submit="changeChannel()" id="change-channel-form">
-                <input type="button" class="btn btn-primary" id="change-channel" value="Change" ng-click="changeChannel()" />
-            </form>
-        </div>
-
-        <div id="channel">
-            <div class="{{msg.who}} msg" ng-repeat="msg in msgs | limitTo:-8"
-                 ng-class-odd="'msg1'" ng-class-even="'msg2'">{{msg.timestamp}}<br/>
-                <strong>{{msg.user}}: </strong><a href="{{msg.diffUrl}}">{{msg.text}}</a><br/>
-            </div>
-        </div>
-
-        <div id="footer">
-            <span ng-model="counter"># messages: {{counter}}</span>
-        </div>
-    </div>
+    <div ng-view></div>
 </body>
 </html>

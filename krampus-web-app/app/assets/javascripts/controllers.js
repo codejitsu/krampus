@@ -3,9 +3,26 @@
 
     /** Controllers */
     angular.module('wikiWatch.controllers', ['wikiWatch.services']).
-        controller('WikiCtrl', function ($scope, $http, wikiModel) {
+        controller('WikiCtrl', function ($scope, $http, $routeParams, $location, wikiModel) {
             $scope.channels = wikiModel.getChannels();
             $scope.currentChannel = $scope.channels[0];
+
+            var index;
+            var found = false;
+            for (index = 0; index < $scope.channels.length; ++index) {
+                var ch = $scope.channels[index];
+
+                if (ch.value === $routeParams.channel) {
+                    $scope.currentChannel = ch;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found === false) {
+                $location.path("/channel/all");
+            }
+
             $scope.msgs = [];
             $scope.counter = 0;
             $scope.connectionAttempt = 0;
@@ -14,6 +31,7 @@
             /** change current channel */
             $scope.setCurrentChannel = function (channel) {
                 $scope.currentChannel = channel;
+                $location.path("/channel/" + channel.value);
             };
 
             /** change current channel, restart websocket connection */

@@ -14,4 +14,5 @@ object WikiwatchController extends Controller with LazyLogging {
   }
 
   def wikiwatch: Action[AnyContent] = Action { Ok(views.html.wikiwatch("WikiWatch")) }
+  def wiki: Action[AnyContent] = Action { Ok(views.html.wiki()) }
 }
