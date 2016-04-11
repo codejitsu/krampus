@@ -3,7 +3,7 @@
 
     /** Controllers */
     angular.module('wikiWatch.controllers', ['wikiWatch.services']).
-        controller('WikiCtrl', function ($scope, $http, $routeParams, $location, wikiModel) {
+        controller('WikiCtrl', function ($scope, $http, $websocket, $routeParams, $location, wikiModel) {
             $scope.channels = wikiModel.getChannels();
             $scope.currentChannel = $scope.channels[0];
 
@@ -79,18 +79,18 @@
                 stream_uri += "//" + loc.host;
                 stream_uri += "/stream/" + $scope.currentChannel.value;
 
-                $scope.wikiStream = new WebSocket(stream_uri);
+                $scope.wikiStream = $websocket(stream_uri);
 
-                $scope.wikiStream.onmessage = function(event) {
+                $scope.wikiStream.onMessage(function(event) {
                     console.log(event);
                     var data = JSON.parse(event.data);
                     $scope.addMsg(data);
-                };
+                });
 
-                $scope.wikiStream.onopen = function() {
+                $scope.wikiStream.onOpen(function() {
                     $scope.connectionAttempt = 1;
                     $scope.wikiStream.send("subscribe");
-                };
+                });
             };
 
             $scope.listen(1);

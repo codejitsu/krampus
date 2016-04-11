@@ -2,7 +2,7 @@
    'use strict';
 
     /** app level module which depends on services and controllers */
-    var wikiWatchApp = angular.module('wikiWatch', ['ngRoute', 'wikiWatch.services', 'wikiWatch.controllers']);
+    var wikiWatchApp = angular.module('wikiWatch', ['ngRoute', 'ngWebSocket', 'wikiWatch.services', 'wikiWatch.controllers']);
 
     wikiWatchApp.config(['$routeProvider',
       function($routeProvider) {

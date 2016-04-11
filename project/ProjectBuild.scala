@@ -78,9 +78,12 @@ object Dependencies {
       (ExclusionRule(organization = "com.typesafe.akka"))
 
     val akkaLogging  =        "com.typesafe.akka"        %% "akka-slf4j"              % AkkaLoggingVer
+
     val webjarsPlay =         "org.webjars"              %% "webjars-play"            % WebjarsPlayVer
-    val webjarsAngular =      "org.webjars"               % "angularjs"               % WebjarsAngularVer
-    val webjarsAngularRoute = "org.webjars"               % "angular-ui-router"       % WebjarsAngularRouteVer
+    val webjarsAng =          "org.webjars"               % "angularjs"               % WebjarsAngVer
+    val webjarsAngRoute =     "org.webjars"               % "angular-ui-router"       % WebjarsAngRouteVer
+    val webjarsAngWebsocket = "org.webjars.bower"         % "angular-websocket"       % WebjarsAngWebsocketVer
+
     val webjarsBootstrap =    "org.webjars"               % "bootstrap"               % WebjarsBootstrapVer
   }
 
@@ -102,5 +105,5 @@ object Dependencies {
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
   val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging, logback, akkaLogging,
-    webjarsPlay, webjarsAngular, webjarsAngularRoute, webjarsBootstrap) ++ test
+    webjarsPlay, webjarsAng, webjarsAngRoute, webjarsAngWebsocket, webjarsBootstrap) ++ test
 }
