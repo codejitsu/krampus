@@ -10,6 +10,7 @@ CREATE TABLE edits (
   minute            int,
   weekday           int,
   time              int,
+  day_minute        int,
   ts                timestamp,
   uid               uuid,
   channel           text,
