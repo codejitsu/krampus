@@ -100,7 +100,7 @@ object Dependencies {
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test
-  val krampusProcessor = Seq(config, akka, akkaStreams, logging, logback) ++ test
+  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
