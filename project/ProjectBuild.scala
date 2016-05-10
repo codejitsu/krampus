@@ -67,8 +67,8 @@ object Dependencies {
     val logging       = "com.typesafe.scala-logging"     %% "scala-logging"            % TypesafeLoggingVer
     val joda          = "joda-time"                       % "joda-time"                % JodaTimeVer
     val jodaConvert   = "org.joda"                        % "joda-convert"             % JodaTimeConvertVer
-    val akkaStreams   = "com.typesafe.akka"              %% "akka-stream-experimental" % AkkaStreamsVer exclude
-      ("com.typesafe.akka", "akka-actor_2.11")
+    val akkaStreams   = "com.typesafe.akka"              %% "akka-stream-experimental" % AkkaStreamsVer excludeAll
+      (ExclusionRule("com.typesafe.akka", "akka-actor_2.11"), ExclusionRule("com.typesafe", "config"))
 
     val akka          = "com.typesafe.akka"              %% "akka-actor"               % AkkaVer
     val jackson       = "org.json4s"                     %% "json4s-jackson"           % Jackson4sVer
