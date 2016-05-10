@@ -6,10 +6,12 @@ import akka.actor._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
-import com.softwaremill.react.kafka.{PublisherWithCommitSink, ConsumerProperties, ReactiveKafka}
+import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink, ReactiveKafka}
 import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Decoder
-import krampus.monitoring.util.{AppConfig, RawKafkaMessage}
+import krampus.monitoring.util.AppConfig
+import krampus.queue.RawKafkaMessage
+
 import scala.concurrent.duration._
 
 /**

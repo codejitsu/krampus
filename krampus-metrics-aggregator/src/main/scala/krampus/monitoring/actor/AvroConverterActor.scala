@@ -2,14 +2,15 @@
 
 package krampus.monitoring.actor
 
-import akka.actor.{ActorRef, Props, Actor}
+import akka.actor.{Actor, ActorRef, Props}
 import com.typesafe.scalalogging.LazyLogging
 import krampus.avro.WikiChangeEntryAvro
 import krampus.entity.WikiChangeEntry
-import krampus.monitoring.util.{AggregationMessage, AppConfig, RawKafkaMessage}
+import krampus.monitoring.util.{AggregationMessage, AppConfig}
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.specific.SpecificDatumReader
 import krampus.monitoring.util.AppConfig.ConfigDuration
+import krampus.queue.RawKafkaMessage
 
 /**
   * Bytes to Avro converter actor.
