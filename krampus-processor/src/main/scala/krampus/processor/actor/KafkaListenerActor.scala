@@ -13,7 +13,7 @@ import krampus.processor.util.{AppConfig, RawKafkaMessage}
 import scala.concurrent.duration._
 
 /**
-  * Actor to read all kafka events and propagate them to aggregate actors.
+  * Actor to read all kafka events and propagate them to the next processing step.
   */
 class KafkaListenerActor(config: AppConfig) extends Actor with LazyLogging {
   import context.system

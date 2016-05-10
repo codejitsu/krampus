@@ -11,7 +11,6 @@ import krampus.processor.util.AppConfig
   * Read Kafka Events and store data in cassandra.
   */
 object CassandraProcessorApp extends LazyLogging {
-
   def main(args: Array[String]): Unit = {
     logger.info("Starting krampus cassandra processor app...")
 
