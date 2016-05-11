@@ -18,6 +18,10 @@ class NodeGuardianActor(appConfig: AppConfig) extends Actor with LazyLogging {
 
     case ListenerInitialized =>
       logger.info("Kafka listener initialized.")
+
+    //TODO type erasure!
+    case MessageConverted(msg) =>
+      logger.info(s"Message converted: $msg")
   }
 }
 

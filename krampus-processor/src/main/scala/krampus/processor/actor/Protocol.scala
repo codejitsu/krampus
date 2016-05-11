@@ -7,5 +7,5 @@ sealed trait Protocol
 case object StartListener extends Protocol
 case object InitializeListener extends Protocol
 case object ListenerInitialized extends Protocol
-case object MessageConverted extends Protocol
+final case class  MessageConverted[T](msg: T) extends Protocol
 case object Flush extends Protocol

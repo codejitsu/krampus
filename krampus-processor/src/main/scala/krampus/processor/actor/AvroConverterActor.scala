@@ -9,27 +9,24 @@ import krampus.entity.WikiChangeEntry
 import krampus.processor.util.AppConfig
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.specific.SpecificDatumReader
-import krampus.processor.util.AppConfig.ConfigDuration
 import krampus.queue.RawKafkaMessage
 
 /**
   * Bytes to Avro converter actor.
   */
-class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
+class AvroConverterActor(config: AppConfig, recipient: ActorRef) extends Actor with LazyLogging {
   private[this] lazy val reader =
     new SpecificDatumReader[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
 
   override def receive: Receive = {
     case msg @ RawKafkaMessage(_, _) =>
-      val entryAvro = convert(msg)
+      val entryAvro = deserializeMessage(msg)
       val entry = fromAvro(entryAvro)
 
-      //TODO business logic here
-
-      context.parent ! MessageConverted
+      recipient ! MessageConverted(entry)
   }
 
-  def convert(msg: RawKafkaMessage): WikiChangeEntryAvro = {
+  def deserializeMessage(msg: RawKafkaMessage): WikiChangeEntryAvro = {
     val decoder = DecoderFactory.get().binaryDecoder(msg.msg, null) //scalastyle:ignore
     val wikiChangeEntryAvro = reader.read(null, decoder) //scalastyle:ignore
 
@@ -42,5 +39,5 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
 }
 
 object AvroConverterActor {
-  def props(config: AppConfig): Props = Props(new AvroConverterActor(config))
+  def props(config: AppConfig, recipient: ActorRef): Props = Props(new AvroConverterActor(config, recipient))
 }
