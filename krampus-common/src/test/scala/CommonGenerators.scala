@@ -30,7 +30,7 @@ object CommonGenerators {
   } yield new WikiChangeEntryAvro(isRobot, channel, timestamp.toString, flags, isUnpatrolled, page,
     s"http://$diffUrl.com/diff", added, deleted, comment, isNew, isMinor, delta, user, namespace)
 
-  val rawKafkaMessageGenerator: Gen[RawKafkaMessage] = for {
+  val rawKafkaMessageGenerator: Gen[(RawKafkaMessage, WikiChangeEntry)] = for {
     entity <- wikiChangeEntryAvroGenerator
   } yield {
     val out = new ByteArrayOutputStream()
@@ -42,6 +42,6 @@ object CommonGenerators {
     out.close()
     val serializedAvro = out.toByteArray()
 
-    RawKafkaMessage(entity.getChannel.toString.toCharArray.map(_.toByte), serializedAvro)
+    (RawKafkaMessage(entity.getChannel.toString.toCharArray.map(_.toByte), serializedAvro), WikiChangeEntry(entity))
   }
 }

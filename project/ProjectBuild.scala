@@ -31,7 +31,7 @@ object ProjectBuild extends Build {
     id = "krampus-processor",
     base = file("./krampus-processor"),
     settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusProcessor)
-  ).dependsOn(krampusCommon)
+  ).dependsOn(krampusCommon % "compile->compile;test->test")
 
   lazy val krampusProducer = Project(
     id = "krampus-producer",
@@ -90,6 +90,7 @@ object Dependencies {
   object Test {
     val scalatest     = "org.scalatest"           %% "scalatest"            % ScalaTestVer      % "test"
     val scalacheck    = "org.scalacheck"          %% "scalacheck"           % ScalaCheckVer     % "test"
+    val akkatest      = "com.typesafe.akka"       %% "akka-testkit"         % AkkaVer           % "test"
   }
 
   import Compile._
@@ -100,7 +101,7 @@ object Dependencies {
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test
-  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test
+  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test ++ Seq(Test.akkatest)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test

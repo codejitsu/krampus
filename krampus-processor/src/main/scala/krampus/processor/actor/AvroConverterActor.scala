@@ -6,7 +6,6 @@ import akka.actor.{Actor, ActorRef, Props}
 import com.typesafe.scalalogging.LazyLogging
 import krampus.avro.WikiChangeEntryAvro
 import krampus.entity.WikiChangeEntry
-import krampus.processor.util.AppConfig
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.specific.SpecificDatumReader
 import krampus.queue.RawKafkaMessage
@@ -14,7 +13,7 @@ import krampus.queue.RawKafkaMessage
 /**
   * Bytes to Avro converter actor.
   */
-class AvroConverterActor(config: AppConfig, recipient: ActorRef) extends Actor with LazyLogging {
+class AvroConverterActor(recipient: ActorRef) extends Actor with LazyLogging {
   private[this] lazy val reader =
     new SpecificDatumReader[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
 
@@ -39,5 +38,5 @@ class AvroConverterActor(config: AppConfig, recipient: ActorRef) extends Actor w
 }
 
 object AvroConverterActor {
-  def props(config: AppConfig, recipient: ActorRef): Props = Props(new AvroConverterActor(config, recipient))
+  def props(recipient: ActorRef): Props = Props(new AvroConverterActor(recipient))
 }

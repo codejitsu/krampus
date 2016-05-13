@@ -2,8 +2,22 @@
 
 package krampus.processor.actor
 
-import org.scalacheck.Properties
+import akka.actor.ActorSystem
+import akka.testkit.{ImplicitSender, TestKit}
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
+import krampus.entity.CommonGenerators._
 
-class AvroConverterActorSpecification extends Properties("AvroConverterActor") {
+class AvroConverterActorSpecification() extends TestKit(ActorSystem("AvroConverterActorSpecification")) with ImplicitSender
+  with FunSuiteLike with Matchers with GeneratorDrivenPropertyChecks with BeforeAndAfterAll {
+  override def afterAll: Unit = TestKit.shutdownActorSystem(system)
 
+  test("AvroConverterActor must convert raw kafka messages to entities") {
+    val actor = system.actorOf(AvroConverterActor.props(self))
+
+    forAll(rawKafkaMessageGenerator) { case (rawMessage, converted) =>
+      actor ! rawMessage
+      expectMsg(MessageConverted(converted))
+    }
+  }
 }
