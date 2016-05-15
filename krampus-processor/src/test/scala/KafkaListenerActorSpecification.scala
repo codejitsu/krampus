@@ -16,6 +16,7 @@ import org.apache.kafka.common.serialization.Serializer
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
 class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListenerActorSpecification"))
@@ -50,19 +51,21 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
   override def afterAll: Unit = TestKit.shutdownActorSystem(system)
 
   test("KafkaListenerActor must forward raw kafka messages to avro converter actor") {
-    def process(msg: RawKafkaMessage): Unit = ()
+    val messages = ListBuffer.empty[RawKafkaMessage]
+
+    def process(msg: RawKafkaMessage): Unit = messages :+ msg
     val cnf = config
 
-    val actor = system.actorOf(KafkaListenerActor.props(cnf, process))
-    actor ! InitializeListener
-
     withRunningKafka {
+      val actor = system.actorOf(KafkaListenerActor.props(cnf, process))
+      actor ! InitializeListener
+
       forAll(rawKafkaMessageGenerator) { case (rawMessage, converted) =>
         kafkaProducer.send(new ProducerRecord(cnf.topic, rawMessage))
       }
-    }
 
-    system.stop(actor)
+      system.stop(actor)
+    }
   }
 
   def config: AppConfig = new AppConfig("cassandra-processor-app")
