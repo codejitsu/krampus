@@ -88,9 +88,10 @@ object Dependencies {
   }
 
   object Test {
-    val scalatest     = "org.scalatest"           %% "scalatest"            % ScalaTestVer      % "test"
-    val scalacheck    = "org.scalacheck"          %% "scalacheck"           % ScalaCheckVer     % "test"
-    val akkatest      = "com.typesafe.akka"       %% "akka-testkit"         % AkkaVer           % "test"
+    val scalatest     = "org.scalatest"           %% "scalatest"                % ScalaTestVer      % "test"
+    val scalacheck    = "org.scalacheck"          %% "scalacheck"               % ScalaCheckVer     % "test"
+    val akkatest      = "com.typesafe.akka"       %% "akka-testkit"             % AkkaVer           % "test"
+    val embeddedKafka = "net.manub"               %% "scalatest-embedded-kafka" % EmbeddedKafkaVer  % "test"
   }
 
   import Compile._
@@ -101,7 +102,7 @@ object Dependencies {
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test
-  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test ++ Seq(Test.akkatest)
+  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test ++ Seq(Test.akkatest, Test.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test
