@@ -7,17 +7,17 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
 import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink, ReactiveKafka}
-import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Decoder
 import krampus.processor.util.AppConfig
 import krampus.queue.RawKafkaMessage
 
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
 /**
   * Actor to read all kafka events and propagate them to the next processing step.
   */
-class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) extends Actor with LazyLogging {
+class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) extends Actor with ActorLogging {
   import context.system
 
   implicit val materializer = ActorMaterializer.create(context.system)
@@ -39,22 +39,23 @@ class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) ex
 
   override def receive: Receive = {
     case InitializeListener =>
+      log.info("Received InitializeListener message.")
       initListener()
       context.parent ! ListenerInitialized
 
     case Terminated(_) =>
-      logger.error("The consumer has been terminated, restarting the whole stream...")
+      log.error("The consumer has been terminated, restarting the whole stream...")
       initListener()
 
     case msg =>
-      logger.error(s"Unexpected message: $msg")
+      log.error(s"Unexpected message: $msg")
   }
 
-  def initListener(): Unit = {
+  def initListener(): Unit = try {
     consumerWithOffsetSink = Option(reactiveKafka.consumeWithOffsetSink(consumerProperties))
 
     consumerWithOffsetSink.foreach { consumer =>
-      logger.info("Starting the kafka listener...")
+      log.info("Starting the kafka listener...")
 
       context.watch(consumer.publisherActor)
 
@@ -62,10 +63,16 @@ class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) ex
         .map(processMessage)
         .to(consumer.offsetCommitSink).run()
     }
+  } catch {
+    case NonFatal(e) => log.error(e, e.getMessage)
   }
 
   private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
+    log.debug(s"Before process message $msg")
+
     process(RawKafkaMessage(msg.key(), msg.message()))
+
+    log.debug(s"After process message $msg")
 
     msg
   }
