@@ -12,7 +12,8 @@ import krampus.queue.RawKafkaMessage
   */
 class NodeGuardianActor(appConfig: AppConfig) extends Actor with LazyLogging {
   val avroConverter = context.actorOf(AvroConverterActor.props(self), "avro-converter")
-  val kafkaListener = context.actorOf(KafkaListenerActor.props(appConfig, processKafkaMessage), "kafka-listener")
+  val kafkaListener = context.actorOf(KafkaListenerActor.props(appConfig.kafkaConfig, processKafkaMessage),
+    "kafka-listener")
 
   override def receive: Receive = {
     case StartListener =>

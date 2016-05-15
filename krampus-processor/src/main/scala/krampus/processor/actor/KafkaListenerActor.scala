@@ -7,8 +7,8 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
 import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink, ReactiveKafka}
+import com.typesafe.config.Config
 import kafka.serializer.Decoder
-import krampus.processor.util.AppConfig
 import krampus.queue.RawKafkaMessage
 
 import scala.concurrent.duration._
@@ -17,7 +17,7 @@ import scala.util.control.NonFatal
 /**
   * Actor to read all kafka events and propagate them to the next processing step.
   */
-class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) extends Actor with ActorLogging {
+class KafkaListenerActor(config: Config, process: RawKafkaMessage => Unit) extends Actor with ActorLogging {
   import context.system
 
   implicit val materializer = ActorMaterializer.create(context.system)
@@ -28,10 +28,10 @@ class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) ex
 
   // consumer
   private[this] lazy val consumerProperties = ConsumerProperties(
-    brokerList = config.kafkaConfig.getString("broker-list"),
-    zooKeeperHost = config.kafkaConfig.getString("zookeeper-host"),
-    topic = config.kafkaConfig.getString("topic"),
-    groupId = config.kafkaConfig.getString("group-id"),
+    brokerList = config.getString("broker-list"),
+    zooKeeperHost = config.getString("zookeeper-host"),
+    topic = config.getString("topic"),
+    groupId = config.getString("group-id"),
     decoder = new Decoder[Array[Byte]] {
       override def fromBytes(bytes: Array[Byte]): Array[Byte] = bytes
     }
@@ -70,7 +70,11 @@ class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) ex
   private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
     log.debug(s"Before process message $msg")
 
-    process(RawKafkaMessage(msg.key(), msg.message()))
+    try {
+      process(RawKafkaMessage(msg.key(), msg.message()))
+    } catch {
+      case NonFatal(e) => log.error(e, e.getMessage)
+    }
 
     log.debug(s"After process message $msg")
 
@@ -87,5 +91,5 @@ class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) ex
 }
 
 object KafkaListenerActor {
-  def props(config: AppConfig, process: RawKafkaMessage => Unit): Props = Props(new KafkaListenerActor(config, process))
+  def props(config: Config, process: RawKafkaMessage => Unit): Props = Props(new KafkaListenerActor(config, process))
 }

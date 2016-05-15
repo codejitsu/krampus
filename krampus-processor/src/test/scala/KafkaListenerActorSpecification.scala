@@ -54,14 +54,14 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
 
   override def afterAll: Unit = TestKit.shutdownActorSystem(system)
 
-  test("KafkaListenerActor must forward raw kafka messages to avro converter actor") {
+  test("KafkaListenerActor must read and process messages from kafka") {
     withRunningKafka {
       val messages = ListBuffer.empty[RawKafkaMessage]
 
       def process(msg: RawKafkaMessage): Unit = messages += msg
       val cnf = config
 
-      val actor = system.actorOf(KafkaListenerActor.props(cnf, process))
+      val actor = system.actorOf(KafkaListenerActor.props(cnf.kafkaConfig, process))
       actor ! InitializeListener
 
       var counter = 0
