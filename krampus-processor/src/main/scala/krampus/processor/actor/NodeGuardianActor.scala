@@ -3,14 +3,15 @@
 package krampus.processor.actor
 
 import krampus.processor.util.AppConfig
-import akka.actor.{Props, Actor}
+import akka.actor.{Actor, Props}
 import com.typesafe.scalalogging.LazyLogging
+import krampus.queue.RawKafkaMessage
 
 /**
   * Root actor node.
   */
 class NodeGuardianActor(appConfig: AppConfig) extends Actor with LazyLogging {
-  val kafkaListener = context.actorOf(KafkaListenerActor.props(appConfig), "kafka-listener")
+  val kafkaListener = context.actorOf(KafkaListenerActor.props(appConfig, processKafkaMessage), "kafka-listener")
 
   override def receive: Receive = {
     case StartListener =>
@@ -22,6 +23,10 @@ class NodeGuardianActor(appConfig: AppConfig) extends Actor with LazyLogging {
     //TODO type erasure!
     case MessageConverted(msg) =>
       logger.info(s"Message converted: $msg")
+  }
+
+  def processKafkaMessage(msg: RawKafkaMessage): Unit = {
+
   }
 }
 

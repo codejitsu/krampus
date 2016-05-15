@@ -17,7 +17,7 @@ import scala.concurrent.duration._
 /**
   * Actor to read all kafka events and propagate them to the next processing step.
   */
-class KafkaListenerActor(config: AppConfig) extends Actor with LazyLogging {
+class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) extends Actor with LazyLogging {
   import context.system
 
   implicit val materializer = ActorMaterializer.create(context.system)
@@ -85,5 +85,5 @@ class KafkaListenerActor(config: AppConfig) extends Actor with LazyLogging {
 }
 
 object KafkaListenerActor {
-  def props(config: AppConfig): Props = Props(new KafkaListenerActor(config))
+  def props(config: AppConfig, process: RawKafkaMessage => Unit): Props = Props(new KafkaListenerActor(config, process))
 }
