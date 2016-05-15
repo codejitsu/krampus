@@ -14,7 +14,7 @@ object CassandraProcessorApp extends LazyLogging {
   def main(args: Array[String]): Unit = {
     logger.info("Starting krampus cassandra processor app...")
 
-    val appConfig = new AppConfig()
+    val appConfig = new AppConfig("cassandra-processor-app")
     val system = ActorSystem(appConfig.systemName)
 
     val guardian = system.actorOf(NodeGuardianActor.props(appConfig), "node-guardian")
