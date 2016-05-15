@@ -45,8 +45,6 @@ class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) ex
       initListener()
       context.parent ! ListenerInitialized
 
-    case MessageConverted => // avro converter successfully converted message
-
     case Terminated(_) =>
       logger.error("The consumer has been terminated, restarting the whole stream...")
       initListener()

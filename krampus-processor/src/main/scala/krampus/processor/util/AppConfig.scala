@@ -9,12 +9,13 @@ import com.typesafe.config.{Config, ConfigFactory}
 import scala.concurrent.duration.FiniteDuration
 
 class AppConfig(appName: String) {
-
   lazy val config: Config = ConfigFactory.load()
 
   lazy val kafkaConfig: Config = config.getConfig(s"krampus.$appName.kafka")
   lazy val cassandraConfig = config.getConfig(s"krampus.$appName.cassandra")
   lazy val systemName: String = config.getString(s"krampus.$appName.system-name")
+
+  lazy val topic: String = kafkaConfig.getString("topic")
 }
 
 //TODO move this class to commons
