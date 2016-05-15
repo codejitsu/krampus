@@ -11,6 +11,7 @@ import krampus.queue.RawKafkaMessage
   * Root actor node.
   */
 class NodeGuardianActor(appConfig: AppConfig) extends Actor with LazyLogging {
+  val avroConverter = context.actorOf(AvroConverterActor.props(self), "avro-converter")
   val kafkaListener = context.actorOf(KafkaListenerActor.props(appConfig, processKafkaMessage), "kafka-listener")
 
   override def receive: Receive = {
@@ -20,14 +21,11 @@ class NodeGuardianActor(appConfig: AppConfig) extends Actor with LazyLogging {
     case ListenerInitialized =>
       logger.info("Kafka listener initialized.")
 
-    //TODO type erasure!
     case MessageConverted(msg) =>
       logger.info(s"Message converted: $msg")
   }
 
-  def processKafkaMessage(msg: RawKafkaMessage): Unit = {
-
-  }
+  def processKafkaMessage(msg: RawKafkaMessage): Unit = avroConverter ! msg
 }
 
 //TODO refactor all this stream processing, avro actors out to commons

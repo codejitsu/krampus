@@ -37,9 +37,6 @@ class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) ex
     }
   ).commitInterval(1200 milliseconds)
 
-  private[this] lazy val avroConverter =
-    context.actorOf(AvroConverterActor.props(context.parent), "avro-converter")
-
   override def receive: Receive = {
     case InitializeListener =>
       initListener()
@@ -68,7 +65,7 @@ class KafkaListenerActor(config: AppConfig, process: RawKafkaMessage => Unit) ex
   }
 
   private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
-    avroConverter ! RawKafkaMessage(msg.key(), msg.message())
+    process(RawKafkaMessage(msg.key(), msg.message()))
 
     msg
   }
