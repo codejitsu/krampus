@@ -18,11 +18,11 @@ class StreamProcessorActor(appConfig: AppConfig, onMessage: WikiChangeEntry => U
   private[this] def processKafkaMessage(msg: RawKafkaMessage): Unit = avroConverter ! msg
 
   override def receive: Receive = {
-    case StartListener =>
+    case StartStreamProcessor =>
       log.debug("Start initializing kafka listener.")
-      kafkaListener ! InitializeListener
+      kafkaListener ! InitializeQueueListener
 
-    case ListenerInitialized =>
+    case QueueListenerInitialized =>
       log.debug("Kafka listener initialized.")
 
     case MessageConverted(msg) =>

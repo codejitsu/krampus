@@ -38,10 +38,10 @@ class KafkaListenerActor(config: Config, process: RawKafkaMessage => Unit) exten
   ).commitInterval(1200 milliseconds)
 
   override def receive: Receive = {
-    case InitializeListener =>
+    case InitializeQueueListener =>
       log.info("Received InitializeListener message.")
       initListener()
-      context.parent ! ListenerInitialized
+      context.parent ! QueueListenerInitialized
 
     case Terminated(_) =>
       log.error("The consumer has been terminated, restarting the whole stream...")

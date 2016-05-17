@@ -5,7 +5,7 @@ package krampus.processor
 import akka.actor.{ActorSystem, PoisonPill}
 import com.typesafe.scalalogging.LazyLogging
 import krampus.entity.WikiChangeEntry
-import krampus.processor.actor.{StartListener, StreamProcessorActor}
+import krampus.processor.actor.{StartStreamProcessor, StreamProcessorActor}
 import krampus.processor.util.AppConfig
 
 /**
@@ -18,12 +18,12 @@ object CassandraProcessorApp extends LazyLogging {
     val appConfig = new AppConfig("cassandra-processor-app")
     val system = ActorSystem(appConfig.systemName)
 
-    val guardian = system.actorOf(StreamProcessorActor.props(appConfig, onMessage), "node-guardian")
+    val streamProcessor = system.actorOf(StreamProcessorActor.props(appConfig, onMessage), "stream-processor")
 
-    guardian ! StartListener
+    streamProcessor ! StartStreamProcessor
 
     system.registerOnTermination {
-      guardian ! PoisonPill
+      streamProcessor ! PoisonPill
     }
   }
 

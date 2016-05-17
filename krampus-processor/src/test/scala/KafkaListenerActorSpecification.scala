@@ -62,7 +62,7 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
       val cnf = config
 
       val actor = system.actorOf(KafkaListenerActor.props(cnf.kafkaConfig, process))
-      actor ! InitializeListener
+      actor ! InitializeQueueListener
 
       var counter = 0
       forAll(rawKafkaMessageGenerator) { case (rawMessage, _) =>
