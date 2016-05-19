@@ -6,17 +6,19 @@ import java.util
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
+import akka.util.Timeout
+import krampus.entity.CommonGenerators._
 import krampus.entity.WikiChangeEntry
 import krampus.processor.util.AppConfig
 import krampus.queue.RawKafkaMessage
 import net.manub.embeddedkafka.EmbeddedKafka
-import org.scalatest.concurrent.Eventually
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
-import krampus.entity.CommonGenerators._
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.Serializer
-
+import org.scalatest.concurrent.Eventually
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
+import scala.concurrent.duration._
 import scala.collection.mutable.ListBuffer
 
 class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamProcessorActorSpecification"))
@@ -43,8 +45,13 @@ class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamPro
 
     override def close(): Unit = ()
   }
-  
+
+  implicit override val generatorDrivenConfig = PropertyCheckConfig(maxSize = 10) // scalastyle:ignore
+  implicit override val patienceConfig = PatienceConfig(timeout = scaled(Span(15, Seconds)), interval = scaled(Span(100, Millis))) // scalastyle:ignore
+  implicit val timeout: Timeout = Timeout(30 seconds)
+
   lazy val kafkaProducer = aKafkaProducer[RawKafkaMessage]
+
   override def afterAll: Unit = TestKit.shutdownActorSystem(system)
 
   test("StreamProcessorActor onMessage function receives deserialized kafka messages") {
@@ -55,7 +62,7 @@ class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamPro
 
       val cnf = config
       val actor = system.actorOf(StreamProcessorActor.props(cnf, process))
-      actor ! InitializeQueueListener
+      actor ! StartStreamProcessor
 
       var counter = 0
       forAll(rawKafkaMessageGenerator) { case (rawMessage, _) =>

@@ -13,7 +13,7 @@ import krampus.queue.RawKafkaMessage
 /**
   * Bytes to Avro converter actor.
   */
-class AvroConverterActor(recipient: ActorRef) extends Actor with LazyLogging {
+class AvroConverterActor(recipient: ActorRef) extends Actor with LazyLogging { //TODO switch to ActorLogging
   private[this] lazy val reader =
     new SpecificDatumReader[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
 
