@@ -36,6 +36,8 @@ class KafkaListenerActor(config: Config, process: RawKafkaMessage => Unit) exten
       override def fromBytes(bytes: Array[Byte]): Array[Byte] = bytes
     }
   ).commitInterval(1200 milliseconds)
+   .setProperty("zookeeper.connection.timeout.ms", 12000.toString)
+   .setProperty("zookeeper.session.timeout.ms", 12000.toString)
 
   override def receive: Receive = {
     case InitializeQueueListener =>
