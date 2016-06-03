@@ -78,6 +78,8 @@ object Dependencies {
     val reactiveKafka = "com.softwaremill.reactivekafka" %% "reactive-kafka-core"      % ReactiveKafkaVer excludeAll
       (ExclusionRule(organization = "com.typesafe.akka"))
 
+    val phantom       = "com.websudos"                   %% "phantom-dsl"              % PhantomVer
+
     val akkaLogging  =        "com.typesafe.akka"        %% "akka-slf4j"              % AkkaLoggingVer
 
     val webjarsPlay =         "org.webjars"              %% "webjars-play"            % WebjarsPlayVer
@@ -103,7 +105,7 @@ object Dependencies {
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test
-  val krampusProcessor = Seq(config, akka, akkaLogger, akkaStreams, reactiveKafka, logging, logback, kafkaClients) ++ test ++ Seq(Test.akkatest, Test.embeddedKafka)
+  val krampusProcessor = Seq(config, akka, akkaLogger, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ test ++ Seq(Test.akkatest, Test.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
   val krampusScoreApp = Seq(config) ++ test
   val krampusSparkApp = Seq(config) ++ test

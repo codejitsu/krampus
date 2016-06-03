@@ -40,7 +40,11 @@ object Settings extends Build {
     ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
     resolvers += "Typesafe private" at "https://private-repo.typesafe.com/typesafe/maven-releases",
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
-    resolvers += "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/"
+    resolvers += "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
+    resolvers ++= Seq(
+      Resolver.bintrayRepo("websudos", "oss-releases"),
+      "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
+    )
   )
 
   lazy val commonSettings = defaultSettings ++ sbtavro.SbtAvro.avroSettings
