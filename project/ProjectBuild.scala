@@ -61,7 +61,7 @@ object ProjectBuild extends Build {
 object Dependencies {
   import Versions._
 
-  object Compile {
+  object CompileDeps {
     val config        = "com.typesafe"                    % "config"                   % TypesafeConfigVer
     val logback       = "ch.qos.logback"                  % "logback-classic"          % LogbackVer
     val logging       = "com.typesafe.scala-logging"     %% "scala-logging"            % TypesafeLoggingVer
@@ -71,7 +71,7 @@ object Dependencies {
       (ExclusionRule("com.typesafe.akka", "akka-actor_2.11"), ExclusionRule("com.typesafe", "config"))
 
     val akka          = "com.typesafe.akka"              %% "akka-actor"               % AkkaVer
-    val akkaLogger    = "com.typesafe.akka"               % "akka-slf4j_2.11"          % "2.4.1"
+    val akkaLogger    = "com.typesafe.akka"               % "akka-slf4j_2.11"          % AkkaSlf4jVer
     val jackson       = "org.json4s"                     %% "json4s-jackson"           % Jackson4sVer
     val avro          = "org.apache.avro"                 % "avro"                     % AvroVer
     val kafkaClients  = "org.apache.kafka"                % "kafka-clients"            % KafkaClientsVer
@@ -90,25 +90,25 @@ object Dependencies {
     val webjarsBootstrap =    "org.webjars"               % "bootstrap"               % WebjarsBootstrapVer
   }
 
-  object Test {
-    val scalatest     = "org.scalatest"           %% "scalatest"                % ScalaTestVer      % "test"
-    val scalacheck    = "org.scalacheck"          %% "scalacheck"               % ScalaCheckVer     % "test"
-    val akkatest      = "com.typesafe.akka"       %% "akka-testkit"             % AkkaVer           % "test"
-    val embeddedKafka = "net.manub"               %% "scalatest-embedded-kafka" % EmbeddedKafkaVer  % "test"
+  object TestDeps {
+    val scalatest     = "org.scalatest"           %% "scalatest"                % ScalaTestVer      % Test
+    val scalacheck    = "org.scalacheck"          %% "scalacheck"               % ScalaCheckVer     % Test
+    val akkatest      = "com.typesafe.akka"       %% "akka-testkit"             % AkkaVer           % Test
+    val embeddedKafka = "net.manub"               %% "scalatest-embedded-kafka" % EmbeddedKafkaVer  % Test
   }
 
-  import Compile._
+  import CompileDeps._
 
-  val test = Seq(Test.scalatest, Test.scalacheck)
+  val test = Seq(TestDeps.scalatest, TestDeps.scalacheck)
 
   /** Module deps */
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
-  val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback) ++ test
-  val krampusProcessor = Seq(config, akka, akkaLogger, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ test ++ Seq(Test.akkatest, Test.embeddedKafka)
-  val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback) ++ test
-  val krampusScoreApp = Seq(config) ++ test
-  val krampusSparkApp = Seq(config) ++ test
+  val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
+  val krampusProcessor = Seq(config, akka, akkaLogger, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
+  val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback)
+  val krampusScoreApp = Seq(config)
+  val krampusSparkApp = Seq(config)
   val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging, logback, akkaLogging,
-    webjarsPlay, webjarsAng, webjarsAngRoute, webjarsAngWebsocket, webjarsBootstrap) ++ test
+    webjarsPlay, webjarsAng, webjarsAngRoute, webjarsAngWebsocket, webjarsBootstrap)
 }
