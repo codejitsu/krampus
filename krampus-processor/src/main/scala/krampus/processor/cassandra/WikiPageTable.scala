@@ -24,11 +24,10 @@ class Pages extends CassandraTable[ConcretePages, WikiPage] {
 abstract class ConcretePages extends Pages with RootConnector {
   def store(page: WikiPage): Future[ResultSet] =
     insert.value(_.Id, page.id).value(_.Title, page.title)
-      .value(_.Url, page.url.toString)
+      .value(_.Url, page.url.toString).ifNotExists()
       .consistencyLevel_=(ConsistencyLevel.ALL)
       .future()
 
-  def getById(id: UUID): Future[Option[WikiPage]] = {
+  def getById(id: UUID): Future[Option[WikiPage]] =
     select.where(_.Id eqs id).one()
-  }
 }
