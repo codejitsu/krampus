@@ -5,7 +5,7 @@ object Versions {
   val JDKVer                  = "1.8"
 
   val TypesafeConfigVer       = "1.3.0"
-  val TypesafeLoggingVer      = "3.1.0"
+  val TypesafeLoggingVer      = "3.4.0"
 
   val JodaTimeVer             = "2.9.1"
   val JodaTimeConvertVer      = "1.2"
@@ -22,10 +22,10 @@ object Versions {
   val AvroVer                 = "1.7.7"
 
   val KafkaClientsVer         = "0.8.2.2"
-  val EmbeddedKafkaVer        = "0.6.0"
+  val EmbeddedKafkaVer        = "0.6.1"
   val ReactiveKafkaVer        = "0.8.3" //TODO -> 0.9.0
 
-  val LogbackVer              = "1.1.2"
+  val LogbackVer              = "1.1.7"
 
   val WebjarsPlayVer          = "2.4.0-2"
   val WebjarsAngVer           = "1.5.0"
