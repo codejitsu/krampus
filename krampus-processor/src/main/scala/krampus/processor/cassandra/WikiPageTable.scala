@@ -8,7 +8,7 @@ import scala.concurrent.Future
 import com.websudos.phantom.dsl._
 import krampus.entity.WikiPage
 
-class Pages extends CassandraTable[ConcretePages, WikiPage] {
+class Pages extends CassandraTable[PagesRepository, WikiPage] {
   object Id extends UUIDColumn(this) with PartitionKey[UUID]
   object Title extends StringColumn(this)
   object Url extends StringColumn(this)
@@ -21,7 +21,7 @@ class Pages extends CassandraTable[ConcretePages, WikiPage] {
     )
 }
 
-abstract class ConcretePages extends Pages with RootConnector {
+abstract class PagesRepository extends Pages with RootConnector {
   def store(page: WikiPage): Future[ResultSet] =
     insert.value(_.Id, page.id).value(_.Title, page.title)
       .value(_.Url, page.url.toString).ifNotExists()

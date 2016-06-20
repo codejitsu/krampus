@@ -8,7 +8,7 @@ import scala.concurrent.Future
 import com.websudos.phantom.dsl._
 import krampus.entity.WikiChangeEntry
 
-class Edits extends CassandraTable[ConcreteEdits, WikiChangeEntry] {
+class Edits extends CassandraTable[EditsRepository, WikiChangeEntry] {
   object Id extends UUIDColumn(this) with PartitionKey[UUID]
   object IsRobot extends BooleanColumn(this)
   object Channel extends StringColumn(this)
@@ -49,7 +49,7 @@ class Edits extends CassandraTable[ConcreteEdits, WikiChangeEntry] {
     )
 }
 
-abstract class ConcreteEdits extends Edits with RootConnector {
+abstract class EditsRepository extends Edits with RootConnector {
   def store(user: WikiChangeEntry): Future[ResultSet] =
     insert
       .value(_.IsRobot, user.isRobot)
