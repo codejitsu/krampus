@@ -27,3 +27,13 @@ resolvers += "sbt-plugin-releases" at "http://repo.scala-sbt.org/scalasbt/sbt-pl
 resolvers += "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/"
 
 resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
+
+// phantom
+
+resolvers ++= Seq(
+  // whatever is already in here..,
+  Resolver.bintrayRepo("websudos", "oss-releases"),
+  Resolver.url("Outworkers OSS", url("http://dl.bintray.com/websudos/oss-releases"))(Resolver.ivyStylePatterns)
+)
+
+addSbtPlugin("com.websudos" %% "phantom-sbt" % "1.22.0")
