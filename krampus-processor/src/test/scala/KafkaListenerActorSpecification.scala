@@ -10,7 +10,7 @@ import akka.util.Timeout
 import krampus.entity.CommonGenerators._
 import krampus.processor.util.AppConfig
 import krampus.queue.RawKafkaMessage
-import net.manub.embeddedkafka.EmbeddedKafka
+import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.Serializer
 import org.scalatest.concurrent.Eventually
@@ -46,6 +46,7 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
     override def close(): Unit = ()
   }
 
+  implicit val embeddedKafkaConfig = EmbeddedKafkaConfig.defaultConfig.copy(customBrokerProperties = Map("zookeeper.connection.timeout.ms" -> "30000"))
   implicit override val generatorDrivenConfig = PropertyCheckConfig(maxSize = 10) // scalastyle:ignore
   implicit override val patienceConfig = PatienceConfig(timeout = scaled(Span(15, Seconds)), interval = scaled(Span(100, Millis))) // scalastyle:ignore
   implicit val timeout: Timeout = Timeout(30 seconds)
