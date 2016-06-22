@@ -6,20 +6,17 @@ import java.util
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
-import akka.util.Timeout
 import krampus.entity.CommonGenerators._
 import krampus.entity.WikiChangeEntry
 import krampus.processor.util.AppConfig
 import krampus.queue.RawKafkaMessage
-import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
+import net.manub.embeddedkafka.EmbeddedKafka
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.Serializer
 import org.scalatest.concurrent.Eventually
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
-import scala.concurrent.duration._
 import scala.collection.mutable.ListBuffer
 
 class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamProcessorActorSpecification"))
@@ -29,6 +26,7 @@ class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamPro
   with GeneratorDrivenPropertyChecks
   with BeforeAndAfterAll
   with EmbeddedKafka
+  with EmbeddedGeneratorDrivenKafkaConfig
   with Eventually {
 
   implicit val serializer = new Serializer[RawKafkaMessage] {
@@ -47,12 +45,7 @@ class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamPro
     override def close(): Unit = ()
   }
 
-  implicit val embeddedKafkaConfig = EmbeddedKafkaConfig.defaultConfig.copy(customBrokerProperties = Map("zookeeper.connection.timeout.ms" -> "30000"))
-  implicit override val generatorDrivenConfig = PropertyCheckConfig(maxSize = 10) // scalastyle:ignore
-  implicit override val patienceConfig = PatienceConfig(timeout = scaled(Span(15, Seconds)), interval = scaled(Span(100, Millis))) // scalastyle:ignore
-  implicit val timeout: Timeout = Timeout(30 seconds)
-
-  lazy val kafkaProducer = aKafkaProducer[RawKafkaMessage]
+  val kafkaProducer = aKafkaProducer[RawKafkaMessage]
 
   override def afterAll: Unit = TestKit.shutdownActorSystem(system)
 
