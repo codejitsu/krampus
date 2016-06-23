@@ -45,6 +45,7 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
   }
 
   lazy val kafkaProducer = aKafkaProducer[RawKafkaMessage]
+  implicit val kafkaConf = embeddedKafkaConfig
 
   override def afterAll: Unit = TestKit.shutdownActorSystem(system)
 

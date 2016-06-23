@@ -44,4 +44,10 @@ object CommonGenerators {
 
     (RawKafkaMessage(entity.getChannel.toString.toCharArray.map(_.toByte), serializedAvro), WikiChangeEntry(entity))
   }
+
+  val wikiUserEntityGenerator: Gen[WikiUser] = for {
+    uuid <- Gen.uuid
+    name <- Gen.alphaStr
+    isRobot <- Gen.oneOf(true, false)
+  } yield WikiUser(uuid, name, isRobot)
 }
