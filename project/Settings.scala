@@ -3,6 +3,7 @@
 import de.johoop.jacoco4sbt.JacocoPlugin.jacoco
 import de.johoop.jacoco4sbt.Thresholds
 import org.scalastyle.sbt.ScalastylePlugin
+import com.websudos.phantom.sbt.PhantomSbtPlugin
 import sbt._
 import sbt.Keys._
 import scala.language.postfixOps
@@ -30,7 +31,7 @@ object Settings extends Build {
   val javacSettings = Seq("-encoding", "UTF-8", "-source", Versions.JDKVer,
     "-target", Versions.JDKVer, "-Xlint:deprecation", "-Xlint:unchecked")
 
-  lazy val defaultSettings = testSettings ++ Seq(
+  lazy val defaultSettings = Defaults.coreDefaultSettings ++ testSettings ++ Seq(
     autoCompilerPlugins := true,
     scalacOptions       ++= scalacSettings,
     javacOptions        in Compile    ++= javacSettings,
@@ -67,4 +68,6 @@ object Settings extends Build {
     managedClasspath in IntegrationTest <<= Classpaths.concat(managedClasspath in IntegrationTest, exportedProducts in Test),
     jacoco.thresholds in jacoco.Config := Thresholds(instruction = 70, method = 70, branch = 70, complexity = 70, line = 70, clazz = 70)
   )
+
+  lazy val phantomSettings = PhantomSbtPlugin.projectSettings
 }

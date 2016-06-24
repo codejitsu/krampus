@@ -30,7 +30,7 @@ object ProjectBuild extends Build {
   lazy val krampusProcessor = Project(
     id = "krampus-processor",
     base = file("./krampus-processor"),
-    settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusProcessor)
+    settings = defaultSettings ++ phantomSettings ++ Seq(libraryDependencies ++= Dependencies.krampusProcessor)
   ).dependsOn(krampusCommon % "compile->compile;test->test")
 
   lazy val krampusProducer = Project(
