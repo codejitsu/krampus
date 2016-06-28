@@ -1,16 +1,15 @@
 // Copyright (C) 2016, codejitsu.
 
-package krampus.processor.actor
+package krampus.processor.cassandra
 
-import krampus.processor.cassandra.EmbeddedCassandraDatabaseProvider
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{BeforeAndAfterAll, Matchers, OptionValues, Suite}
+import org.scalatest._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EmbeddedCassandraSuite extends Suite
+class EmbeddedCassandraSuite extends FunSuite
   with BeforeAndAfterAll
   with ScalaFutures
   with Matchers
