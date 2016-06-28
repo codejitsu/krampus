@@ -7,8 +7,8 @@ import com.websudos.phantom.dsl.{Database, KeySpaceDef}
 
 object Defaults {
   val keySpaceName = "wiki"
-  val local = ContactPoint.local.keySpace(keySpaceName)
-  val embedded = ContactPoint.embedded.keySpace(keySpaceName)
+  lazy val local = ContactPoint.local.keySpace(keySpaceName)
+  lazy val embedded = ContactPoint.embedded.keySpace(keySpaceName)
 }
 
 abstract class CassandraDatabase(val keyspace: KeySpaceDef) extends Database(keyspace) {
