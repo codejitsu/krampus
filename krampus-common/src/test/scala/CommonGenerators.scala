@@ -3,6 +3,7 @@
 package krampus.entity
 
 import java.io.ByteArrayOutputStream
+import java.net.URL
 
 import krampus.avro.WikiChangeEntryAvro
 import krampus.queue.RawKafkaMessage
@@ -50,4 +51,10 @@ object CommonGenerators {
     name <- Gen.alphaStr
     isRobot <- Gen.oneOf(true, false)
   } yield WikiUser(uuid, name, isRobot)
+
+  val wikiPageEntityGenerator: Gen[WikiPage] = for {
+    uuid <- Gen.uuid
+    title <- Gen.alphaStr
+    url <- Gen.alphaStr
+  } yield WikiPage(uuid, title, new URL(s"http://wikipedia.org/$url"))
 }
