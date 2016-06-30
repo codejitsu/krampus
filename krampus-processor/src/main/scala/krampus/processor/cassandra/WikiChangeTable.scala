@@ -31,6 +31,7 @@ class Edits extends CassandraTable[EditsRepository, WikiChangeEntry] {
 
   def fromRow(row: Row): WikiChangeEntry =
     WikiChangeEntry(
+      Id(row),
       IsRobot(row),
       Channel(row),
       Timestamp(row),
@@ -50,23 +51,24 @@ class Edits extends CassandraTable[EditsRepository, WikiChangeEntry] {
 }
 
 abstract class EditsRepository extends Edits with RootConnector {
-  def store(user: WikiChangeEntry): Future[ResultSet] =
+  def store(edit: WikiChangeEntry): Future[ResultSet] =
     insert
-      .value(_.IsRobot, user.isRobot)
-      .value(_.Channel, user.channel)
-      .value(_.Timestamp, user.timestamp)
-      .value(_.Flags, user.flags)
-      .value(_.IsUnpatrolled, user.isUnpatrolled)
-      .value(_.Page, user.page)
-      .value(_.DiffUrl, user.diffUrl.toString)
-      .value(_.Added, user.added)
-      .value(_.Deleted, user.deleted)
-      .value(_.Comment, user.comment)
-      .value(_.IsNew, user.isNew)
-      .value(_.IsMinor, user.isMinor)
-      .value(_.Delta, user.delta)
-      .value(_.User, user.user)
-      .value(_.Namespace, user.namespace)
+      .value(_.Id, edit.id)
+      .value(_.IsRobot, edit.isRobot)
+      .value(_.Channel, edit.channel)
+      .value(_.Timestamp, edit.timestamp)
+      .value(_.Flags, edit.flags)
+      .value(_.IsUnpatrolled, edit.isUnpatrolled)
+      .value(_.Page, edit.page)
+      .value(_.DiffUrl, edit.diffUrl.toString)
+      .value(_.Added, edit.added)
+      .value(_.Deleted, edit.deleted)
+      .value(_.Comment, edit.comment)
+      .value(_.IsNew, edit.isNew)
+      .value(_.IsMinor, edit.isMinor)
+      .value(_.Delta, edit.delta)
+      .value(_.User, edit.user)
+      .value(_.Namespace, edit.namespace)
       .consistencyLevel_=(ConsistencyLevel.ALL)
       .future()
 

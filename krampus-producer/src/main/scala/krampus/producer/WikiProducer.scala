@@ -122,7 +122,7 @@ abstract class WikiProducer extends LazyLogging {
       JString(user) <- json \ "user"
       JString(namespace) <- json \ "namespace"
     } yield {
-      WikiChangeEntry(isRobot, channel, new DateTime(timestamp), flags.split(",").toList,
+      WikiChangeEntry(UUID.randomUUID(), isRobot, channel, new DateTime(timestamp), flags.split(",").toList,
         isUnpatrolled, page, new URL(diffUrl), added.toInt, deleted.toInt,
         comment, isNew, isMinor, delta.toInt, user, namespace)
     }
@@ -154,6 +154,7 @@ abstract class WikiProducer extends LazyLogging {
 
         val avroVal = new WikiChangeEntryAvro()
 
+        avroVal.setId(id.toString)
         avroVal.setIsRobot(isRobot)
         avroVal.setChannel(channel)
         avroVal.setTimestamp(timestamp.toString)

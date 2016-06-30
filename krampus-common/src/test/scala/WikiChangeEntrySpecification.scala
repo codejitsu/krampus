@@ -10,6 +10,12 @@ class WikiChangeEntrySpecification extends Properties("WikiChangeEntry") {
 
   import Prop.forAll
 
+  property("constructor: id") = forAll(wikiChangeEntryAvroGenerator) { avroEntry =>
+    val converted = WikiChangeEntry(avroEntry)
+
+    converted.id.toString == avroEntry.getId.toString
+  }
+
   property("constructor: added") = forAll(wikiChangeEntryAvroGenerator) { avroEntry =>
     val converted = WikiChangeEntry(avroEntry)
 

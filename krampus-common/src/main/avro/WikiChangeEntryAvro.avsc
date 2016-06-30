@@ -3,6 +3,7 @@
     "type": "record",
     "name": "WikiChangeEntryAvro",
     "fields": [
+         {"name": "id", "type": "string"},
          {"name": "isRobot", "type": "boolean"},
          {"name": "channel",  "type": "string"},
          {"name": "timestamp", "type": "string"},

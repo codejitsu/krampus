@@ -13,6 +13,7 @@ import org.scalacheck.Gen
 
 object CommonGenerators {
   val wikiChangeEntryAvroGenerator: Gen[WikiChangeEntryAvro] = for {
+    uuid <- Gen.uuid
     isRobot <- Gen.oneOf(true, false)
     channel <- Gen.alphaStr
     timestamp <- Gen.posNum[Int]
@@ -28,7 +29,7 @@ object CommonGenerators {
     delta <- Gen.posNum[Int]
     user <- Gen.alphaStr
     namespace <- Gen.alphaStr
-  } yield new WikiChangeEntryAvro(isRobot, channel, timestamp.toString, flags, isUnpatrolled, page,
+  } yield new WikiChangeEntryAvro(uuid.toString, isRobot, channel, timestamp.toString, flags, isUnpatrolled, page,
     s"http://$diffUrl.com/diff", added, deleted, comment, isNew, isMinor, delta, user, namespace)
 
   val rawKafkaMessageGenerator: Gen[(RawKafkaMessage, WikiChangeEntry)] = for {

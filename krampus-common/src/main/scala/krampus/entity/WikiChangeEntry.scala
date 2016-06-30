@@ -3,6 +3,7 @@
 package krampus.entity
 
 import java.net.URL
+import java.util.UUID
 
 import krampus.avro.WikiChangeEntryAvro
 import org.joda.time.DateTime
@@ -27,7 +28,8 @@ import org.joda.time.DateTime
   }
 */
 
-final case class WikiChangeEntry( isRobot: Boolean,
+final case class WikiChangeEntry( id: UUID,
+                                  isRobot: Boolean,
                                   channel: String,
                                   timestamp: DateTime,
                                   flags: List[String],
@@ -46,6 +48,7 @@ final case class WikiChangeEntry( isRobot: Boolean,
 object WikiChangeEntry {
   def apply(avro: WikiChangeEntryAvro): WikiChangeEntry =
     WikiChangeEntry(
+      UUID.fromString(avro.getId().toString()),
       avro.getIsRobot(),
       avro.getChannel().toString(),
       DateTime.parse(avro.getTimestamp().toString()),

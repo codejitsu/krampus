@@ -3,6 +3,7 @@
 package actors
 
 import java.net.URL
+import java.util.UUID
 
 import actors.Messages.{ChannelMessage, KafkaRawDataMessage}
 import akka.actor.{Actor, Props}
@@ -22,11 +23,16 @@ import scala.util.{Failure, Try}
   * Bytes to Avro converter actor.
   */
 class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
+  implicit val uuidWrites = new Writes[UUID] {
+    def writes(uuid: UUID) = Json.toJson(uuid.toString)
+  }
+
   implicit val urlWrites = new Writes[URL] {
     def writes(url: URL) = Json.toJson(url.toString)
   }
 
   implicit val wikiChangeEntryWrites: Writes[WikiChangeEntry] = (
+    (JsPath \ "id").write[UUID] and
     (JsPath \ "isRobot").write[Boolean] and
     (JsPath \ "channel").write[String] and
     (JsPath \ "timestamp").write[DateTime] and
