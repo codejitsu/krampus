@@ -19,7 +19,7 @@ class Users extends CassandraTable[UsersRepository, WikiUser] {
     )
 }
 
-abstract class UsersRepository extends Users with RootConnector {
+abstract class UsersRepository extends Users with RootConnector with CassandraDao[WikiUser] {
   def store(user: WikiUser): Future[ResultSet] =
     insert.value(_.Id, user.id).value(_.Name, user.name)
       .value(_.IsRobot, user.isRobot).ifNotExists()

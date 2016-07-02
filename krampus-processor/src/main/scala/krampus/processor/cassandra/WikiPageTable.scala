@@ -21,7 +21,7 @@ class Pages extends CassandraTable[PagesRepository, WikiPage] {
     )
 }
 
-abstract class PagesRepository extends Pages with RootConnector {
+abstract class PagesRepository extends Pages with RootConnector with CassandraDao[WikiPage] {
   def store(page: WikiPage): Future[ResultSet] =
     insert.value(_.Id, page.id).value(_.Title, page.title)
       .value(_.Url, page.url.toString).ifNotExists()

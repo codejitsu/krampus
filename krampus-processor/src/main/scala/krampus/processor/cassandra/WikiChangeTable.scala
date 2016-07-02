@@ -50,7 +50,7 @@ class Edits extends CassandraTable[EditsRepository, WikiChangeEntry] {
     )
 }
 
-abstract class EditsRepository extends Edits with RootConnector {
+abstract class EditsRepository extends Edits with RootConnector with CassandraDao[WikiChangeEntry] {
   def store(edit: WikiChangeEntry): Future[ResultSet] =
     insert
       .value(_.Id, edit.id)
