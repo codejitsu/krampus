@@ -14,7 +14,7 @@ class CassandraUserEntityActorSpecification() extends EmbeddedCassandraSuite
   with Matchers with GeneratorDrivenPropertyChecks with BeforeAndAfterAll with EmbeddedCassandraDatabaseProvider {
 
   val testKit = new TestKit(ActorSystem("CassandraUserEntityActorSpecification")) with ImplicitSender
-  
+
   import testKit._
 
   override def afterAll: Unit = TestKit.shutdownActorSystem(system)

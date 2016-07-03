@@ -11,6 +11,11 @@ class CassandraEntityActor[E](implicit ev: ClassTag[E], dao: CassandraDao[E]) ex
   override def receive: Receive = {
     case Store(e) if e.getClass == ev.runtimeClass =>
       log.debug(s"Processing message $e of class ${ev.runtimeClass.getCanonicalName}")
+
+      val concreteEntity = e.asInstanceOf[E]
+
+      dao.store(concreteEntity)
+
       sender ! Stored(e)
     }
 }
