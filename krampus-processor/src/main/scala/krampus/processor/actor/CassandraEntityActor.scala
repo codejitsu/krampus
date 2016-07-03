@@ -14,7 +14,7 @@ class CassandraEntityActor[E](implicit ev: ClassTag[E], dao: CassandraDao[E]) ex
 
       val concreteEntity = e.asInstanceOf[E]
 
-      dao.store(concreteEntity)
+      dao.store(concreteEntity) // add pipeTo here
 
       sender ! Stored(e)
     }
