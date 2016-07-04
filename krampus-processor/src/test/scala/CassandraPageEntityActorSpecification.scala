@@ -30,14 +30,14 @@ class CassandraPageEntityActorSpecification() extends EmbeddedCassandraSuite
     }
   }
 
-  test("CassandraEntityActor for Page entity must ignore all other entities") {
+  test("CassandraEntityActor for Page entity must ignore all other entities and return 'InvalidEntityType' error message") {
     val actor = system.actorOf(CassandraEntityActor.props[WikiPage])
 
     val msg = rawKafkaMessageGenerator.sample
 
     msg.foreach { case (_, wikiEntry) =>
       actor ! Store(wikiEntry)
-      expectNoMsg()
+      expectMsg(InvalidEntityType)
     }
   }
 }

@@ -29,3 +29,4 @@ class EmbeddedCassandraSuite extends FunSuite
   }
 }
 
+//TODO add trait with the same functionality

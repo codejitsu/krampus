@@ -17,7 +17,9 @@ class CassandraEntityActor[E](implicit ev: ClassTag[E], dao: CassandraDao[E]) ex
       dao.store(concreteEntity) // add pipeTo here
 
       sender ! Stored(e)
-    }
+
+    case Store(_) => sender ! InvalidEntityType
+  }
 }
 
 object CassandraEntityActor {

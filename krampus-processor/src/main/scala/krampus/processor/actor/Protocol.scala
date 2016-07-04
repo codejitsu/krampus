@@ -17,5 +17,4 @@ final case class Insert(msg: WikiChangeEntry) extends Protocol
 
 final case class Store[E](msg: E)(implicit ev: ClassTag[E]) extends Protocol
 final case class Stored[E](msg: E)(implicit ev: ClassTag[E]) extends Protocol
-
-//TODO add InvalidEntity return message
+case object InvalidEntityType extends Protocol

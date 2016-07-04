@@ -30,14 +30,14 @@ class CassandraChangeEntityActorSpecification() extends EmbeddedCassandraSuite
     }
   }
 
-  test("CassandraEntityActor for Change entity must ignore all other entities") {
+  test("CassandraEntityActor for Change entity must ignore all other entities and return 'InvalidEntityType' error message") {
     val actor = system.actorOf(CassandraEntityActor.props[WikiChangeEntry])
 
     val msg = wikiPageEntityGenerator.sample
 
     msg.foreach { case wikiPage =>
       actor ! Store(wikiPage)
-      expectNoMsg()
+      expectMsg(InvalidEntityType)
     }
   }
 }
