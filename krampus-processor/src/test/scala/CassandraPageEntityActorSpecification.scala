@@ -6,18 +6,18 @@ import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import krampus.entity.CommonGenerators._
 import krampus.entity.WikiPage
-import krampus.processor.cassandra.{EmbeddedCassandraDatabaseProvider, EmbeddedCassandraSuite}
+import krampus.processor.cassandra.{EmbeddedCassandraDatabaseProvider, WithEmbeddedCassandra}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{BeforeAndAfterAll, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
-class CassandraPageEntityActorSpecification() extends EmbeddedCassandraSuite
+class CassandraPageEntityActorSpecification() extends TestKit(ActorSystem("CassandraPageEntityActorSpecification")) with ImplicitSender
+  with FunSuiteLike with WithEmbeddedCassandra
   with Matchers with GeneratorDrivenPropertyChecks with BeforeAndAfterAll with EmbeddedCassandraDatabaseProvider {
 
-  val testKit = new TestKit(ActorSystem("CassandraPageEntityActorSpecification")) with ImplicitSender
-
-  import testKit._
-
-  override def afterAll: Unit = TestKit.shutdownActorSystem(system)
+  override def afterAll: Unit = {
+    super.afterAll()
+    TestKit.shutdownActorSystem(system)
+  }
 
   implicit val db = database.Pages
 
