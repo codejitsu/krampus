@@ -9,12 +9,14 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class EmbeddedCassandraSuite extends FunSuite
-  with BeforeAndAfterAll
+class EmbeddedCassandraSuite extends FunSuite with WithEmbeddedCassandra
+
+trait WithEmbeddedCassandra extends BeforeAndAfterAll
   with ScalaFutures
   with Matchers
   with OptionValues
   with EmbeddedCassandraDatabaseProvider {
+  self: Suite =>
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -28,5 +30,3 @@ class EmbeddedCassandraSuite extends FunSuite
     Await.result(db.autocreate.future(), 5 seconds)
   }
 }
-
-//TODO add trait with the same functionality
