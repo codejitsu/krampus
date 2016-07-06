@@ -5,9 +5,14 @@ package krampus.processor.cassandra
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.Matchers
 import krampus.entity.CommonGenerators._
+import org.scalatest.concurrent.IntegrationPatience
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class WikiChangeEntryCassandraSpecification extends EmbeddedCassandraSuite with Matchers with GeneratorDrivenPropertyChecks {
+class WikiChangeEntryCassandraSpecification extends EmbeddedCassandraSuite with Matchers
+  with GeneratorDrivenPropertyChecks
+  with IntegrationPatience {
+
   test("WikiChangeEntry entities should be stored and retrieved") {
     forAll(rawKafkaMessageGenerator) { case (_, wikiChange) =>
       val chain = for {

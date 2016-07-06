@@ -76,7 +76,8 @@ class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamPro
 
       whenReady(Future.sequence(futures)) { case res =>
         eventually {
-          messages.size shouldBe counter
+          messages.size > 0 shouldBe true
+          messages.size shouldBe futures.size
         }
       }
 
