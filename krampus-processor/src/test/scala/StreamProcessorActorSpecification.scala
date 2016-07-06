@@ -11,23 +11,26 @@ import krampus.entity.WikiChangeEntry
 import krampus.processor.util.AppConfig
 import krampus.queue.RawKafkaMessage
 import net.manub.embeddedkafka.EmbeddedKafka
-import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.{ProducerRecord, RecordMetadata}
 import org.apache.kafka.common.serialization.Serializer
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.Future
 
 class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamProcessorActorSpecification"))
   with ImplicitSender
   with FunSuiteLike
   with Matchers
+  with ScalaFutures
   with GeneratorDrivenPropertyChecks
   with BeforeAndAfterAll
   with EmbeddedKafka
   with EmbeddedGeneratorDrivenKafkaConfig
-  with Eventually {
+  with Eventually
+  with IntegrationPatience {
 
   implicit val serializer = new Serializer[RawKafkaMessage] {
     private var isKey: Boolean = false
@@ -60,15 +63,21 @@ class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamPro
       actor ! StartStreamProcessor
 
       var counter = 0
+      val futures = ListBuffer.empty[Future[RecordMetadata]]
       forAll(rawKafkaMessageGenerator) { case (rawMessage, _) =>
-        kafkaProducer.send(new ProducerRecord(cnf.topic, rawMessage))
-        counter = counter + 1
+        val fut = Future { kafkaProducer.send(new ProducerRecord(cnf.topic, rawMessage)).get() }
+
+        fut.onSuccess { case succ =>
+          counter = counter + 1
+        }
+
+        futures += fut
       }
 
-      Thread.sleep(5000) // scalastyle:ignore
-
-      eventually {
-        assert(messages.size == counter)
+      whenReady(Future.sequence(futures)) { case res =>
+        eventually {
+          messages.size shouldBe counter
+        }
       }
 
       system.stop(actor)

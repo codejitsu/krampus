@@ -12,7 +12,7 @@ import krampus.queue.RawKafkaMessage
 import net.manub.embeddedkafka.EmbeddedKafka
 import org.apache.kafka.clients.producer.{ProducerRecord, RecordMetadata}
 import org.apache.kafka.common.serialization.Serializer
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
@@ -28,7 +28,8 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
   with BeforeAndAfterAll
   with EmbeddedKafka
   with EmbeddedGeneratorDrivenKafkaConfig
-  with Eventually {
+  with Eventually
+  with IntegrationPatience {
 
   implicit val serializer = new Serializer[RawKafkaMessage] {
     private var isKey: Boolean = false
@@ -74,7 +75,9 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
       }
 
       whenReady(Future.sequence(futures)) { case res =>
-        assert(messages.size == counter)
+        eventually {
+          messages.size shouldBe counter
+        }
       }
 
       system.stop(actor)
