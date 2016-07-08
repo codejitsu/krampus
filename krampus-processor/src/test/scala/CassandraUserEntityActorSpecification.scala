@@ -4,11 +4,11 @@ package krampus.processor.actor
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 import krampus.entity.CommonGenerators._
 import krampus.entity.WikiUser
-import krampus.processor.cassandra.{EmbeddedCassandraDatabaseProvider, EmbeddedCassandraSuite, WithEmbeddedCassandra}
+import krampus.processor.cassandra.{EmbeddedCassandraDatabaseProvider, WithEmbeddedCassandra}
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
 class CassandraUserEntityActorSpecification() extends TestKit(ActorSystem("CassandraUserEntityActorSpecification")) with ImplicitSender
   with FunSuiteLike with WithEmbeddedCassandra

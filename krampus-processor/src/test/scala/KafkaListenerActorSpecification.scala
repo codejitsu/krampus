@@ -62,16 +62,9 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
       val actor = system.actorOf(KafkaListenerActor.props(cnf.kafkaConfig, process))
       actor ! InitializeQueueListener
 
-      var counter = 0
       val futures = ListBuffer.empty[Future[RecordMetadata]]
       forAll(rawKafkaMessageGenerator) { case (rawMessage, _) =>
-        val fut = Future { kafkaProducer.send(new ProducerRecord(cnf.topic, rawMessage)).get() }
-
-        fut.onSuccess { case succ =>
-          counter = counter + 1
-        }
-
-        futures += fut
+        futures += Future { kafkaProducer.send(new ProducerRecord(cnf.topic, rawMessage)).get() }
       }
 
       whenReady(Future.sequence(futures)) { case res =>
