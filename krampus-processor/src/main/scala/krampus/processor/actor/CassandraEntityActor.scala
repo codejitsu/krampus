@@ -24,7 +24,7 @@ class CassandraEntityActor[E](implicit ev: ClassTag[E], dao: CassandraDao[E]) ex
 
     case Store(_) => sender ! InvalidEntityType
 
-    case StoreResult(r, to) => to ! Stored(r.asInstanceOf[E])
+    case StoreResult(res, to) => to ! Stored(res)
 
     case Failure(e) => log.error("Cassandra error", e)
   }
