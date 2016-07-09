@@ -14,6 +14,7 @@ import org.apache.kafka.clients.producer.{ProducerRecord, RecordMetadata}
 import org.apache.kafka.common.serialization.Serializer
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
 import scala.collection.mutable.ListBuffer
@@ -49,6 +50,14 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
 
   lazy val kafkaProducer = aKafkaProducer[RawKafkaMessage]
   implicit val kafkaConf = embeddedKafkaConfig
+
+  private val kafkaPatienceConfig: PatienceConfig =
+    PatienceConfig(
+      timeout = scaled(Span(60, Seconds)), //scalastyle:ignore
+      interval = scaled(Span(300, Millis)) //scalastyle:ignore
+    )
+
+  implicit override val patienceConfig: PatienceConfig = kafkaPatienceConfig
 
   override def afterAll: Unit = TestKit.shutdownActorSystem(system)
 
