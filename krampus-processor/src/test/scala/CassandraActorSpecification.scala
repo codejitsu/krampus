@@ -30,14 +30,22 @@ class CassandraActorSpecification() extends TestKit(ActorSystem("CassandraActorS
     val cassandraActor = system.actorOf(CassandraActor.props(config))
 
     forAll(rawKafkaMessageGenerator) { case (_, wikiChange) =>
-      cassandraActor ! Insert(wikiChange)
-      expectMsg(Stored(wikiChange))
-
-      val chain = for {
+      val chainBefore = for {
         retrieve <- db.getById(wikiChange.id)
       } yield retrieve
 
-      whenReady(chain) { result =>
+      whenReady(chainBefore) { result =>
+        result shouldBe None
+      }
+
+      cassandraActor ! Insert(wikiChange)
+      expectMsg(Stored(wikiChange))
+
+      val chainAfter = for {
+        retrieve <- db.getById(wikiChange.id)
+      } yield retrieve
+
+      whenReady(chainAfter) { result =>
         result shouldBe defined
         result.value shouldBe wikiChange
       }
