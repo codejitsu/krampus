@@ -35,9 +35,18 @@ CREATE TABLE users (
   PRIMARY KEY (uid)
 );
 
+CREATE INDEX user_name
+   ON wiki.users (name);
+
 CREATE TABLE pages (
   pid   uuid,
   name  text,
   url   text,
   PRIMARY KEY (pid)
 );
+
+CREATE INDEX page_name
+   ON wiki.pages (name);
+
+CREATE INDEX page_url
+   ON wiki.pages (url);

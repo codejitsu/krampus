@@ -17,7 +17,7 @@ class WikiUserCassandraSpecification extends EmbeddedCassandraSuite with Matcher
 
       whenReady(chain) { result =>
         result shouldBe defined
-        result.value shouldBe user
+        result.value shouldBe user.copy(name = user.name.trim.toLowerCase)
       }
     }
   }
