@@ -16,7 +16,7 @@ final case class MessageConverted(msg: WikiChangeEntry) extends Protocol
 
 final case class Insert(msg: WikiChangeEntry) extends Protocol
 
-final case class Store[E](msg: E)(implicit ev: ClassTag[E]) extends Protocol
-final case class StoreResult[R](res: R, to: ActorRef)(implicit ev: ClassTag[R]) extends Protocol
+final case class Store[E](msg: E, back: ActorRef)(implicit ev: ClassTag[E]) extends Protocol
+final case class StoreResult[R](res: R, back: ActorRef)(implicit ev: ClassTag[R]) extends Protocol
 final case class Stored[E](msg: E)(implicit ev: ClassTag[E]) extends Protocol
 case object InvalidEntityType extends Protocol

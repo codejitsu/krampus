@@ -2,9 +2,7 @@
 
 package krampus.processor.actor
 
-import akka.actor.Status.Failure
 import akka.actor.{Actor, ActorLogging, Props}
-import akka.pattern.pipe
 import com.typesafe.config.Config
 import krampus.entity.WikiChangeEntry
 import krampus.processor.cassandra.CassandraDao
@@ -18,17 +16,23 @@ class CassandraActor(config: Config, dao: CassandraDao[WikiChangeEntry]) extends
   //TODO add all Cassandra actors here to store all parts of events.
   //TODO add tests to check if all parts stored correctly.
 
+  implicit val changeEntryDao = dao
+
+  val changeEntityActor = context.actorOf(CassandraEntityActor.props[WikiChangeEntry])
+
   override def receive: Receive = {
     case Insert(entry) => {
       log.debug(s"Insert $entry into cassandra.")
-
       val back = sender
-      dao.store(entry)  map { res => StoreResult(entry, back) } pipeTo self
+      changeEntityActor ! Store(entry, back)
     }
 
-    case StoreResult(res, to) => to ! Stored(res)
+    case stored @ Stored(res) => {
+      log.debug(s"$res stored in cassandra.")
+      context.parent ! stored
+    }
 
-    case Failure(e) => log.error("Cassandra error", e)
+    case InvalidEntityType => log.error("Invalid entity type.")
 
     case msg => log.error(s"Unexpected message: $msg")
   }

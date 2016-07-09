@@ -24,7 +24,7 @@ class CassandraChangeEntityActorSpecification() extends TestKit(ActorSystem("Cas
     val actor = system.actorOf(CassandraEntityActor.props[WikiChangeEntry])
 
     forAll(rawKafkaMessageGenerator) { case (_, wikiChange) =>
-      actor ! Store(wikiChange)
+      actor ! Store(wikiChange, testActor)
       expectMsg(Stored(wikiChange))
     }
   }
@@ -35,7 +35,7 @@ class CassandraChangeEntityActorSpecification() extends TestKit(ActorSystem("Cas
     val msg = wikiPageEntityGenerator.sample
 
     msg.foreach { case wikiPage =>
-      actor ! Store(wikiPage)
+      actor ! Store(wikiPage, testActor)
       expectMsg(InvalidEntityType)
     }
   }

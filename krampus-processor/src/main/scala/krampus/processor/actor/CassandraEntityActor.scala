@@ -13,18 +13,15 @@ class CassandraEntityActor[E](implicit ev: ClassTag[E], dao: CassandraDao[E]) ex
   implicit val ec = context.dispatcher
 
   override def receive: Receive = {
-    case Store(e) if e.getClass == ev.runtimeClass => {
+    case Store(e, back) if e.getClass == ev.runtimeClass => {
       log.debug(s"Processing message $e of class ${ev.runtimeClass.getCanonicalName}")
-
       val concreteEntity = e.asInstanceOf[E]
-      val back = sender
-
       dao.store(concreteEntity) map { res => StoreResult(concreteEntity, back) } pipeTo self
     }
 
-    case Store(_) => sender ! InvalidEntityType
+    case Store(_, back) => back ! InvalidEntityType
 
-    case StoreResult(res, to) => to ! Stored(res)
+    case StoreResult(res, back) => back ! Stored(res)
 
     case Failure(e) => log.error("Cassandra error", e)
   }
