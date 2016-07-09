@@ -9,10 +9,10 @@ import krampus.processor.cassandra.{EmbeddedCassandraDatabaseProvider, WithEmbed
 import krampus.processor.util.AppConfig
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 
 class CassandraActorSpecification() extends TestKit(ActorSystem("CassandraActorSpecification")) with ImplicitSender
-  with FunSuiteLike with WithEmbeddedCassandra with ScalaFutures
+  with FunSuiteLike with WithEmbeddedCassandra with ScalaFutures with IntegrationPatience
   with Matchers with GeneratorDrivenPropertyChecks with BeforeAndAfterAll with EmbeddedCassandraDatabaseProvider {
   override def afterAll: Unit = {
     super.afterAll()
