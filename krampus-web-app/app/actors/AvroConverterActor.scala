@@ -8,8 +8,8 @@ import java.util.UUID
 import actors.Messages.{ChannelMessage, KafkaRawDataMessage}
 import akka.actor.{Actor, Props}
 import com.typesafe.scalalogging.LazyLogging
-import krampus.avro.WikiChangeEntryAvro
-import krampus.entity.WikiChangeEntry
+import krampus.avro.WikiEditAvro
+import krampus.entity.WikiEdit
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.specific.SpecificDatumReader
 import org.joda.time.DateTime
@@ -31,7 +31,7 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
     def writes(url: URL) = Json.toJson(url.toString)
   }
 
-  implicit val wikiChangeEntryWrites: Writes[WikiChangeEntry] = (
+  implicit val wikiEditWrites: Writes[WikiEdit] = (
     (JsPath \ "id").write[UUID] and
     (JsPath \ "isRobot").write[Boolean] and
     (JsPath \ "channel").write[String] and
@@ -48,10 +48,10 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
     (JsPath \ "delta").write[Int] and
     (JsPath \ "user").write[String] and
     (JsPath \ "namespace").write[String]
-  )(unlift(WikiChangeEntry.unapply))
+  )(unlift(WikiEdit.unapply))
 
   private[this] lazy val reader =
-    new SpecificDatumReader[WikiChangeEntryAvro](classOf[WikiChangeEntryAvro])
+    new SpecificDatumReader[WikiEditAvro](classOf[WikiEditAvro])
 
   override def receive: Receive = {
     case kafkaData @ KafkaRawDataMessage(_) =>
@@ -76,16 +76,16 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
     case msg => logger.error(s"Unexpected message '$msg'")
   }
 
-  private def readAvro(msg: KafkaRawDataMessage): WikiChangeEntryAvro = {
+  private def readAvro(msg: KafkaRawDataMessage): WikiEditAvro = {
     val decoder = DecoderFactory.get().binaryDecoder(msg.data, null) //scalastyle:ignore
-    val wikiChangeEntryAvro = reader.read(null, decoder) //scalastyle:ignore
+    val wikiEditAvro = reader.read(null, decoder) //scalastyle:ignore
 
-    logger.debug(s"${wikiChangeEntryAvro.getChannel()}: ${wikiChangeEntryAvro.getPage()}")
+    logger.debug(s"${wikiEditAvro.getChannel()}: ${wikiEditAvro.getPage()}")
 
-    wikiChangeEntryAvro
+    wikiEditAvro
   }
 
-  private def convertFromAvro(entryAvro: WikiChangeEntryAvro): WikiChangeEntry = WikiChangeEntry(entryAvro)
+  private def convertFromAvro(entryAvro: WikiEditAvro): WikiEdit = WikiEdit(entryAvro)
 }
 
 object AvroConverterActor {

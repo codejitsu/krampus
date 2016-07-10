@@ -14,8 +14,8 @@ import com.softwaremill.react.kafka.{ProducerProperties, ReactiveKafka}
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Encoder
-import krampus.avro.WikiChangeEntryAvro
-import krampus.entity.WikiChangeEntry
+import krampus.avro.WikiEditAvro
+import krampus.entity.WikiEdit
 import org.apache.avro.io.EncoderFactory
 import org.apache.avro.specific.SpecificDatumWriter
 import org.joda.time.DateTime
@@ -50,7 +50,7 @@ abstract class WikiProducer extends LazyLogging {
       out => {
         import GraphDSL.Implicits._
 
-        val broadcast = builder.add(Broadcast[Option[WikiChangeEntry]](3))
+        val broadcast = builder.add(Broadcast[Option[WikiEdit]](3))
 
         entries ~> broadcast ~> logEveryNSink(logElements(config))
                    broadcast ~> out
@@ -93,7 +93,7 @@ abstract class WikiProducer extends LazyLogging {
 
   def source(args: Array[String]): Source[String, Unit]
 
-  def parseJson(config: Config)(implicit ec: ExecutionContext): Flow[String, Option[WikiChangeEntry], Unit] =
+  def parseJson(config: Config)(implicit ec: ExecutionContext): Flow[String, Option[WikiEdit], Unit] =
     Flow[String].mapAsync(config.getInt("krampus.producer.json.parallelizm"))(line => Future(parseItem(line))).collect {
       case Success(e) => Some(e)
       case Failure(f) => {
@@ -102,10 +102,10 @@ abstract class WikiProducer extends LazyLogging {
       }
     }
 
-  def parseItem(line: String): Try[WikiChangeEntry] = Try {
+  def parseItem(line: String): Try[WikiEdit] = Try {
     val json = parse(line)
 
-    val parsed: List[WikiChangeEntry] = for {
+    val parsed: List[WikiEdit] = for {
       JBool(isRobot) <- json \ "isRobot"
       JString(channel) <- json \ "channel"
       JString(timestamp) <- json \ "timestamp"
@@ -122,7 +122,7 @@ abstract class WikiProducer extends LazyLogging {
       JString(user) <- json \ "user"
       JString(namespace) <- json \ "namespace"
     } yield {
-      WikiChangeEntry(UUID.randomUUID(), isRobot, channel, new DateTime(timestamp), flags.split(",").toList,
+      WikiEdit(UUID.randomUUID(), isRobot, channel, new DateTime(timestamp), flags.split(",").toList,
         isUnpatrolled, page, new URL(diffUrl), added.toInt, deleted.toInt,
         comment, isNew, isMinor, delta.toInt, user, namespace)
     }
@@ -138,7 +138,7 @@ abstract class WikiProducer extends LazyLogging {
     x + 1
   }
 
-  def count: Sink[Option[WikiChangeEntry], Future[Int]] = Sink.fold(0) {
+  def count: Sink[Option[WikiEdit], Future[Int]] = Sink.fold(0) {
     case (c, _) => c + 1
   }
 
@@ -147,12 +147,12 @@ abstract class WikiProducer extends LazyLogging {
       case _ => ()
     }
 
-  def avro: Flow[Option[WikiChangeEntry], Option[WikiChangeEntryAvro], Unit] =
-    Flow[Option[WikiChangeEntry]].map { entryOpt =>
+  def avro: Flow[Option[WikiEdit], Option[WikiEditAvro], Unit] =
+    Flow[Option[WikiEdit]].map { entryOpt =>
       entryOpt.map { entry =>
         import entry._
 
-        val avroVal = new WikiChangeEntryAvro()
+        val avroVal = new WikiEditAvro()
 
         avroVal.setId(id.toString)
         avroVal.setIsRobot(isRobot)
@@ -175,12 +175,12 @@ abstract class WikiProducer extends LazyLogging {
       }
     }
 
-  def serialize: Flow[Option[WikiChangeEntryAvro], Option[(CharSequence, Array[Byte])], Unit] =
-    Flow[Option[WikiChangeEntryAvro]].map { avroValOpt =>
+  def serialize: Flow[Option[WikiEditAvro], Option[(CharSequence, Array[Byte])], Unit] =
+    Flow[Option[WikiEditAvro]].map { avroValOpt =>
       avroValOpt.map { avroVal =>
         val out = new ByteArrayOutputStream()
         val encoder = EncoderFactory.get().binaryEncoder(out, null) // scalastyle:ignore
-        val writer = new SpecificDatumWriter[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
+        val writer = new SpecificDatumWriter[WikiEditAvro](WikiEditAvro.getClassSchema())
 
         writer.write(avroVal, encoder)
         encoder.flush()

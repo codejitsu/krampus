@@ -7,7 +7,7 @@ import java.util
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import krampus.entity.CommonGenerators._
-import krampus.entity.WikiChangeEntry
+import krampus.entity.WikiEdit
 import krampus.processor.util.AppConfig
 import krampus.queue.RawKafkaMessage
 import net.manub.embeddedkafka.EmbeddedKafka
@@ -54,9 +54,9 @@ class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamPro
 
   test("StreamProcessorActor onMessage function receives deserialized kafka messages") {
     withRunningKafka {
-      val messages = ListBuffer.empty[WikiChangeEntry]
+      val messages = ListBuffer.empty[WikiEdit]
 
-      def process(msg: WikiChangeEntry): Unit = messages += msg
+      def process(msg: WikiEdit): Unit = messages += msg
 
       val cnf = config
       val actor = system.actorOf(StreamProcessorActor.props(cnf, process))

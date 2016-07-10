@@ -1,7 +1,7 @@
 {
     "namespace": "krampus.avro",
     "type": "record",
-    "name": "WikiChangeEntryAvro",
+    "name": "WikiEditAvro",
     "fields": [
          {"name": "id", "type": "string"},
          {"name": "isRobot", "type": "boolean"},

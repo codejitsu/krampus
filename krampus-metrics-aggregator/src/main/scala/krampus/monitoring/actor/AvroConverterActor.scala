@@ -4,8 +4,8 @@ package krampus.monitoring.actor
 
 import akka.actor.{Actor, ActorRef, Props}
 import com.typesafe.scalalogging.LazyLogging
-import krampus.avro.WikiChangeEntryAvro
-import krampus.entity.WikiChangeEntry
+import krampus.avro.WikiEditAvro
+import krampus.entity.WikiEdit
 import krampus.monitoring.util.{AggregationMessage, AppConfig}
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.specific.SpecificDatumReader
@@ -19,7 +19,7 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
   import scala.collection._
 
   private[this] lazy val reader =
-    new SpecificDatumReader[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
+    new SpecificDatumReader[WikiEditAvro](WikiEditAvro.getClassSchema())
 
   private[this] lazy val statsdConnection =
     (config.aggregationConfig.getString("statsd.host"), config.aggregationConfig.getInt("statsd.port"))
@@ -53,16 +53,16 @@ class AvroConverterActor(config: AppConfig) extends Actor with LazyLogging {
       context.parent ! MessageConverted
   }
 
-  def convert(msg: RawKafkaMessage): WikiChangeEntryAvro = {
+  def convert(msg: RawKafkaMessage): WikiEditAvro = {
     val decoder = DecoderFactory.get().binaryDecoder(msg.msg, null) //scalastyle:ignore
-    val wikiChangeEntryAvro = reader.read(null, decoder) //scalastyle:ignore
+    val wikiEditAvro = reader.read(null, decoder) //scalastyle:ignore
 
-    logger.debug(s"${wikiChangeEntryAvro.getChannel()}: ${wikiChangeEntryAvro.getPage()}")
+    logger.debug(s"${wikiEditAvro.getChannel()}: ${wikiEditAvro.getPage()}")
 
-    wikiChangeEntryAvro
+    wikiEditAvro
   }
 
-  def fromAvro(entryAvro: WikiChangeEntryAvro): WikiChangeEntry = WikiChangeEntry(entryAvro)
+  def fromAvro(entryAvro: WikiEditAvro): WikiEdit = WikiEdit(entryAvro)
 }
 
 object AvroConverterActor {

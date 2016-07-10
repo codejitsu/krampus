@@ -6,9 +6,9 @@ import java.net.URL
 
 import scala.concurrent.Future
 import com.websudos.phantom.dsl._
-import krampus.entity.WikiChangeEntry
+import krampus.entity.WikiEdit
 
-class Edits extends CassandraTable[EditsRepository, WikiChangeEntry] {
+class WikiEdits extends CassandraTable[WikiEditsRepository, WikiEdit] {
   object Id extends UUIDColumn(this) with PartitionKey[UUID]
   object IsRobot extends BooleanColumn(this)
   object Channel extends StringColumn(this)
@@ -29,8 +29,8 @@ class Edits extends CassandraTable[EditsRepository, WikiChangeEntry] {
   object Namespace extends StringColumn(this)
 
 
-  def fromRow(row: Row): WikiChangeEntry =
-    WikiChangeEntry(
+  def fromRow(row: Row): WikiEdit =
+    WikiEdit(
       Id(row),
       IsRobot(row),
       Channel(row),
@@ -50,8 +50,8 @@ class Edits extends CassandraTable[EditsRepository, WikiChangeEntry] {
     )
 }
 
-abstract class EditsRepository extends Edits with RootConnector with CassandraDao[WikiChangeEntry] {
-  def store(edit: WikiChangeEntry): Future[ResultSet] =
+abstract class WikiEditsRepository extends WikiEdits with RootConnector with CassandraDao[WikiEdit] {
+  def store(edit: WikiEdit): Future[ResultSet] =
     insert
       .value(_.Id, edit.id)
       .value(_.IsRobot, edit.isRobot)
@@ -72,6 +72,6 @@ abstract class EditsRepository extends Edits with RootConnector with CassandraDa
       .consistencyLevel_=(ConsistencyLevel.ALL)
       .future()
 
-  def getById(id: UUID): Future[Option[WikiChangeEntry]] =
+  def getById(id: UUID): Future[Option[WikiEdit]] =
     select.where(_.Id eqs id).one()
 }

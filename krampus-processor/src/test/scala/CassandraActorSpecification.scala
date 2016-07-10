@@ -11,7 +11,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 
-class CassandraActorSpecification() extends TestKit(ActorSystem("CassandraActorSpecification")) with ImplicitSender
+class CassandraActorSpecification extends TestKit(ActorSystem("CassandraActorSpecification")) with ImplicitSender
   with FunSuiteLike with WithEmbeddedCassandra with ScalaFutures with IntegrationPatience
   with Matchers with GeneratorDrivenPropertyChecks with BeforeAndAfterAll with EmbeddedCassandraDatabaseProvider {
   override def afterAll: Unit = {
@@ -22,32 +22,32 @@ class CassandraActorSpecification() extends TestKit(ActorSystem("CassandraActorS
   val appConfig = new AppConfig("cassandra-processor-app")
   val config = appConfig.cassandraConfig
 
-  implicit val db = database.Edits
+  implicit val db = database.WikiEdits
 
-  test("CassandraActor must store WikiChangeEntry in Cassandra") {
+  test("CassandraActor must store WikiEdits in Cassandra") {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val cassandraActor = system.actorOf(CassandraActor.props(config))
 
-    forAll(rawKafkaMessageGenerator) { case (_, wikiChange) =>
+    forAll(rawKafkaMessageGenerator) { case (_, wikiEdit) =>
       val chainBefore = for {
-        retrieve <- db.getById(wikiChange.id)
+        retrieve <- db.getById(wikiEdit.id)
       } yield retrieve
 
       whenReady(chainBefore) { result =>
         result shouldBe None
       }
 
-      cassandraActor ! Insert(wikiChange)
-      expectMsg(Stored(wikiChange))
+      cassandraActor ! Insert(wikiEdit)
+      expectMsg(Stored(wikiEdit))
 
       val chainAfter = for {
-        retrieve <- db.getById(wikiChange.id)
+        retrieve <- db.getById(wikiEdit.id)
       } yield retrieve
 
       whenReady(chainAfter) { result =>
         result shouldBe defined
-        result.value shouldBe wikiChange
+        result.value shouldBe wikiEdit
       }
     }
   }

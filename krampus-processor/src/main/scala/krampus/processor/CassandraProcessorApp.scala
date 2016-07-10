@@ -4,7 +4,7 @@ package krampus.processor
 
 import akka.actor.{ActorRef, ActorSystem, PoisonPill}
 import com.typesafe.scalalogging.LazyLogging
-import krampus.entity.WikiChangeEntry
+import krampus.entity.WikiEdit
 import krampus.processor.actor.{CassandraActor, Insert, StartStreamProcessor, StreamProcessorActor}
 import krampus.processor.cassandra.ProductionCassandraDatabaseProvider
 import krampus.processor.util.AppConfig
@@ -19,7 +19,7 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
     val appConfig = new AppConfig("cassandra-processor-app")
     val system = ActorSystem(appConfig.systemName)
 
-    implicit val dao = database.Edits
+    implicit val dao = database.WikiEdits
 
     val cassandraActor = system.actorOf(CassandraActor.props(appConfig.cassandraConfig), "cassandra-actor")
     val streamProcessor = system.actorOf(StreamProcessorActor.props(appConfig, storeToCassandra(cassandraActor)), "stream-processor-actor")
@@ -31,7 +31,7 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
     }
   }
 
-  def storeToCassandra(actor: ActorRef)(msg: WikiChangeEntry): Unit = {
+  def storeToCassandra(actor: ActorRef)(msg: WikiEdit): Unit = {
     logger.debug(s"About to store $msg to cassandra...")
     actor ! Insert(msg)
   }

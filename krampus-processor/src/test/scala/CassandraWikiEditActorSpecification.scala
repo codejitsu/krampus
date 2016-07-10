@@ -5,12 +5,12 @@ package krampus.processor.actor
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import krampus.entity.CommonGenerators._
-import krampus.entity.WikiChangeEntry
+import krampus.entity.WikiEdit
 import krampus.processor.cassandra.{EmbeddedCassandraDatabaseProvider, WithEmbeddedCassandra}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
-class CassandraChangeEntityActorSpecification() extends TestKit(ActorSystem("CassandraChangeEntityActorSpecification")) with ImplicitSender
+class CassandraWikiEditActorSpecification extends TestKit(ActorSystem("CassandraWikiEditActorSpecification")) with ImplicitSender
   with FunSuiteLike with WithEmbeddedCassandra
   with Matchers with GeneratorDrivenPropertyChecks with BeforeAndAfterAll with EmbeddedCassandraDatabaseProvider {
   override def afterAll: Unit = {
@@ -18,14 +18,14 @@ class CassandraChangeEntityActorSpecification() extends TestKit(ActorSystem("Cas
     TestKit.shutdownActorSystem(system)
   }
 
-  implicit val db = database.Edits
+  implicit val db = database.WikiEdits
 
-  test("CassandraEntityActor for Change entity must receive Store(change) messages") {
-    val actor = system.actorOf(CassandraEntityActor.props[WikiChangeEntry])
+  test("CassandraEntityActor for WikiEdit entity must receive Store(edit) messages") {
+    val actor = system.actorOf(CassandraEntityActor.props[WikiEdit])
 
-    forAll(rawKafkaMessageGenerator) { case (_, wikiChange) =>
-      actor ! Store(wikiChange, testActor)
-      expectMsg(Stored(wikiChange))
+    forAll(rawKafkaMessageGenerator) { case (_, wikiEdit) =>
+      actor ! Store(wikiEdit, testActor)
+      expectMsg(Stored(wikiEdit))
     }
   }
 }

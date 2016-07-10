@@ -12,7 +12,7 @@ object Defaults {
 }
 
 abstract class CassandraDatabase(val keyspace: KeySpaceDef) extends Database(keyspace) {
-  object Edits extends EditsRepository with keyspace.Connector
+  object WikiEdits extends WikiEditsRepository with keyspace.Connector
 }
 
 trait CassandraDatabaseProvider {

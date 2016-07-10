@@ -9,20 +9,20 @@ import org.scalatest.concurrent.IntegrationPatience
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class WikiChangeEntryCassandraSpecification extends EmbeddedCassandraSuite with Matchers
+class WikiEditCassandraSpecification extends EmbeddedCassandraSuite with Matchers
   with GeneratorDrivenPropertyChecks
   with IntegrationPatience {
 
-  test("WikiChangeEntry entities should be stored and retrieved") {
-    forAll(rawKafkaMessageGenerator) { case (_, wikiChange) =>
+  test("WikiEdit entities should be stored and retrieved") {
+    forAll(rawKafkaMessageGenerator) { case (_, wikiEdit) =>
       val chain = for {
-        store <- database.Edits.store(wikiChange)
-        retrieve <- database.Edits.getById(wikiChange.id)
+        store <- database.WikiEdits.store(wikiEdit)
+        retrieve <- database.WikiEdits.getById(wikiEdit.id)
       } yield retrieve
 
       whenReady(chain) { result =>
         result shouldBe defined
-        result.value shouldBe wikiChange
+        result.value shouldBe wikiEdit
       }
     }
   }

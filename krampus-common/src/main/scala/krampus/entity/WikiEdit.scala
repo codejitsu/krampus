@@ -5,7 +5,7 @@ package krampus.entity
 import java.net.URL
 import java.util.UUID
 
-import krampus.avro.WikiChangeEntryAvro
+import krampus.avro.WikiEditAvro
 import org.joda.time.DateTime
 
 /*
@@ -28,26 +28,26 @@ import org.joda.time.DateTime
   }
 */
 
-final case class WikiChangeEntry( id: UUID,
-                                  isRobot: Boolean,
-                                  channel: String,
-                                  timestamp: DateTime,
-                                  flags: List[String],
-                                  isUnpatrolled: Boolean,
-                                  page: String,
-                                  diffUrl: URL,
-                                  added: Int,
-                                  deleted: Int,
-                                  comment: String,
-                                  isNew: Boolean,
-                                  isMinor: Boolean,
-                                  delta: Int,
-                                  user: String,
-                                  namespace: String )
+final case class WikiEdit(id: UUID,
+                          isRobot: Boolean,
+                          channel: String,
+                          timestamp: DateTime,
+                          flags: List[String],
+                          isUnpatrolled: Boolean,
+                          page: String,
+                          diffUrl: URL,
+                          added: Int,
+                          deleted: Int,
+                          comment: String,
+                          isNew: Boolean,
+                          isMinor: Boolean,
+                          delta: Int,
+                          user: String,
+                          namespace: String )
 
-object WikiChangeEntry {
-  def apply(avro: WikiChangeEntryAvro): WikiChangeEntry =
-    WikiChangeEntry(
+object WikiEdit {
+  def apply(avro: WikiEditAvro): WikiEdit =
+    WikiEdit(
       UUID.fromString(avro.getId().toString()),
       avro.getIsRobot(),
       avro.getChannel().toString(),

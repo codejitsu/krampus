@@ -4,14 +4,14 @@ package krampus.entity
 
 import java.io.ByteArrayOutputStream
 
-import krampus.avro.WikiChangeEntryAvro
+import krampus.avro.WikiEditAvro
 import krampus.queue.RawKafkaMessage
 import org.apache.avro.io.EncoderFactory
 import org.apache.avro.specific.SpecificDatumWriter
 import org.scalacheck.Gen
 
 object CommonGenerators {
-  val wikiChangeEntryAvroGenerator: Gen[WikiChangeEntryAvro] = for {
+  val wikiEditAvroGenerator: Gen[WikiEditAvro] = for {
     uuid <- Gen.uuid
     isRobot <- Gen.oneOf(true, false)
     channel <- Gen.alphaStr
@@ -28,21 +28,21 @@ object CommonGenerators {
     delta <- Gen.posNum[Int]
     user <- Gen.alphaStr
     namespace <- Gen.alphaStr
-  } yield new WikiChangeEntryAvro(uuid.toString, isRobot, channel, timestamp.toString, flags, isUnpatrolled, page,
+  } yield new WikiEditAvro(uuid.toString, isRobot, channel, timestamp.toString, flags, isUnpatrolled, page,
     s"http://$diffUrl.com/diff", added, deleted, comment, isNew, isMinor, delta, user, namespace)
 
-  val rawKafkaMessageGenerator: Gen[(RawKafkaMessage, WikiChangeEntry)] = for {
-    entity <- wikiChangeEntryAvroGenerator
+  val rawKafkaMessageGenerator: Gen[(RawKafkaMessage, WikiEdit)] = for {
+    entity <- wikiEditAvroGenerator
   } yield {
     val out = new ByteArrayOutputStream()
     val encoder = EncoderFactory.get().binaryEncoder(out, null) // scalastyle:ignore
-    val writer = new SpecificDatumWriter[WikiChangeEntryAvro](WikiChangeEntryAvro.getClassSchema())
+    val writer = new SpecificDatumWriter[WikiEditAvro](WikiEditAvro.getClassSchema())
 
     writer.write(entity, encoder)
     encoder.flush()
     out.close()
     val serializedAvro = out.toByteArray()
 
-    (RawKafkaMessage(entity.getChannel.toString.toCharArray.map(_.toByte), serializedAvro), WikiChangeEntry(entity))
+    (RawKafkaMessage(entity.getChannel.toString.toCharArray.map(_.toByte), serializedAvro), WikiEdit(entity))
   }
 }

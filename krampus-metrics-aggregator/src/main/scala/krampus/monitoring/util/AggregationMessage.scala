@@ -2,6 +2,6 @@
 
 package krampus.monitoring.util
 
-import krampus.entity.WikiChangeEntry
+import krampus.entity.WikiEdit
 
-final case class AggregationMessage(msg: WikiChangeEntry)
+final case class AggregationMessage(msg: WikiEdit)
