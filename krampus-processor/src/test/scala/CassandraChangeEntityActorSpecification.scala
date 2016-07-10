@@ -28,15 +28,4 @@ class CassandraChangeEntityActorSpecification() extends TestKit(ActorSystem("Cas
       expectMsg(Stored(wikiChange))
     }
   }
-
-  test("CassandraEntityActor for Change entity must ignore all other entities and return 'InvalidEntityType' error message") {
-    val actor = system.actorOf(CassandraEntityActor.props[WikiChangeEntry])
-
-    val msg = wikiPageEntityGenerator.sample
-
-    msg.foreach { case wikiPage =>
-      actor ! Store(wikiPage, testActor)
-      expectMsg(InvalidEntityType)
-    }
-  }
 }

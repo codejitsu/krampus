@@ -12,8 +12,6 @@ object Defaults {
 }
 
 abstract class CassandraDatabase(val keyspace: KeySpaceDef) extends Database(keyspace) {
-  object Users extends UsersRepository with keyspace.Connector
-  object Pages extends PagesRepository with keyspace.Connector
   object Edits extends EditsRepository with keyspace.Connector
 }
 

@@ -12,10 +12,6 @@ import krampus.processor.cassandra.CassandraDao
   */
 class CassandraActor(config: Config, dao: CassandraDao[WikiChangeEntry]) extends Actor with ActorLogging {
   implicit val ec = context.dispatcher
-
-  //TODO add all Cassandra actors here to store all parts of events.
-  //TODO add tests to check if all parts stored correctly.
-
   implicit val changeEntryDao = dao
 
   val changeEntityActor = context.actorOf(CassandraEntityActor.props[WikiChangeEntry])
