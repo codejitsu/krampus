@@ -3,6 +3,7 @@
 package krampus.processor.actor
 
 import akka.actor.{Actor, ActorLogging, Props}
+import akka.routing.FromConfig
 import com.typesafe.config.Config
 import krampus.entity.WikiEdit
 import krampus.processor.cassandra.CassandraDao
@@ -14,7 +15,7 @@ class CassandraFacadeActor(config: Config, dao: CassandraDao[WikiEdit]) extends 
   implicit val ec = context.dispatcher
   implicit val editsDao = dao
 
-  val wikiEditActor = context.actorOf(CassandraEntityActor.props[WikiEdit])
+  val wikiEditActor = context.actorOf(CassandraEntityActor.props[WikiEdit].withRouter(FromConfig()), "wiki-edit-actor")
 
   override def receive: Receive = {
     case Insert(entry) => {

@@ -27,7 +27,7 @@ class CassandraFacadeActorSpecification extends TestKit(ActorSystem("CassandraFa
   test("CassandraFacadeActor must store WikiEdits in Cassandra") {
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(config))
+    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(config), "cassandra-facade-actor")
 
     forAll(rawKafkaMessageGenerator) { case (_, wikiEdit) =>
       val chainBefore = for {

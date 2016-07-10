@@ -21,7 +21,7 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
 
     implicit val dao = database.WikiEdits
 
-    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(appConfig.cassandraConfig), "cassandra-actor")
+    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(appConfig.cassandraConfig), "cassandra-facade-actor")
     val streamProcessor = system.actorOf(StreamProcessorActor.props(appConfig, storeToCassandra(cassandraFacadeActor)), "stream-processor-actor")
 
     streamProcessor ! StartStreamProcessor
