@@ -11,7 +11,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 
-class CassandraActorSpecification extends TestKit(ActorSystem("CassandraActorSpecification")) with ImplicitSender
+class CassandraFacadeActorSpecification extends TestKit(ActorSystem("CassandraFacadeActorSpecification")) with ImplicitSender
   with FunSuiteLike with WithEmbeddedCassandra with ScalaFutures with IntegrationPatience
   with Matchers with GeneratorDrivenPropertyChecks with BeforeAndAfterAll with EmbeddedCassandraDatabaseProvider {
   override def afterAll: Unit = {
@@ -24,10 +24,10 @@ class CassandraActorSpecification extends TestKit(ActorSystem("CassandraActorSpe
 
   implicit val db = database.WikiEdits
 
-  test("CassandraActor must store WikiEdits in Cassandra") {
+  test("CassandraFacadeActor must store WikiEdits in Cassandra") {
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    val cassandraActor = system.actorOf(CassandraActor.props(config))
+    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(config))
 
     forAll(rawKafkaMessageGenerator) { case (_, wikiEdit) =>
       val chainBefore = for {
@@ -38,7 +38,7 @@ class CassandraActorSpecification extends TestKit(ActorSystem("CassandraActorSpe
         result shouldBe None
       }
 
-      cassandraActor ! Insert(wikiEdit)
+      cassandraFacadeActor ! Insert(wikiEdit)
       expectMsg(Stored(wikiEdit))
 
       val chainAfter = for {

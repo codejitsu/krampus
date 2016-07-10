@@ -10,7 +10,7 @@ import krampus.processor.cassandra.CassandraDao
 /**
   * Actor to store entities in cassandra.
   */
-class CassandraActor(config: Config, dao: CassandraDao[WikiEdit]) extends Actor with ActorLogging {
+class CassandraFacadeActor(config: Config, dao: CassandraDao[WikiEdit]) extends Actor with ActorLogging {
   implicit val ec = context.dispatcher
   implicit val editsDao = dao
 
@@ -34,6 +34,6 @@ class CassandraActor(config: Config, dao: CassandraDao[WikiEdit]) extends Actor 
   }
 }
 
-object CassandraActor {
-  def props(config: Config)(implicit dao: CassandraDao[WikiEdit]): Props = Props(new CassandraActor(config, dao))
+object CassandraFacadeActor {
+  def props(config: Config)(implicit dao: CassandraDao[WikiEdit]): Props = Props(new CassandraFacadeActor(config, dao))
 }

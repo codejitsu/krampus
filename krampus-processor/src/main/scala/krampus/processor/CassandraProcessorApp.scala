@@ -5,7 +5,7 @@ package krampus.processor
 import akka.actor.{ActorRef, ActorSystem, PoisonPill}
 import com.typesafe.scalalogging.LazyLogging
 import krampus.entity.WikiEdit
-import krampus.processor.actor.{CassandraActor, Insert, StartStreamProcessor, StreamProcessorActor}
+import krampus.processor.actor.{CassandraFacadeActor, Insert, StartStreamProcessor, StreamProcessorActor}
 import krampus.processor.cassandra.ProductionCassandraDatabaseProvider
 import krampus.processor.util.AppConfig
 
@@ -21,8 +21,8 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
 
     implicit val dao = database.WikiEdits
 
-    val cassandraActor = system.actorOf(CassandraActor.props(appConfig.cassandraConfig), "cassandra-actor")
-    val streamProcessor = system.actorOf(StreamProcessorActor.props(appConfig, storeToCassandra(cassandraActor)), "stream-processor-actor")
+    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(appConfig.cassandraConfig), "cassandra-actor")
+    val streamProcessor = system.actorOf(StreamProcessorActor.props(appConfig, storeToCassandra(cassandraFacadeActor)), "stream-processor-actor")
 
     streamProcessor ! StartStreamProcessor
 
