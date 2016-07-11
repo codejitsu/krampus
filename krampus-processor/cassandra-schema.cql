@@ -2,7 +2,7 @@ CREATE KEYSPACE IF NOT EXISTS wiki WITH replication = {'class': 'SimpleStrategy'
 
 USE wiki;
 
-CREATE TABLE edits (
+CREATE TABLE wikiedits (
   year              int,
   month             int,
   day               int,
@@ -27,26 +27,3 @@ CREATE TABLE edits (
   pid               uuid,
   PRIMARY KEY ((year, month), day, time, uid)
 ) WITH CLUSTERING ORDER BY (day ASC, time ASC, uid ASC);
-
-CREATE TABLE users (
-  uid   uuid,
-  name  text,
-  robot boolean,
-  PRIMARY KEY (uid)
-);
-
-CREATE INDEX user_name
-   ON wiki.users (name);
-
-CREATE TABLE pages (
-  pid   uuid,
-  name  text,
-  url   text,
-  PRIMARY KEY (pid)
-);
-
-CREATE INDEX page_name
-   ON wiki.pages (name);
-
-CREATE INDEX page_url
-   ON wiki.pages (url);
