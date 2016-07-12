@@ -48,6 +48,8 @@ class WikiEdits extends CassandraTable[WikiEditsRepository, WikiEdit] {
       User(row),
       Namespace(row)
     )
+
+  override def tableName: String = "edits"
 }
 
 abstract class WikiEditsRepository extends WikiEdits with RootConnector with CassandraDao[WikiEdit] {

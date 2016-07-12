@@ -2,7 +2,7 @@ CREATE KEYSPACE IF NOT EXISTS wiki WITH replication = {'class': 'SimpleStrategy'
 
 USE wiki;
 
-CREATE TABLE wikiedits (
+CREATE TABLE edits (
   year              int,
   month             int,
   day               int,
