@@ -1,5 +1,6 @@
 Repositories:
 * https://hub.docker.com/r/spotify/kafka/
+* https://hub.docker.com/r/kamon/grafana_graphite/
 
 ==========================================
 
