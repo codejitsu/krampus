@@ -1,5 +1,10 @@
+Repositories:
+* https://hub.docker.com/r/spotify/kafka/
+
+==========================================
+
 # start kafka in docker
-docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=`docker-machine ip \`docker-machine active\`` --env ADVERTISED_PORT=9092 spotify/kafka
+docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=127.0.0.1 --env ADVERTISED_PORT=9092 spotify/kafka
 
 # start graphite/graphana in docker
 docker run --detach --publish=80:80 --publish=81:81 --publish=8125:8125/udp --publish=8126:8126 --name kamon-grafana-dashboard kamon/grafana_graphite
