@@ -23,7 +23,7 @@ class CassandraEntityActor[E](implicit ev: ClassTag[E], dao: CassandraDao[E]) ex
 
     case StoreResult(res, back) => back ! Stored(res)
 
-    case Failure(e) => log.error("Cassandra error", e)
+    case Failure(e) => log.error(e, "Cassandra error")
   }
 }
 
