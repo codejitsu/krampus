@@ -17,6 +17,9 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
     logger.info("Starting krampus cassandra processor app...")
 
     val appConfig = new AppConfig("cassandra-processor-app")
+
+    logger.debug(appConfig.cassandraConfig.toString)
+
     val system = ActorSystem(appConfig.systemName)
 
     implicit val dao = database.WikiEdits

@@ -1,6 +1,7 @@
 Repositories:
 * https://hub.docker.com/r/spotify/kafka/
 * https://hub.docker.com/r/kamon/grafana_graphite/
+* https://hub.docker.com/_/cassandra/
 
 ==========================================
 
@@ -11,6 +12,6 @@ docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=127.0.0.1 --env ADVER
 docker run --detach --publish=80:80 --publish=81:81 --publish=8125:8125/udp --publish=8126:8126 --name kamon-grafana-dashboard kamon/grafana_graphite
 
 # start cassandra in docker
-- docker run --name krampus-cassandra -d cassandra:3.3
+- docker run --name krampus-cassandra -p 127.0.0.1:9042:9042 -p 127.0.0.1:9160:9160 -d cassandra:3.7
 - docker run -it --link krampus-cassandra:cassandra --rm cassandra sh -c 'exec cqlsh "$CASSANDRA_PORT_9042_TCP_ADDR"'
 - import cassandra-schema.cql
