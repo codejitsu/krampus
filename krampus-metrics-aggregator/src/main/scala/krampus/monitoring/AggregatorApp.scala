@@ -17,7 +17,7 @@ object AggregatorApp extends LazyLogging {
 
     val appConfig = new AppConfig()
 
-    logger.info(appConfig.toString)
+    logger.info(appConfig.config.toString)
 
     val system = ActorSystem(appConfig.systemName)
 
