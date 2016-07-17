@@ -20,3 +20,4 @@ final case class Store[E](msg: E, back: ActorRef)(implicit ev: ClassTag[E]) exte
 final case class StoreResult[R](res: R, back: ActorRef)(implicit ev: ClassTag[R]) extends Protocol
 final case class Stored[E](msg: E)(implicit ev: ClassTag[E]) extends Protocol
 case object InvalidEntityType extends Protocol
+case object PrintCountInserted
