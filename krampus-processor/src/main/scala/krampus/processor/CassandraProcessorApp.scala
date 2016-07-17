@@ -18,7 +18,7 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
 
     val appConfig = new AppConfig("cassandra-processor-app")
 
-    logger.debug(appConfig.cassandraConfig.toString)
+    logger.info(appConfig.toString)
 
     val system = ActorSystem(appConfig.systemName)
 

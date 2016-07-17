@@ -16,6 +16,9 @@ object AggregatorApp extends LazyLogging {
     logger.info("Starting krampus aggregator app...")
 
     val appConfig = new AppConfig()
+
+    logger.info(appConfig.toString)
+
     val system = ActorSystem(appConfig.systemName)
 
     val guardian = system.actorOf(NodeGuardianActor.props(appConfig), "node-guardian")

@@ -32,6 +32,8 @@ import scala.util.{Failure, Success, Try}
 abstract class WikiProducer extends LazyLogging {
   val config = ConfigFactory.load()
 
+  logger.info(config.toString)
+
   implicit val ec = ExecutionContext
       .fromExecutor(Executors.newFixedThreadPool(config.getInt("krampus.producer.json.pool-size")))
 
