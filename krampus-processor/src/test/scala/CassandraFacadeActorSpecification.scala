@@ -39,7 +39,7 @@ class CassandraFacadeActorSpecification extends TestKit(ActorSystem("CassandraFa
       }
 
       cassandraFacadeActor ! Insert(wikiEdit)
-      expectMsg(Stored(wikiEdit))
+      expectMsg(Stored(wikiEdit, testActor))
 
       val chainAfter = for {
         retrieve <- db.getById(wikiEdit.id)

@@ -16,8 +16,9 @@ final case class MessageConverted(msg: WikiEdit) extends Protocol
 
 final case class Insert(msg: WikiEdit) extends Protocol
 
-final case class Store[E](msg: E, back: ActorRef)(implicit ev: ClassTag[E]) extends Protocol
-final case class StoreResult[R](res: R, back: ActorRef)(implicit ev: ClassTag[R]) extends Protocol
-final case class Stored[E](msg: E)(implicit ev: ClassTag[E]) extends Protocol
+final case class Store[E](msg: E, back: ActorRef, caller: ActorRef)(implicit ev: ClassTag[E]) extends Protocol
+final case class StoreResult[R](res: R, back: ActorRef, caller: ActorRef)(implicit ev: ClassTag[R]) extends Protocol
+final case class Stored[E](msg: E, caller: ActorRef)(implicit ev: ClassTag[E]) extends Protocol
 case object InvalidEntityType extends Protocol
-case object PrintCountInserted
+case object GetCountInserted extends Protocol
+final case class CountInserted(inserted: Long) extends Protocol

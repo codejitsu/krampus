@@ -2,12 +2,17 @@
 
 package krampus.processor
 
-import akka.actor.{ActorRef, ActorSystem, PoisonPill}
+import akka.actor.{ActorRef, ActorSystem, Cancellable, PoisonPill}
+import akka.pattern.ask
 import com.typesafe.scalalogging.LazyLogging
 import krampus.entity.WikiEdit
-import krampus.processor.actor.{CassandraFacadeActor, Insert, StartStreamProcessor, StreamProcessorActor}
+import krampus.processor.actor._
 import krampus.processor.cassandra.ProductionCassandraDatabaseProvider
 import krampus.processor.util.AppConfig
+import krampus.processor.util.AppConfig._
+
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 /**
   * Read Kafka Events and store data in cassandra.
@@ -23,14 +28,25 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
     val system = ActorSystem(appConfig.systemName)
 
     implicit val dao = database.WikiEdits
+    implicit val ec = system.dispatcher
+    implicit val timeout = akka.util.Timeout(10 seconds)
 
     val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(appConfig.cassandraConfig), "cassandra-facade-actor")
     val streamProcessor = system.actorOf(StreamProcessorActor.props(appConfig, storeToCassandra(cassandraFacadeActor)), "stream-processor-actor")
+
+    val task: Option[Cancellable] = Some(system.scheduler.schedule(Duration.Zero, appConfig.cassandraConfig.getMillis("flush-interval-ms")) {
+      val insertedFut: Future[Long] = (cassandraFacadeActor ? GetCountInserted).mapTo[Long]
+
+      insertedFut.onSuccess { case inserted =>
+        logger.info(s"Inserted entries into Cassandra: # $inserted")
+      }
+    })
 
     streamProcessor ! StartStreamProcessor
 
     system.registerOnTermination {
       streamProcessor ! PoisonPill
+      task.map(_.cancel())
     }
   }
 
