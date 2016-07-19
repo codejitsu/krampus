@@ -13,6 +13,7 @@ import krampus.processor.util.AppConfig._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 /**
   * Read Kafka Events and store data in cassandra.
@@ -37,8 +38,9 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
     val task: Option[Cancellable] = Some(system.scheduler.schedule(Duration.Zero, appConfig.cassandraConfig.getMillis("flush-interval-ms")) {
       val insertedFut: Future[Long] = (cassandraFacadeActor ? GetCountInserted).mapTo[Long]
 
-      insertedFut.onSuccess { case inserted =>
-        logger.info(s"Inserted entries into Cassandra: # $inserted")
+      insertedFut.onComplete {
+        case Success(inserted) => logger.info(s"Inserted entries into Cassandra: # $inserted")
+        case Failure(th) => logger.error("Error by inserting entries into Cassandra", th)
       }
     })
 
