@@ -70,4 +70,9 @@ object Settings extends Build {
   )
 
   lazy val phantomSettings = PhantomSbtPlugin.projectSettings
+
+  lazy val krampusProcessorSettings = Seq(
+    javaOptions += "-Xmx4G",
+    javaOptions += "-Xms4G"
+  )
 }
