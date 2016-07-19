@@ -22,14 +22,12 @@ class CassandraFacadeActor(config: Config, dao: CassandraDao[WikiEdit]) extends 
   override def receive: Receive = {
     case Insert(entry) => {
       log.debug(s"Insert $entry into cassandra.")
-      println(s"Insert $entry into cassandra.")
       val back = sender()
       wikiEditActor ! Store(entry, self, back)
     }
 
     case stored @ Stored(res, caller) => {
       log.debug(s"$res stored in cassandra.")
-      println(s"$res stored in cassandra.")
       inserted = inserted + 1
       caller ! stored
     }
