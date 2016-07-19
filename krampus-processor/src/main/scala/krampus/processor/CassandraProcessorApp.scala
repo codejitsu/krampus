@@ -36,10 +36,10 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
     val streamProcessor = system.actorOf(StreamProcessorActor.props(appConfig, storeToCassandra(cassandraFacadeActor)), "stream-processor-actor")
 
     val task: Option[Cancellable] = Some(system.scheduler.schedule(Duration.Zero, appConfig.cassandraConfig.getMillis("flush-interval-ms")) {
-      val insertedFut: Future[Long] = (cassandraFacadeActor ? GetCountInserted).mapTo[Long]
+      val insertedFut: Future[CountInserted] = (cassandraFacadeActor ? GetCountInserted).mapTo[CountInserted]
 
       insertedFut.onComplete {
-        case Success(inserted) => logger.info(s"Inserted entries into Cassandra: # $inserted")
+        case Success(CountInserted(inserted)) => logger.info(s"Inserted entries into Cassandra: # $inserted")
         case Failure(th) => logger.error("Error by inserting entries into Cassandra", th)
       }
     })
