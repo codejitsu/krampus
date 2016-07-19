@@ -4,7 +4,6 @@ package krampus.processor
 
 import akka.actor.{ActorRef, ActorSystem, Cancellable, PoisonPill}
 import akka.pattern.ask
-import akka.routing.FromConfig
 import com.typesafe.scalalogging.LazyLogging
 import krampus.entity.WikiEdit
 import krampus.processor.actor._
@@ -33,7 +32,7 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
     implicit val ec = system.dispatcher
     implicit val timeout = akka.util.Timeout(10 seconds)
 
-    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(appConfig.cassandraConfig, None).withRouter(FromConfig()), "cassandra-facade-actor")
+    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(appConfig.cassandraConfig, None), "cassandra-facade-actor")
     val streamProcessor = system.actorOf(StreamProcessorActor.props(appConfig, storeToCassandra(cassandraFacadeActor)), "stream-processor-actor")
 
     streamProcessor ! StartStreamProcessor
