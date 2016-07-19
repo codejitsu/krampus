@@ -24,8 +24,8 @@ class CassandraWikiEditActorSpecification extends TestKit(ActorSystem("Cassandra
     val actor = system.actorOf(CassandraEntityActor.props[WikiEdit])
 
     forAll(rawKafkaMessageGenerator) { case (_, wikiEdit) =>
-      actor ! Store(wikiEdit, testActor, testActor)
-      expectMsg(Stored(wikiEdit, testActor))
+      actor ! Store(wikiEdit, testActor, None)
+      expectMsg(Stored(wikiEdit, None))
     }
   }
 }

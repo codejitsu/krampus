@@ -27,7 +27,7 @@ class CassandraFacadeActorSpecification extends TestKit(ActorSystem("CassandraFa
   test("CassandraFacadeActor must store WikiEdits in Cassandra") {
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(config), "cassandra-facade-actor")
+    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(config, Option(testActor)), "cassandra-facade-actor")
 
     forAll(rawKafkaMessageGenerator) { case (_, wikiEdit) =>
       val chainBefore = for {
@@ -39,7 +39,7 @@ class CassandraFacadeActorSpecification extends TestKit(ActorSystem("CassandraFa
       }
 
       cassandraFacadeActor ! Insert(wikiEdit)
-      expectMsg(Stored(wikiEdit, testActor))
+      expectMsg(Stored(wikiEdit, Option(testActor)))
 
       val chainAfter = for {
         retrieve <- db.getById(wikiEdit.id)

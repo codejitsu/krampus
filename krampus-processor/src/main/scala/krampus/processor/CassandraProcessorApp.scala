@@ -4,6 +4,7 @@ package krampus.processor
 
 import akka.actor.{ActorRef, ActorSystem, Cancellable, PoisonPill}
 import akka.pattern.ask
+import akka.routing.FromConfig
 import com.typesafe.scalalogging.LazyLogging
 import krampus.entity.WikiEdit
 import krampus.processor.actor._
@@ -32,10 +33,13 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
     implicit val ec = system.dispatcher
     implicit val timeout = akka.util.Timeout(10 seconds)
 
-    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(appConfig.cassandraConfig), "cassandra-facade-actor")
+    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(appConfig.cassandraConfig, None).withRouter(FromConfig()), "cassandra-facade-actor")
     val streamProcessor = system.actorOf(StreamProcessorActor.props(appConfig, storeToCassandra(cassandraFacadeActor)), "stream-processor-actor")
 
-    val task: Option[Cancellable] = Some(system.scheduler.schedule(Duration.Zero, appConfig.cassandraConfig.getMillis("flush-interval-ms")) {
+    streamProcessor ! StartStreamProcessor
+
+    val flushInterval: FiniteDuration = appConfig.cassandraConfig.getMillis("flush-interval-ms")
+    val task: Option[Cancellable] = Some(system.scheduler.schedule(flushInterval, flushInterval) {
       val insertedFut: Future[CountInserted] = (cassandraFacadeActor ? GetCountInserted).mapTo[CountInserted]
 
       insertedFut.onComplete {
@@ -43,8 +47,6 @@ object CassandraProcessorApp extends LazyLogging with ProductionCassandraDatabas
         case Failure(th) => logger.error("Error by inserting entries into Cassandra", th)
       }
     })
-
-    streamProcessor ! StartStreamProcessor
 
     system.registerOnTermination {
       streamProcessor ! PoisonPill

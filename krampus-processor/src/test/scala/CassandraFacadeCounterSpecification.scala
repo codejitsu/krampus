@@ -25,7 +25,7 @@ class CassandraFacadeCounterSpecification extends TestKit(ActorSystem("Cassandra
   implicit val db = database.WikiEdits
 
   test("CassandraFacadeActor must count stored entities") {
-    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(config), "cassandra-facade-actor")
+    val cassandraFacadeActor = system.actorOf(CassandraFacadeActor.props(config, Option(testActor)), "cassandra-facade-actor")
 
     cassandraFacadeActor ! GetCountInserted
     expectMsg(CountInserted(0))
@@ -33,7 +33,7 @@ class CassandraFacadeCounterSpecification extends TestKit(ActorSystem("Cassandra
     var counter = 0
     forAll(rawKafkaMessageGenerator) { case (_, wikiEdit) =>
       cassandraFacadeActor ! Insert(wikiEdit)
-      expectMsg(Stored(wikiEdit, testActor))
+      expectMsg(Stored(wikiEdit, Option(testActor)))
 
       counter = counter + 1
 
