@@ -30,15 +30,16 @@ class CassandraFacadeCounterSpecification extends TestKit(ActorSystem("Cassandra
     cassandraFacadeActor ! GetCountInserted
     expectMsg(CountInserted(0))
 
-    val msg = rawKafkaMessageGenerator.sample
-
-    msg.foreach { case (_, wikiEdit) =>
+    var counter = 0
+    forAll(rawKafkaMessageGenerator) { case (_, wikiEdit) =>
       cassandraFacadeActor ! Insert(wikiEdit)
       expectMsg(Stored(wikiEdit, testActor))
-    }
 
-    cassandraFacadeActor ! GetCountInserted
-    expectMsg(CountInserted(1))
+      counter = counter + 1
+
+      cassandraFacadeActor ! GetCountInserted
+      expectMsg(CountInserted(counter))
+    }
 
     system.stop(cassandraFacadeActor)
   }
