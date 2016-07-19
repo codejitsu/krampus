@@ -2,6 +2,7 @@
 
 package krampus.processor.cassandra
 
+import com.datastax.driver.core.{HostDistance, PoolingOptions}
 import com.websudos.phantom.connectors.{ContactPoint, ContactPoints}
 import com.websudos.phantom.dsl.{Database, KeySpaceDef}
 import krampus.processor.util.AppConfig
@@ -11,7 +12,15 @@ object Defaults {
   lazy val conf = new AppConfig("cassandra-processor-app")
 
   lazy val local = ContactPoints(conf.cassandraConfig.getString("nodes").split(","),
-    conf.cassandraConfig.getInt("port")).keySpace(keySpaceName)
+    conf.cassandraConfig.getInt("port")).withClusterBuilder(_.withPoolingOptions(
+    new PoolingOptions().setCoreConnectionsPerHost(HostDistance.LOCAL, 4) // scalastyle:ignore
+      .setMaxConnectionsPerHost(HostDistance.LOCAL, 10) // scalastyle:ignore
+      .setCoreConnectionsPerHost(HostDistance.REMOTE, 2) // scalastyle:ignore
+      .setMaxConnectionsPerHost(HostDistance.REMOTE, 4) // scalastyle:ignore
+      .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768) // scalastyle:ignore
+      .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000) // scalastyle:ignore
+      .setPoolTimeoutMillis(10000) // scalastyle:ignore
+  )).keySpace(keySpaceName)
   lazy val embedded = ContactPoint.embedded.keySpace(keySpaceName)
 }
 
