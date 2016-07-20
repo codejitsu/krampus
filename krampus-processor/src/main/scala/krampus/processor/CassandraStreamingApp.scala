@@ -34,6 +34,9 @@ object CassandraStreamingApp extends LazyLogging {
 }
 
 class StreamingCassandra(config: AppConfig) extends LazyLogging with ProductionCassandraDatabaseProvider {
+  import akka.stream.ActorAttributes.supervisionStrategy
+  import akka.stream.Supervision.restartingDecider
+
   implicit val system = ActorSystem("krampus-streaming-cassandra")
   implicit val materializer = ActorMaterializer.create(system)
 
@@ -97,7 +100,7 @@ class StreamingCassandra(config: AppConfig) extends LazyLogging with ProductionC
   def storeCassandra: Flow[(WikiEdit, KafkaMessage[Array[Byte]]), KafkaMessage[Array[Byte]], Unit] =
     Flow[(WikiEdit, KafkaMessage[Array[Byte]])].mapAsync(1) { msg =>
       dao.store(msg._1) map { (_, msg._2) }
-    }.collect {
+    }.withAttributes(supervisionStrategy(restartingDecider)).collect {
       case (_, bytes) => bytes
     }
 }
