@@ -5,6 +5,8 @@ package krampus.processor.cassandra
 import java.net.URL
 import java.util.UUID
 
+import com.datastax.driver.core.exceptions.OperationTimedOutException
+
 import scala.concurrent.Future
 import com.websudos.phantom.dsl._
 import krampus.entity.WikiEdit
@@ -91,8 +93,10 @@ abstract class WikiEditsRepository extends WikiEdits with RootConnector with Cas
       .value(_.Namespace, edit.namespace)
       .value(_.User, edit.user)
       .value(_.Page, edit.page)
-      .consistencyLevel_=(ConsistencyLevel.ALL)
-      .future()
+      .consistencyLevel_=(ConsistencyLevel.ONE)
+      .future().recoverWith {
+        case _ : OperationTimedOutException => store(edit)
+      }
 
   def getById(id: UUID): Future[Option[WikiEdit]] =
     select.where(_.Id eqs id).allowFiltering().one()
