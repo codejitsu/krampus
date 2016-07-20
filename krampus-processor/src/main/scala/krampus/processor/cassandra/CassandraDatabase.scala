@@ -2,7 +2,7 @@
 
 package krampus.processor.cassandra
 
-import com.datastax.driver.core.{HostDistance, PoolingOptions}
+import com.datastax.driver.core.{HostDistance, PoolingOptions, SocketOptions}
 import com.websudos.phantom.connectors.{ContactPoint, ContactPoints}
 import com.websudos.phantom.dsl.{Database, KeySpaceDef}
 import krampus.processor.util.AppConfig
@@ -19,8 +19,8 @@ object Defaults {
       .setMaxConnectionsPerHost(HostDistance.REMOTE, 4) // scalastyle:ignore
       .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768) // scalastyle:ignore
       .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000) // scalastyle:ignore
-      .setPoolTimeoutMillis(10000) // scalastyle:ignore
-  )).keySpace(keySpaceName)
+      .setPoolTimeoutMillis(30000) // scalastyle:ignore
+    ).withSocketOptions(new SocketOptions().setConnectTimeoutMillis(30000))).keySpace(keySpaceName) // scalastyle:ignore
   lazy val embedded = ContactPoint.embedded.keySpace(keySpaceName)
 }
 
