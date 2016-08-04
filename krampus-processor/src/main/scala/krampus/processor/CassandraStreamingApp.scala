@@ -98,7 +98,7 @@ class StreamingCassandra(config: AppConfig) extends LazyLogging with ProductionC
   def fromAvro(entryAvro: WikiEditAvro): WikiEdit = WikiEdit(entryAvro)
 
   def storeCassandra: Flow[(WikiEdit, KafkaMessage[Array[Byte]]), KafkaMessage[Array[Byte]], Unit] =
-    Flow[(WikiEdit, KafkaMessage[Array[Byte]])].mapAsync(1) { msg =>
+    Flow[(WikiEdit, KafkaMessage[Array[Byte]])].mapAsync(8) { msg =>
       dao.store(msg._1) map { (_, msg._2) }
     }.withAttributes(supervisionStrategy(restartingDecider)).collect {
       case (_, bytes) => bytes
