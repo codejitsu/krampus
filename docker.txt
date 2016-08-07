@@ -12,9 +12,11 @@ docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=127.0.0.1 --env ADVER
 docker run --detach --publish=80:80 --publish=81:81 --publish=8125:8125/udp --publish=8126:8126 --name kamon-grafana-dashboard kamon/grafana_graphite
 
 # start cassandra in docker
-- docker run --name krampus-cassandra -p 127.0.0.1:9042:9042 -p 127.0.0.1:9160:9160 -d cassandra:3.7
-- docker run --name krampus-cassandra:cassandra-02 -d -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' krampus-cassandra:cassandra-01)" cassandra:3.7
-- docker run --name krampus-cassandra:cassandra-03 -d -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' krampus-cassandra:cassandra-01)" cassandra:3.7
-- docker run -it --link krampus-cassandra:cassandra-01 --rm cassandra sh -c 'exec cqlsh "$CASSANDRA_PORT_9042_TCP_ADDR"'
-- docker exec -it krampus-cassandra:cassandra-01 bash
+- docker run --name krampus-cassandra-01 -p 127.0.0.1:9042:9042 -p 127.0.0.1:9160:9160 -d cassandra:3.7
+- docker run --name krampus-cassandra-02 -d -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' krampus-cassandra-01)" cassandra:3.7
+- docker run --name krampus-cassandra-03 -d -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' krampus-cassandra-01)" cassandra:3.7
+- docker run --name krampus-cassandra-04 -d -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' krampus-cassandra-01)" cassandra:3.7
+- docker run --name krampus-cassandra-05 -d -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' krampus-cassandra-01)" cassandra:3.7
+- docker run -it --link krampus-cassandra-01:cassandra --rm cassandra sh -c 'exec cqlsh "$CASSANDRA_PORT_9042_TCP_ADDR"'
+- docker exec -it krampus-cassandra-01 bash
 - import cassandra-schema.cql

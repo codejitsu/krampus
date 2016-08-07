@@ -3,8 +3,8 @@
 package krampus.processor
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Flow, Source}
+import akka.stream.{ActorMaterializer, ClosedShape}
+import akka.stream.scaladsl._
 import com.softwaremill.react.kafka.KafkaMessages._
 import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink, ReactiveKafka}
 import com.typesafe.scalalogging.LazyLogging
@@ -18,7 +18,9 @@ import krampus.queue.RawKafkaMessage
 import org.apache.avro.io.DecoderFactory
 import org.apache.avro.specific.SpecificDatumReader
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 import scala.util.control.NonFatal
 
 object CassandraStreamingApp extends LazyLogging {
@@ -66,11 +68,34 @@ class StreamingCassandra(config: AppConfig) extends LazyLogging with ProductionC
     consumerWithOffsetSink.foreach { consumer =>
       logger.info("Starting the kafka listener...")
 
-      Source.fromPublisher(consumer.publisher)
+      val cassandraFlow = Source.fromPublisher(consumer.publisher)
         .map(processKafkaMessage)
         .map(parseAvro)
         .via(storeCassandra)
-        .to(consumer.offsetCommitSink).run()
+        //.to(consumer.offsetCommitSink).run()
+
+      val graph = GraphDSL.create(count) { implicit builder =>
+        out => {
+          import GraphDSL.Implicits._
+
+          val broadcast = builder.add(Broadcast[KafkaMessage[Array[Byte]]](3))
+
+          //cassandraFlow ~> broadcast ~> logEveryNSink(logElements(config))
+          cassandraFlow ~> broadcast ~> logEveryNSink(10000)
+                           broadcast ~> out
+                           broadcast ~> consumer.offsetCommitSink
+
+          ClosedShape
+        }
+      }
+
+      RunnableGraph.fromGraph(graph).run().onComplete { res =>
+        res match {
+          case Success(c) => logger.info(s"Completed: $c items processed")
+          case Failure(_) => logger.info("Something went wrong")
+        }
+        system.terminate()
+      }
     }
   } catch {
     case NonFatal(e) => logger.error(e.getMessage, e)
@@ -103,4 +128,16 @@ class StreamingCassandra(config: AppConfig) extends LazyLogging with ProductionC
     }.withAttributes(supervisionStrategy(restartingDecider)).collect {
       case (_, bytes) => bytes
     }
+
+  def logEveryNSink[T](n: Int): Sink[T, Future[Int]] = Sink.fold(0) { (x, y: T) =>
+    if (x % n == 0) {
+      logger.info(s"element #$x -> $y\n")
+    }
+
+    x + 1
+  }
+
+  def count[T]: Sink[T, Future[Int]] = Sink.fold(0) {
+    case (c, _) => c + 1
+  }
 }
