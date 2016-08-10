@@ -12,6 +12,7 @@ import krampus.entity.WikiEdit
 class WikiEdits extends CassandraTable[WikiEditsRepository, WikiEdit] {
   object Year extends IntColumn(this) with PartitionKey[Int]  { override lazy val name = "year" }
   object Month extends IntColumn(this) with PartitionKey[Int] { override lazy val name = "month" }
+  object Week extends IntColumn(this) with PartitionKey[Int]  { override lazy val name = "week" }
   object Id extends UUIDColumn(this) with PrimaryKey[UUID] with ClusteringOrder[UUID] with Ascending
                                                               { override lazy val name = "id" }
   object Day extends IntColumn(this) with PrimaryKey[Int] with ClusteringOrder[Int] with Ascending
@@ -70,6 +71,7 @@ abstract class WikiEditsRepository extends WikiEdits with RootConnector with Cas
       .value(_.Id, edit.id)
       .value(_.Year, edit.timestamp.year().get())
       .value(_.Month, edit.timestamp.monthOfYear().get())
+      .value(_.Week, edit.timestamp.weekOfWeekyear().get())
       .value(_.Day, edit.timestamp.dayOfMonth().get())
       .value(_.Hour, edit.timestamp.hourOfDay().get())
       .value(_.Minute, edit.timestamp.minuteOfHour().get())
