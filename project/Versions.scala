@@ -34,4 +34,8 @@ object Versions {
   val WebjarsBootstrapVer     = "2.3.2"
 
   val PhantomVer              = "1.27.0"
+
+  val SparkVer                = "2.0.0"
+  val SparkMlVer              = "2.0.0"
+  val SparkCassandraVer       = "2.0.0-M1"
 }

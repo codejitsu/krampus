@@ -88,6 +88,10 @@ object Dependencies {
     val webjarsAngWebsocket = "org.webjars.bower"         % "angular-websocket"       % WebjarsAngWebsocketVer
 
     val webjarsBootstrap =    "org.webjars"               % "bootstrap"               % WebjarsBootstrapVer
+
+    val sparkCore =   "org.apache.spark"                 %% "spark-core"              % SparkVer
+    val sparkMl   =   "org.apache.spark"                 %% "spark-mllib"             % SparkMlVer
+    val sparkCassandraConnector = "com.datastax.spark"   %% "spark-cassandra-connector" % SparkCassandraVer
   }
 
   object TestDeps {
@@ -108,7 +112,7 @@ object Dependencies {
   val krampusProcessor = Seq(config, akka, akkaLogger, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback)
   val krampusScoreApp = Seq(config)
-  val krampusSparkApp = Seq(config)
+  val krampusSparkApp = Seq(config, sparkCore, sparkMl, sparkCassandraConnector)
   val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging, logback, akkaLogging,
     webjarsPlay, webjarsAng, webjarsAngRoute, webjarsAngWebsocket, webjarsBootstrap)
 }
