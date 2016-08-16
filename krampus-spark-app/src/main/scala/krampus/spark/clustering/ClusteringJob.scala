@@ -3,16 +3,16 @@
 package krampus.spark.clustering
 
 import com.datastax.spark.connector._
-import org.apache.spark.mllib.linalg.Vectors
-import org.apache.spark.{SparkConf, SparkContext}
+import com.typesafe.scalalogging.LazyLogging
+import krampus.spark.util.AppConfig
 import org.apache.spark.mllib.clustering.{KMeans, KMeansModel}
-import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.mllib.linalg.{Vector, Vectors}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.{SparkConf, SparkContext}
 
-class ClusteringJob(context: SparkContext) {
+class ClusteringJob(context: SparkContext, config: AppConfig) extends LazyLogging {
   val keyspace = "wiki"
   val table = "edits"
-  val modelTable = "model"
 
   def distance(a: Vector, b: Vector): Double =
     math.sqrt(a.toArray.zip(b.toArray).map(p => p._1 - p._2).map(d => d * d).sum)
@@ -31,9 +31,9 @@ class ClusteringJob(context: SparkContext) {
     data.map(datum => distToCentroid(datum, model)).mean()
   }
 
-  def run(week: String, channel: String, modelPath: String): Unit = {
+  def run(week: Int, channel: String, modelPath: String): Unit = {
     val editsTable = context.cassandraTable(keyspace, table).cache()
-    val wikiData = editsTable.where(s"channel = '$channel'").cache()
+    val wikiData = editsTable.where(s"channel = '#$channel.wikipedia'").cache()
 
     val weeklyData = wikiData.where(s"week = $week").select("year", "month", "week", "weekday", "day_minute", "id").cache()
     val weeklyEdits =  weeklyData.map(r => ((r.getInt("weekday"), r.getInt("day_minute")), 1)).cache()
@@ -41,31 +41,35 @@ class ClusteringJob(context: SparkContext) {
     val visits = groupedByMinute.map(r => Vectors.dense(r._2)).cache()
 
     val kmeans = new KMeans()
-    kmeans.setK(55)
+    kmeans.setK(config.kMeans)
     kmeans.setEpsilon(1.0e-6)
 
     val model = kmeans.run(visits)
-    model.save(context, modelPath)
+    model.save(context, s"$modelPath/model-week$week-$channel")
+    logger.info(s"Model created: $modelPath/model-week$week-$channel")
   }
 }
 
-object ClusteringJob {
+object ClusteringJob extends LazyLogging {
   def main(args: Array[String]): Unit = {
-    val week = args(0)
-    val channel = args(1)
-    val cassandraHost = args(2)
-    val modelPath = args(3)
+    val appConfig = new AppConfig("spark-app")
+
+    logger.info(appConfig.config.root().render())
+
+    val week = appConfig.targetWeek
+    val channel = appConfig.targetChannel
+    val modelDirectory = appConfig.modelDirectory
+    val cassandraHost = appConfig.cassandraHost
 
     val conf = new SparkConf()
-      .setAppName("ClusteringJob")
+      .setAppName("KrampusClusteringJob")
       .set("spark.cassandra.connection.host", cassandraHost)
       .setMaster("local")
 
     val context = new SparkContext(conf)
-    context.setLogLevel("ERROR")
 
-    val job = new ClusteringJob(context)
-    job.run(week, channel, modelPath)
+    val job = new ClusteringJob(context, appConfig)
+    job.run(week, channel, modelDirectory)
     context.stop()
   }
 }
