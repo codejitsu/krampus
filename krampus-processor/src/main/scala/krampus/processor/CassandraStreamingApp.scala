@@ -80,8 +80,7 @@ class StreamingCassandra(config: AppConfig) extends LazyLogging with ProductionC
 
           val broadcast = builder.add(Broadcast[KafkaMessage[Array[Byte]]](3))
 
-          //cassandraFlow ~> broadcast ~> logEveryNSink(logElements(config))
-          cassandraFlow ~> broadcast ~> logEveryNSink(10000)
+          cassandraFlow ~> broadcast ~> logEveryNSink(config.logEveryNMessage)
                            broadcast ~> out
                            broadcast ~> consumer.offsetCommitSink
 
@@ -123,7 +122,7 @@ class StreamingCassandra(config: AppConfig) extends LazyLogging with ProductionC
   def fromAvro(entryAvro: WikiEditAvro): WikiEdit = WikiEdit(entryAvro)
 
   def storeCassandra: Flow[(WikiEdit, KafkaMessage[Array[Byte]]), KafkaMessage[Array[Byte]], Unit] =
-    Flow[(WikiEdit, KafkaMessage[Array[Byte]])].mapAsync(8) { msg =>
+    Flow[(WikiEdit, KafkaMessage[Array[Byte]])].mapAsync(config.parallelism) { msg =>
       dao.store(msg._1) map { (_, msg._2) }
     }.withAttributes(supervisionStrategy(restartingDecider)).collect {
       case (_, bytes) => bytes

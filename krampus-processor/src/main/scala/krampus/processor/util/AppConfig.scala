@@ -16,6 +16,8 @@ class AppConfig(appName: String) {
   lazy val systemName: String = config.getString(s"krampus.$appName.system-name")
 
   lazy val topic: String = kafkaConfig.getString("topic")
+  lazy val parallelism: Int = cassandraConfig.getInt("parallelism")
+  lazy val logEveryNMessage: Int = cassandraConfig.getInt("log-n-message")
 }
 
 //TODO move this class to commons
