@@ -8,6 +8,8 @@ addSbtPlugin("com.cavorite" % "sbt-avro" % "0.3.2")
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.6")
 
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.3")
+
 // web plugins
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-coffeescript" % "1.0.0")
