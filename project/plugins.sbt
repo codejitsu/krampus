@@ -2,7 +2,7 @@ addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.8.0")
 
 addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.1.6")
 
-addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.5")
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
 
 addSbtPlugin("com.cavorite" % "sbt-avro" % "0.3.2")
 
