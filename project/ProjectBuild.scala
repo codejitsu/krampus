@@ -48,7 +48,7 @@ object ProjectBuild extends Build {
   lazy val krampusSparkApp = Project(
     id = "krampus-spark-app",
     base = file("./krampus-spark-app"),
-    settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusSparkApp)
+    settings = defaultSettings ++ sparkAppSettings ++ Seq(libraryDependencies ++= Dependencies.krampusSparkApp)
   ).dependsOn(krampusCommon)
 
   lazy val krampusWebApp = Project(
@@ -89,7 +89,9 @@ object Dependencies {
 
     val webjarsBootstrap =    "org.webjars"               % "bootstrap"               % WebjarsBootstrapVer
 
-    val sparkCore =   "org.apache.spark"                 %% "spark-core"              % SparkVer
+    val sparkCore =   "org.apache.spark"                 %% "spark-core"              % SparkVer excludeAll
+      (ExclusionRule("io.netty", "netty-all"))
+
     val sparkMl   =   "org.apache.spark"                 %% "spark-mllib"             % SparkMlVer
     val sparkCassandraConnector = "com.datastax.spark"   %% "spark-cassandra-connector" % SparkCassandraVer
   }

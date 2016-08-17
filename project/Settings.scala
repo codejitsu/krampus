@@ -7,6 +7,7 @@ import com.websudos.phantom.sbt.PhantomSbtPlugin
 import sbt._
 import sbt.Keys._
 import scala.language.postfixOps
+import sbtassembly.AssemblyPlugin.autoImport._
 
 object Settings extends Build {
   lazy val buildSettings = Seq(
@@ -74,5 +75,28 @@ object Settings extends Build {
   lazy val krampusProcessorSettings = Seq(
     javaOptions += "-Xmx4G",
     javaOptions += "-Xms4G"
+  )
+
+  lazy val sparkAppSettings = Seq(
+    // Drop these jars
+    excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
+      val excludes = Set(
+        "javax.inject-2.4.0-b34.jar",
+        "aopalliance-1.0.jar",
+        "commons-beanutils-core-1.8.0.jar",
+        "commons-beanutils-1.8.0.jar",
+        "logback-classic-1.1.7.jar"
+      )
+      cp filter { jar => excludes(jar.data.getName) }
+    },
+
+    assemblyMergeStrategy in assembly := {
+      case PathList("org", "apache", "spark", "unused", "UnusedStubClass.class") => MergeStrategy.discard
+      case old if old.endsWith("package-info.class") => MergeStrategy.first
+      case old if old.endsWith("io.netty.versions.properties") => MergeStrategy.first
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    }
   )
 }
