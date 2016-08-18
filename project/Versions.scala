@@ -38,4 +38,5 @@ object Versions {
   val SparkVer                = "2.0.0"
   val SparkMlVer              = "2.0.0"
   val SparkCassandraVer       = "2.0.0-M1"
+  val GuavaVer                = "19.0"
 }
