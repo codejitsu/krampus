@@ -4,6 +4,8 @@ package krampus.score.actor
 
 import akka.actor.{Actor, Cancellable, Props}
 import com.typesafe.scalalogging.LazyLogging
+import krampus.score.ml.ML._
+import org.apache.spark.mllib.clustering.KMeansModel
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.reflect.ClassTag
@@ -11,6 +13,8 @@ import scala.reflect.ClassTag
 class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
                                  filter: T => Boolean,
                                  statsd: StatsD,
+                                 model: Option[KMeansModel],
+                                 epsilon: Option[Double],
                                  startValue: Int = 0) extends Actor with LazyLogging {
   private[this] var counter: Int = startValue
 
@@ -24,7 +28,7 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
     case Flush =>
       logger.info(s"Current count '$name': $counter")
 
-      //TODO check current counter against model
+      checkCurrentCounter()
 
       counter = startValue
 
@@ -34,6 +38,17 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
 
     case x =>
       logger.error(s"Unexpected message: $x")
+  }
+
+  def checkCurrentCounter(): Unit = model match {
+    case Some(kmeansModel) =>
+      if (probablyAnomaly(kmeansModel, counter, epsilon, name)) {
+        logger.info(s"Anomaly detected on channel $name (value $counter)")
+
+        statsd.increment(s"$name-anomaly")
+      }
+
+    case _ =>
   }
 
   override def postStop(): Unit = {
@@ -46,6 +61,8 @@ object CounterActor {
   def props[T : ClassTag](name: String, flushInterval: FiniteDuration,
                           filter: T => Boolean,
                           statsd: StatsD,
+                          model: Option[KMeansModel],
+                          epsilon: Option[Double],
                           startValue: Int = 0): Props =
-    Props(new CounterActor[T](name, flushInterval, filter, statsd, startValue))
+    Props(new CounterActor[T](name, flushInterval, filter, statsd, model, epsilon, startValue))
 }

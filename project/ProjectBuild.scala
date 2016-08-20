@@ -116,7 +116,7 @@ object Dependencies {
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
   val krampusProcessor = Seq(config, akka, akkaLogger, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback)
-  val krampusScoreApp = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
+  val krampusScoreApp = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, sparkCore, sparkMl)
   val krampusSparkApp = Seq(config, sparkCore, sparkMl, sparkCassandraConnector, logging, logback, guava)
   val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging, logback, akkaLogging,
     webjarsPlay, webjarsAng, webjarsAngRoute, webjarsAngWebsocket, webjarsBootstrap)
