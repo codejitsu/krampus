@@ -97,6 +97,10 @@ object Settings extends Build {
       case x =>
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(x)
-    }
+    },
+
+    assemblyShadeRules in assembly := Seq(
+      ShadeRule.rename("com.google.**" -> "shadeio.@1").inAll
+    )
   )
 }
