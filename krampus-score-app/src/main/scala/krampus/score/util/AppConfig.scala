@@ -12,9 +12,9 @@ class AppConfig() {
 
   lazy val config: Config = ConfigFactory.load()
 
-  lazy val kafkaConfig: Config = config.getConfig("krampus.metrics-aggregator-app.kafka")
-  lazy val scoreConfig: Config = config.getConfig("krampus.metrics-aggregator-app.score")
-  lazy val systemName: String = config.getString("krampus.metrics-aggregator-app.system-name")
+  lazy val kafkaConfig: Config = config.getConfig("krampus.score-app.kafka")
+  lazy val scoreConfig: Config = config.getConfig("krampus.score-app.score")
+  lazy val systemName: String = config.getString("krampus.score-app.system-name")
 }
 
 object AppConfig {

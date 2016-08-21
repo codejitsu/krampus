@@ -89,11 +89,8 @@ object Dependencies {
 
     val webjarsBootstrap =    "org.webjars"               % "bootstrap"               % WebjarsBootstrapVer
 
-    val sparkCore =   "org.apache.spark"                 %% "spark-core"              % SparkVer excludeAll
-      (ExclusionRule("io.netty", "netty-all"))
-
+    val sparkCore =   "org.apache.spark"                 %% "spark-core"              % SparkVer
     val sparkMl   =   "org.apache.spark"                 %% "spark-mllib"             % SparkMlVer
-
     val sparkCassandraConnector = "com.datastax.spark"   %% "spark-cassandra-connector" % SparkCassandraVer
 
     val guava =               "com.google.guava"          % "guava"                   % GuavaVer
@@ -116,8 +113,10 @@ object Dependencies {
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
   val krampusProcessor = Seq(config, akka, akkaLogger, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback)
-  val krampusScoreApp = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, sparkCore, sparkMl)
-  val krampusSparkApp = Seq(config, sparkCore, sparkMl, sparkCassandraConnector, logging, logback, guava)
+  val krampusScoreApp = Seq(config, akka, akkaStreams,
+    reactiveKafka excludeAll (ExclusionRule("org.slf4j", "log4j-over-slf4j")), logging, logback, sparkCore, sparkMl)
+  val krampusSparkApp = Seq(config,
+    sparkCore excludeAll (ExclusionRule("io.netty", "netty-all")), sparkMl, sparkCassandraConnector, logging, logback, guava)
   val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging, logback, akkaLogging,
     webjarsPlay, webjarsAng, webjarsAngRoute, webjarsAngWebsocket, webjarsBootstrap)
 }

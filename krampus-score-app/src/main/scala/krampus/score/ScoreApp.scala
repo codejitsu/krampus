@@ -10,7 +10,7 @@ import krampus.score.util.AppConfig
 /**
   * Read Kafka Events and push all aggregated data into graphite.
   */
-object AggregatorApp extends LazyLogging {
+object ScoreApp extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
     logger.info("Starting krampus score app...")

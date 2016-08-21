@@ -22,12 +22,12 @@ object ML extends LazyLogging {
     val eps = epsilon.getOrElse(0.1)
 
     if (predicted(0) * eps < dist) {
-      logger.debug(s"Anomaly detected $label: counter = $counter, predicted = $predicted, dist = $dist, " +
+      logger.info(s"Anomaly detected $label: counter = $counter, predicted = ${predicted(0)}, dist = $dist, " +
         s"eps = $eps, distance > predicted * eps? TRUE")
 
       true
     } else {
-      logger.debug(s"NO anomaly detected $label: counter = $counter, predicted = $predicted, dist = $dist, " +
+      logger.info(s"NO anomaly detected $label: counter = $counter, predicted = ${predicted(0)}, dist = $dist, " +
         s"eps = $eps, distance > predicted * eps? FALSE")
 
       false
