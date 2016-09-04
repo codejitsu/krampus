@@ -5,6 +5,7 @@ package krampus.processor.actor
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.routing.FromConfig
 import com.typesafe.config.Config
+import krampus.actor.protocol._
 import krampus.entity.WikiEdit
 import krampus.processor.cassandra.CassandraDao
 

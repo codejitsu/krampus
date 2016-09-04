@@ -9,6 +9,7 @@ import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
 import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink, ReactiveKafka}
 import com.typesafe.config.Config
 import kafka.serializer.Decoder
+import krampus.actor.protocol.{InitializeQueueListener, QueueListenerInitialized}
 import krampus.queue.RawKafkaMessage
 
 import scala.concurrent.duration._

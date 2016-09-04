@@ -105,11 +105,11 @@ object Dependencies {
 
   import CompileDeps._
 
-  val test = Seq(TestDeps.scalatest, TestDeps.scalacheck)
+  val test = Seq(TestDeps.scalatest, TestDeps.scalacheck, TestDeps.akkatest)
 
   /** Module deps */
 
-  val krampusCommon = Seq(config, joda, jodaConvert, avro) ++ test
+  val krampusCommon = Seq(config, joda, jodaConvert, avro, akka) ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
   val krampusProcessor = Seq(config, akka, akkaLogger, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback)

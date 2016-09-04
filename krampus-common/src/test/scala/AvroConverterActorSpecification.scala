@@ -1,12 +1,14 @@
 // Copyright (C) 2016, codejitsu.
 
-package krampus.processor.actor
+package krampus.actor
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
+import krampus.actor.protocol.MessageConverted
+import krampus.entity.CommonGenerators.rawKafkaMessageGenerator
+import krampus.processor.actor.AvroConverterActor
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
-import krampus.entity.CommonGenerators._
 
 class AvroConverterActorSpecification() extends TestKit(ActorSystem("AvroConverterActorSpecification")) with ImplicitSender
   with FunSuiteLike with Matchers with GeneratorDrivenPropertyChecks with BeforeAndAfterAll {

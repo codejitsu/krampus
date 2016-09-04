@@ -6,6 +6,7 @@ import java.util
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
+import krampus.actor.protocol.StartStreamProcessor
 import krampus.entity.CommonGenerators._
 import krampus.entity.WikiEdit
 import krampus.processor.util.AppConfig

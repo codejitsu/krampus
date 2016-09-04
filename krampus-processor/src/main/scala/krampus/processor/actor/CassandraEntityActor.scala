@@ -3,6 +3,7 @@
 package krampus.processor.actor
 
 import akka.actor.{Actor, ActorLogging, Props}
+import krampus.actor.protocol.{InvalidEntityType, Store, StoreResult, Stored}
 import krampus.processor.cassandra.CassandraDao
 
 import scala.reflect.ClassTag

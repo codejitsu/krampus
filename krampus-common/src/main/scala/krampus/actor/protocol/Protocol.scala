@@ -1,6 +1,6 @@
 // Copyright (C) 2016, codejitsu.
 
-package krampus.processor.actor
+package krampus.actor.protocol
 
 import akka.actor.ActorRef
 import krampus.entity.WikiEdit

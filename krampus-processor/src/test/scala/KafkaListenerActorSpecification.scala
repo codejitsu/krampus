@@ -6,6 +6,7 @@ import java.util
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
+import krampus.actor.protocol.InitializeQueueListener
 import krampus.entity.CommonGenerators._
 import krampus.processor.util.AppConfig
 import krampus.queue.RawKafkaMessage

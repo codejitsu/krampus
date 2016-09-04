@@ -5,6 +5,7 @@ package krampus.processor
 import akka.actor.{ActorRef, ActorSystem, Cancellable, PoisonPill}
 import akka.pattern.ask
 import com.typesafe.scalalogging.LazyLogging
+import krampus.actor.protocol.{CountInserted, GetCountInserted, Insert, StartStreamProcessor}
 import krampus.entity.WikiEdit
 import krampus.processor.actor._
 import krampus.processor.cassandra.ProductionCassandraDatabaseProvider

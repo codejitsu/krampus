@@ -4,6 +4,7 @@ package krampus.processor.actor
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
+import krampus.actor.protocol.{Insert, Stored}
 import krampus.entity.CommonGenerators._
 import krampus.processor.cassandra.{EmbeddedCassandraDatabaseProvider, WithEmbeddedCassandra}
 import krampus.processor.util.AppConfig
