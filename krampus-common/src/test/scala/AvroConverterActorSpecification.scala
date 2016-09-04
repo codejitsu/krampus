@@ -6,7 +6,6 @@ import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import krampus.actor.protocol.MessageConverted
 import krampus.entity.CommonGenerators.rawKafkaMessageGenerator
-import krampus.processor.actor.AvroConverterActor
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 

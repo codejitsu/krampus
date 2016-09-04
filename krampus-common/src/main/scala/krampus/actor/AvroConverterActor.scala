@@ -1,6 +1,6 @@
 // Copyright (C) 2016, codejitsu.
 
-package krampus.processor.actor
+package krampus.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import krampus.actor.protocol.MessageConverted
