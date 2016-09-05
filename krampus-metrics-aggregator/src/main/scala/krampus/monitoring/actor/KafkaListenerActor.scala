@@ -9,9 +9,13 @@ import com.softwaremill.react.kafka.KafkaMessages.KafkaMessage
 import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink, ReactiveKafka}
 import com.typesafe.scalalogging.LazyLogging
 import kafka.serializer.Decoder
-import krampus.monitoring.util.AppConfig
+import krampus.actor.AvroConverterActor
+import krampus.actor.protocol.MessageConverted
+import krampus.monitoring.util.{AggregationMessage, AppConfig}
+import krampus.monitoring.util.AppConfig.ConfigDuration
 import krampus.queue.RawKafkaMessage
 
+import scala.collection.mutable
 import scala.concurrent.duration._
 
 /**
@@ -36,14 +40,37 @@ class KafkaListenerActor(config: AppConfig) extends Actor with LazyLogging {
     }
   ).commitInterval(1200 milliseconds)
 
-  private[this] lazy val avroConverter = context.actorOf(AvroConverterActor.props(config), "avro-converter")
+  private[this] lazy val statsdConnection =
+    (config.aggregationConfig.getString("statsd.host"), config.aggregationConfig.getInt("statsd.port"))
+
+  private[this] val statsdGateway =
+    new StatsD(context, statsdConnection._1, statsdConnection._2,
+      packetBufferSize = config.aggregationConfig.getInt("statsd.packet-buffer-size"))
+
+  private[this] lazy val allCounter =
+    context.actorOf(CounterActor.props[AggregationMessage]("all-messages",
+      config.aggregationConfig.getMillis("flush-interval-ms"),
+      _ => true, statsdGateway), "all-messages-counter")
+
+  private[this] lazy val counters: mutable.Map[String, ActorRef] = mutable.Map.empty
+
+  private[this] lazy val avroConverter = context.actorOf(AvroConverterActor.props(self), "avro-converter")
 
   override def receive: Receive = {
     case InitializeListener =>
       initListener()
       context.parent ! ListenerInitialized
 
-    case MessageConverted => // avro converter successfully converted message
+    case MessageConverted(entry) => // avro converter successfully converted message
+      val aggMsg = AggregationMessage(entry)
+
+      val channelCounter = counters.getOrElseUpdate(entry.channel,
+        context.actorOf(CounterActor.props[AggregationMessage](entry.channel,
+          config.aggregationConfig.getMillis("flush-interval-ms"),
+          e => e.msg.channel == entry.channel, statsdGateway), s"${entry.channel.drop(1)}-counter"))
+
+      allCounter ! aggMsg
+      channelCounter ! aggMsg
 
     case Terminated(_) =>
       logger.error("The consumer has been terminated, restarting the whole stream...")
