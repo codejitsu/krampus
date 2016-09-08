@@ -4,8 +4,7 @@ package modules
 
 import javax.inject._
 
-import actors.AvroConverterActor
-import actors.Messages.KafkaRawDataMessage
+import actors.ChannelPublisherActor
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
@@ -13,6 +12,7 @@ import com.google.inject.AbstractModule
 import com.softwaremill.react.kafka.KafkaMessages._
 import com.softwaremill.react.kafka.{ConsumerProperties, PublisherWithCommitSink, ReactiveKafka}
 import kafka.serializer.Decoder
+import krampus.queue.RawKafkaMessage
 import utils.AppConfig
 
 import scala.concurrent.duration._
@@ -40,14 +40,14 @@ class KafkaProcessorActors @Inject()(system: ActorSystem) extends ApplicationAct
   private[this] val publisher: PublisherWithCommitSink[Array[Byte]] =
     reactiveKafka.consumeWithOffsetSink(consumerProperties)(system)
 
-  private[this] val avroConverter = system.actorOf(AvroConverterActor.props(config))
+  private[this] val channelPublisher = system.actorOf(ChannelPublisherActor.props())
 
   Source.fromPublisher(publisher.publisher)
     .map(processMessage)
     .to(publisher.offsetCommitSink).run()
 
   private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
-    avroConverter ! KafkaRawDataMessage(msg.message())
+    channelPublisher ! RawKafkaMessage(msg.key(), msg.message())
 
     msg
   }
