@@ -4,7 +4,7 @@ package krampus.processor.actor
 
 import krampus.processor.util.AppConfig
 import akka.actor.{Actor, ActorLogging, Props}
-import krampus.actor.AvroConverterActor
+import krampus.actor.{AvroConverterActor, KafkaListenerActor}
 import krampus.actor.protocol.{InitializeQueueListener, MessageConverted, QueueListenerInitialized, StartStreamProcessor}
 import krampus.entity.WikiEdit
 import krampus.queue.RawKafkaMessage
