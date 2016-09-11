@@ -1,15 +1,14 @@
 // Copyright (C) 2016, codejitsu.
 
-package krampus.processor.actor
+package krampus.actor
 
 import java.util
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
-import krampus.actor.KafkaListenerActor
+import com.typesafe.config.{Config, ConfigFactory}
 import krampus.actor.protocol.InitializeQueueListener
 import krampus.entity.CommonGenerators._
-import krampus.processor.util.AppConfig
 import krampus.queue.RawKafkaMessage
 import net.manub.embeddedkafka.EmbeddedKafka
 import org.apache.kafka.clients.producer.{ProducerRecord, RecordMetadata}
@@ -68,14 +67,14 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
       val messages = ListBuffer.empty[RawKafkaMessage]
 
       def process(msg: RawKafkaMessage): Unit = messages += msg
-      val cnf = config
+      val cnf = config.getConfig("krampus.app.kafka")
 
-      val actor = system.actorOf(KafkaListenerActor.props(cnf.kafkaConfig, process))
+      val actor = system.actorOf(KafkaListenerActor.props(cnf, process))
       actor ! InitializeQueueListener
 
       val futures = ListBuffer.empty[Future[RecordMetadata]]
       forAll(rawKafkaMessageGenerator) { case (rawMessage, _) =>
-        futures += Future { kafkaProducer.send(new ProducerRecord(cnf.topic, rawMessage)).get() }
+        futures += Future { kafkaProducer.send(new ProducerRecord(cnf.getString("topic"), rawMessage)).get() }
       }
 
       whenReady(Future.sequence(futures)) { case res =>
@@ -89,5 +88,5 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
     }
   }
 
-  def config: AppConfig = new AppConfig("cassandra-processor-app")
+  def config: Config = ConfigFactory.load()
 }

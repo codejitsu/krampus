@@ -105,7 +105,7 @@ object Dependencies {
 
   import CompileDeps._
 
-  val test = Seq(TestDeps.scalatest, TestDeps.scalacheck, TestDeps.akkatest)
+  val test = Seq(TestDeps.scalatest, TestDeps.scalacheck, TestDeps.akkatest, TestDeps.embeddedKafka)
 
   /** Module deps */
 

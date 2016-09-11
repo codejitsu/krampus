@@ -1,12 +1,13 @@
 // Copyright (C) 2016, codejitsu.
 
-package krampus.processor.actor
+package krampus.actor
 
 import akka.util.Timeout
 import net.manub.embeddedkafka.EmbeddedKafkaConfig
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.time.{Millis, Seconds, Span}
+
 import scala.concurrent.duration._
 
 trait EmbeddedGeneratorDrivenKafkaConfig extends PatienceConfiguration {
