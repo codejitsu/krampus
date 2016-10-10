@@ -8,6 +8,7 @@ import com.typesafe.scalalogging.LazyLogging
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.reflect.ClassTag
 
+//TODO add test
 class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
                                  filter: T => Boolean,
                                  statsd: StatsD,
@@ -16,6 +17,9 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
+  case object Flush
+
+  //TODO move this outside the actor
   val task: Option[Cancellable] = Some(context.system.scheduler.schedule(Duration.Zero, flushInterval) {
     self ! Flush
   })
