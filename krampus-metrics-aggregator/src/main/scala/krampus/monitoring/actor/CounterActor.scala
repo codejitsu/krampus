@@ -2,8 +2,9 @@
 
 package krampus.monitoring.actor
 
-import akka.actor.{Props, Cancellable, Actor}
+import akka.actor.{Actor, Cancellable, Props}
 import com.typesafe.scalalogging.LazyLogging
+import krampus.actor.StatsD
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.reflect.ClassTag

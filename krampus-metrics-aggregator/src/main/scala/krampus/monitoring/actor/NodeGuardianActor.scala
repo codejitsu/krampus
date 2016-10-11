@@ -4,11 +4,12 @@ package krampus.monitoring.actor
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import krampus.actor.protocol.{InitializeQueueListener, MessageConverted, QueueListenerInitialized, StartStreamProcessor}
-import krampus.actor.{AvroConverterActor, KafkaListenerActor}
+import krampus.actor.{AvroConverterActor, KafkaListenerActor, StatsD}
 import krampus.entity.WikiEdit
 import krampus.monitoring.util.{AggregationMessage, AppConfig}
 import krampus.queue.RawKafkaMessage
 import krampus.monitoring.util.AppConfig.ConfigDuration
+
 import scala.collection.mutable
 
 /**

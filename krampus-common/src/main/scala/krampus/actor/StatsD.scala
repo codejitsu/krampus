@@ -1,6 +1,6 @@
 // Copyright (C) 2016, codejitsu.
 
-package krampus.monitoring.actor
+package krampus.actor
 
 /*
 
@@ -32,8 +32,9 @@ import java.net._
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 import java.util.Random
-import org.slf4j.LoggerFactory
+
 import akka.actor._
+import org.slf4j.LoggerFactory
 
 /**
   * Client for sending stats to StatsD uses Akka to manage concurrency
@@ -44,6 +45,8 @@ import akka.actor._
   * @param multiMetrics If true, multiple stats will be sent in a single UDP packet
   * @param packetBufferSize If multiMetrics is true, this is the max buffer size before sending the UDP packet
   */
+
+//TODO add test
 class StatsD(context: ActorContext,
              host: String,
              port: Int,
