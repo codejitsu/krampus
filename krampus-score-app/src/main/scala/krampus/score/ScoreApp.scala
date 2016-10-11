@@ -4,7 +4,8 @@ package krampus.score
 
 import akka.actor.{ActorSystem, PoisonPill}
 import com.typesafe.scalalogging.LazyLogging
-import krampus.score.actor.{NodeGuardianActor, StartListener}
+import krampus.actor.protocol.StartStreamProcessor
+import krampus.score.actor.NodeGuardianActor
 import krampus.score.util.AppConfig
 
 /**
@@ -23,7 +24,7 @@ object ScoreApp extends LazyLogging {
 
     val guardian = system.actorOf(NodeGuardianActor.props(appConfig), "node-guardian")
 
-    guardian ! StartListener
+    guardian ! StartStreamProcessor
 
     system.registerOnTermination {
       guardian ! PoisonPill
