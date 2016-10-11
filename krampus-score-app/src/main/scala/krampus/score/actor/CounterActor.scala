@@ -4,6 +4,7 @@ package krampus.score.actor
 
 import akka.actor.{Actor, Cancellable, Props}
 import com.typesafe.scalalogging.LazyLogging
+import krampus.actor.StatsD
 import krampus.score.ml.ML._
 import org.apache.spark.mllib.clustering.KMeansModel
 

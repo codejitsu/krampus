@@ -5,7 +5,7 @@ package krampus.score.actor
 import java.io.File
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import krampus.actor.{AvroConverterActor, KafkaListenerActor}
+import krampus.actor.{AvroConverterActor, KafkaListenerActor, StatsD}
 import krampus.actor.protocol.{InitializeQueueListener, MessageConverted, QueueListenerInitialized, StartStreamProcessor}
 import krampus.entity.WikiEdit
 import krampus.queue.RawKafkaMessage
