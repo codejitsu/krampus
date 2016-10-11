@@ -43,6 +43,7 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
   }
 }
 
+//TODO move to commons.actor (metrics and score are using the same actors)
 object CounterActor {
   def props[T : ClassTag](name: String, flushInterval: FiniteDuration,
                           filter: T => Boolean,

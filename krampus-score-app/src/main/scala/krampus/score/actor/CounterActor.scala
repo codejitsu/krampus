@@ -20,6 +20,8 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
+  case object Flush
+
   val task: Option[Cancellable] = Some(context.system.scheduler.schedule(Duration.Zero, flushInterval) {
     self ! Flush
   })

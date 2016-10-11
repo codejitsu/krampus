@@ -5,7 +5,7 @@ package krampus.score.actor
 import java.io.File
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import krampus.actor.{AvroConverterActor, KafkaListenerActor => NewKafkaListenerActor}
+import krampus.actor.{AvroConverterActor, KafkaListenerActor}
 import krampus.actor.protocol.{InitializeQueueListener, MessageConverted, QueueListenerInitialized, StartStreamProcessor}
 import krampus.entity.WikiEdit
 import krampus.queue.RawKafkaMessage
@@ -45,7 +45,7 @@ class NodeGuardianActor(config: AppConfig) extends Actor with ActorLogging {
       _ => true, statsdGateway, None, None), "all-messages-counter")
 
   private[this] val avroConverter = context.actorOf(AvroConverterActor.props(self), "avro-converter")
-  private[this] val kafkaListener = context.actorOf(NewKafkaListenerActor.props(config.kafkaConfig, processKafkaMessage),
+  private[this] val kafkaListener = context.actorOf(KafkaListenerActor.props(config.kafkaConfig, processKafkaMessage),
     "kafka-listener")
 
   private[this] def processKafkaMessage(msg: RawKafkaMessage): Unit = avroConverter ! msg

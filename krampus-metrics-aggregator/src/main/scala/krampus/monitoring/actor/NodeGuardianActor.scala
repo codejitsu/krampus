@@ -47,7 +47,7 @@ class NodeGuardianActor(config: AppConfig) extends Actor with ActorLogging {
       log.debug(s"Message converted: $msg")
       onMessage(msg)
   }
-  
+
   def onMessage(msg: WikiEdit): Unit = {
     val aggMsg = AggregationMessage(msg)
 
