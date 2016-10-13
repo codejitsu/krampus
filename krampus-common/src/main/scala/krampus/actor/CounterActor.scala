@@ -6,11 +6,13 @@ import akka.actor.{Actor, ActorLogging, Cancellable, Props}
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.reflect.ClassTag
+import scala.util.control.NonFatal
 
 //TODO add test
 class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
                                  filter: T => Boolean,
                                  statsd: StatsD,
+                                 onFlush: Int => Unit,
                                  startValue: Int = 0) extends Actor with ActorLogging {
   private[this] var counter: Int = startValue
 
@@ -26,6 +28,12 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
   override def receive: Receive = {
     case Flush =>
       log.info(s"Current count '$name': $counter")
+
+      try { onFlush(counter) }
+      catch {
+        case NonFatal(t) => log.error(t, "Error by 'onFlush'.")
+      }
+
       counter = startValue
 
     case msg : T if filter(msg) =>
@@ -42,11 +50,11 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
   }
 }
 
-//TODO move to commons.actor (metrics and score are using the same actors)
 object CounterActor {
   def props[T : ClassTag](name: String, flushInterval: FiniteDuration,
                           filter: T => Boolean,
                           statsd: StatsD,
+                          onFlush: Int => Unit,
                           startValue: Int = 0): Props =
-    Props(new CounterActor[T](name, flushInterval, filter, statsd, startValue))
+    Props(new CounterActor[T](name, flushInterval, filter, statsd, onFlush, startValue))
 }

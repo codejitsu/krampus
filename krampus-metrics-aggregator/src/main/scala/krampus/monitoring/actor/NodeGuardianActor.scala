@@ -26,7 +26,7 @@ class NodeGuardianActor(config: AppConfig) extends Actor with ActorLogging {
   private[this] lazy val allCounter =
     context.actorOf(CounterActor.props[AggregationMessage]("all-messages",
       config.aggregationConfig.getMillis("flush-interval-ms"),
-      _ => true, statsdGateway), "all-messages-counter")
+      _ => true, statsdGateway, onFlush = _ => ()), "all-messages-counter")
 
   private[this] lazy val counters: mutable.Map[String, ActorRef] = mutable.Map.empty
 
@@ -55,7 +55,7 @@ class NodeGuardianActor(config: AppConfig) extends Actor with ActorLogging {
     val channelCounter = counters.getOrElseUpdate(msg.channel,
       context.actorOf(CounterActor.props[AggregationMessage](msg.channel,
         config.aggregationConfig.getMillis("flush-interval-ms"),
-        e => e.msg.channel == msg.channel, statsdGateway), s"${msg.channel.drop(1)}-counter"))
+        e => e.msg.channel == msg.channel, statsdGateway, onFlush = _ => ()), s"${msg.channel.drop(1)}-counter"))
 
     allCounter ! aggMsg
     channelCounter ! aggMsg
