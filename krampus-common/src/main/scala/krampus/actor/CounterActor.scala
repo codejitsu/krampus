@@ -1,10 +1,8 @@
 // Copyright (C) 2016, codejitsu.
 
-package krampus.monitoring.actor
+package krampus.actor
 
-import akka.actor.{Actor, Cancellable, Props}
-import com.typesafe.scalalogging.LazyLogging
-import krampus.actor.StatsD
+import akka.actor.{Actor, ActorLogging, Cancellable, Props}
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.reflect.ClassTag
@@ -13,7 +11,7 @@ import scala.reflect.ClassTag
 class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
                                  filter: T => Boolean,
                                  statsd: StatsD,
-                                 startValue: Int = 0) extends Actor with LazyLogging {
+                                 startValue: Int = 0) extends Actor with ActorLogging {
   private[this] var counter: Int = startValue
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,7 +25,7 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
 
   override def receive: Receive = {
     case Flush =>
-      logger.info(s"Current count '$name': $counter")
+      log.info(s"Current count '$name': $counter")
       counter = startValue
 
     case msg : T if filter(msg) =>
@@ -35,7 +33,7 @@ class CounterActor[T : ClassTag](name: String, flushInterval: FiniteDuration,
       statsd.increment(name)
 
     case x =>
-      logger.error(s"Unexpected message: $x")
+      log.error(s"Unexpected message: $x")
   }
 
   override def postStop(): Unit = {
