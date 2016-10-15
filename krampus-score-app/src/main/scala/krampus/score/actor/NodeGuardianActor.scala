@@ -13,6 +13,8 @@ import krampus.score.util.{AppConfig, MonitoringMessage}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.mllib.clustering.KMeansModel
 import krampus.score.util.AppConfig._
+import krampus.actor.CounterActor
+import krampus.score.ml.ML._
 
 import scala.collection.{Map, mutable}
 
@@ -42,7 +44,7 @@ class NodeGuardianActor(config: AppConfig) extends Actor with ActorLogging {
   private[this] lazy val allCounter =
     context.actorOf(CounterActor.props[MonitoringMessage]("all-messages",
       config.scoreConfig.getMillis("flush-interval-ms"),
-      _ => true, statsdGateway, None, None), "all-messages-counter")
+      _ => true, statsdGateway, count => ()))
 
   private[this] val avroConverter = context.actorOf(AvroConverterActor.props(self), "avro-converter")
   private[this] val kafkaListener = context.actorOf(KafkaListenerActor.props(config.kafkaConfig, processKafkaMessage),
@@ -97,10 +99,25 @@ class NodeGuardianActor(config: AppConfig) extends Actor with ActorLogging {
   def onMessage(msg: WikiEdit): Unit = {
     val monMsg = MonitoringMessage(msg)
 
+    def checkCurrentCounter(model: Option[KMeansModel])(counter: Int): Unit = {
+      val name = msg.channel
+
+      model match {
+        case Some(kmeansModel) =>
+          if (probablyAnomaly(kmeansModel, counter, Option(epsilon), name)) {
+            log.info(s"Anomaly detected on channel $name (value $counter)")
+
+            statsdGateway.increment(s"$name-anomaly")
+          }
+
+        case _ =>
+      }
+    }
+
     val channelCounter = counters.getOrElseUpdate(msg.channel,
       context.actorOf(CounterActor.props[MonitoringMessage](msg.channel,
         config.scoreConfig.getMillis("flush-interval-ms"),
-        e => e.msg.channel == msg.channel, statsdGateway, models.get(msg.channel), Option(epsilon)),
+        e => e.msg.channel == msg.channel, statsdGateway, checkCurrentCounter(models.get(msg.channel))),
         s"${msg.channel.drop(1)}-counter"))
 
     allCounter ! monMsg
