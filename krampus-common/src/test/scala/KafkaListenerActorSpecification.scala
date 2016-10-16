@@ -54,7 +54,7 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
 
   private val kafkaPatienceConfig: PatienceConfig =
     PatienceConfig(
-      timeout = scaled(Span(60, Seconds)), //scalastyle:ignore
+      timeout = scaled(Span(120, Seconds)), //scalastyle:ignore
       interval = scaled(Span(300, Millis)) //scalastyle:ignore
     )
 

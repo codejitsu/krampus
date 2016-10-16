@@ -10,7 +10,7 @@ object Versions {
   val JodaTimeVer             = "2.9.1"
   val JodaTimeConvertVer      = "1.2"
 
-  val ScalaTestVer            = "2.1.7"
+  val ScalaTestVer            = "2.2.6"
   val ScalaCheckVer           = "1.11.4"
 
   val AkkaStreamsVer          = "2.0.2"
