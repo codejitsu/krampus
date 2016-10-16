@@ -33,7 +33,7 @@ object Versions {
   val WebjarsAngWebsocketVer  = "1.0.14"
   val WebjarsBootstrapVer     = "2.3.2"
 
-  val PhantomVer              = "1.27.0"
+  val PhantomVer              = "1.28.16"
 
   val SparkVer                = "2.0.0"
   val SparkMlVer              = "2.0.0"
