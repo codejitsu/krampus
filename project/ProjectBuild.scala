@@ -71,7 +71,7 @@ object Dependencies {
       (ExclusionRule("com.typesafe.akka", "akka-actor_2.11"), ExclusionRule("com.typesafe", "config"))
 
     val akka          = "com.typesafe.akka"              %% "akka-actor"               % AkkaVer
-    val akkaLogger    = "com.typesafe.akka"               % "akka-slf4j_2.11"          % AkkaSlf4jVer
+    val akkaLogger    = "com.typesafe.akka"              %% "akka-slf4j"               % AkkaSlf4jVer
     val jackson       = "org.json4s"                     %% "json4s-jackson"           % Jackson4sVer
     val avro          = "org.apache.avro"                 % "avro"                     % AvroVer
     val kafkaClients  = "org.apache.kafka"                % "kafka-clients"            % KafkaClientsVer
@@ -79,8 +79,6 @@ object Dependencies {
       (ExclusionRule(organization = "com.typesafe.akka"))
 
     val phantom       = "com.websudos"                   %% "phantom-dsl"              % PhantomVer
-
-    val akkaLogging  =        "com.typesafe.akka"        %% "akka-slf4j"              % AkkaLoggingVer
 
     val webjarsPlay =         "org.webjars"              %% "webjars-play"            % WebjarsPlayVer
     val webjarsAng =          "org.webjars"               % "angularjs"               % WebjarsAngVer
@@ -111,12 +109,12 @@ object Dependencies {
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro, akka, akkaLogger, akkaStreams, reactiveKafka) ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
-  val krampusProcessor = Seq(config, akka, akkaLogger, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
+  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback)
   val krampusScoreApp = Seq(config, akka, akkaStreams,
     reactiveKafka excludeAll (ExclusionRule("org.slf4j", "log4j-over-slf4j")), logging, logback, sparkCore, sparkMl)
   val krampusSparkApp = Seq(config,
     sparkCore excludeAll (ExclusionRule("io.netty", "netty-all")), sparkMl, sparkCassandraConnector, logging, logback, guava)
-  val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging, akkaLogging,
+  val krampusWebApp = Seq(akka, akkaStreams, reactiveKafka, logging,
     webjarsPlay, webjarsAng, webjarsAngRoute, webjarsAngWebsocket, webjarsBootstrap)
 }

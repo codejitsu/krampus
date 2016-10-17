@@ -10,13 +10,12 @@ object Versions {
   val JodaTimeVer             = "2.9.4"
   val JodaTimeConvertVer      = "1.8"
 
-  val ScalaTestVer            = "2.2.6"
-  val ScalaCheckVer           = "1.11.4"
+  val ScalaTestVer            = "2.2.6" //
+  val ScalaCheckVer           = "1.11.4" //
 
-  val AkkaStreamsVer          = "2.0.2"
-  val AkkaVer                 = "2.4.1"
-  val AkkaLoggingVer          = "2.4.0"
-  val AkkaSlf4jVer            = "2.4.1"
+  val AkkaStreamsVer          = "2.0.2" //
+  val AkkaVer                 = "2.4.11"
+  val AkkaSlf4jVer            = "2.4.11"
   val Jackson4sVer            = "3.2.11"
 
   val AvroVer                 = "1.7.7"
