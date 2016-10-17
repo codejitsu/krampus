@@ -7,8 +7,8 @@ object Versions {
   val TypesafeConfigVer       = "1.3.1"
   val TypesafeLoggingVer      = "3.5.0"
 
-  val JodaTimeVer             = "2.9.1"
-  val JodaTimeConvertVer      = "1.2"
+  val JodaTimeVer             = "2.9.4"
+  val JodaTimeConvertVer      = "1.8"
 
   val ScalaTestVer            = "2.2.6"
   val ScalaCheckVer           = "1.11.4"
