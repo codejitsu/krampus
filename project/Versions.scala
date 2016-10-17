@@ -4,7 +4,7 @@ object Versions {
   val ScalaVer                = "2.11.6"
   val JDKVer                  = "1.8"
 
-  val TypesafeConfigVer       = "1.3.0"
+  val TypesafeConfigVer       = "1.3.1"
   val TypesafeLoggingVer      = "3.5.0"
 
   val JodaTimeVer             = "2.9.1"
