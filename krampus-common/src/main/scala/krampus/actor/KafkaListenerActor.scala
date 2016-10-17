@@ -42,9 +42,10 @@ class KafkaListenerActor(config: Config, process: RawKafkaMessage => Unit) exten
 
   override def receive: Receive = {
     case InitializeQueueListener =>
+      val sndr: ActorRef = sender
       log.info("Received InitializeListener message.")
       initListener()
-      context.parent ! QueueListenerInitialized
+      sndr ! QueueListenerInitialized
 
     case Terminated(_) =>
       log.error("The consumer has been terminated, restarting the whole stream...")

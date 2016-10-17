@@ -7,7 +7,7 @@ import java.util
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import krampus.actor.EmbeddedGeneratorDrivenKafkaConfig
-import krampus.actor.protocol.StartStreamProcessor
+import krampus.actor.protocol.{StartStreamProcessor, StreamProcessorInitialized}
 import krampus.entity.CommonGenerators._
 import krampus.entity.WikiEdit
 import krampus.processor.util.AppConfig
@@ -17,10 +17,12 @@ import org.apache.kafka.clients.producer.{ProducerRecord, RecordMetadata}
 import org.apache.kafka.common.serialization.Serializer
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamProcessorActorSpecification"))
   with ImplicitSender
@@ -51,8 +53,18 @@ class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamPro
   }
 
   val kafkaProducer = aKafkaProducer[RawKafkaMessage]
+  implicit val kafkaConf = embeddedKafkaConfig
 
   override def afterAll: Unit = TestKit.shutdownActorSystem(system)
+
+  private val streamPatienceConfig: PatienceConfig =
+    PatienceConfig(
+      timeout = scaled(Span(300, Seconds)), //scalastyle:ignore
+      interval = scaled(Span(600, Millis)) //scalastyle:ignore
+    )
+
+  implicit override val patienceConfig: PatienceConfig = streamPatienceConfig
+  val actorTimeout = 300 seconds
 
   test("StreamProcessorActor onMessage function receives deserialized kafka messages") {
     withRunningKafka {
@@ -63,6 +75,8 @@ class StreamProcessorActorSpecification() extends TestKit(ActorSystem("StreamPro
       val cnf = config
       val actor = system.actorOf(StreamProcessorActor.props(cnf, process))
       actor ! StartStreamProcessor
+
+      expectMsg(actorTimeout, StreamProcessorInitialized)
 
       var counter = 0
       val futures = ListBuffer.empty[Future[RecordMetadata]]

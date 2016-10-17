@@ -16,5 +16,5 @@ trait EmbeddedGeneratorDrivenKafkaConfig extends PatienceConfiguration {
   implicit val embeddedKafkaConfig = EmbeddedKafkaConfig.defaultConfig.copy(customBrokerProperties = Map("zookeeper.connection.timeout.ms" -> "30000"))
   implicit override val generatorDrivenConfig = PropertyCheckConfig(maxSize = 10) // scalastyle:ignore
   implicit override val patienceConfig = PatienceConfig(timeout = scaled(Span(15, Seconds)), interval = scaled(Span(100, Millis))) // scalastyle:ignore
-  implicit val timeout: Timeout = Timeout(30 seconds)
+  implicit val timeout: Timeout = Timeout(120 seconds)
 }

@@ -12,6 +12,7 @@ sealed trait Protocol
 case object StartStreamProcessor extends Protocol
 case object InitializeQueueListener extends Protocol
 case object QueueListenerInitialized extends Protocol
+case object StreamProcessorInitialized extends Protocol
 final case class MessageConverted(msg: WikiEdit) extends Protocol
 
 final case class Insert(msg: WikiEdit) extends Protocol

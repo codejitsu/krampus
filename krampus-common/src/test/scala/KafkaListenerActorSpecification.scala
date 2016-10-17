@@ -7,7 +7,7 @@ import java.util
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import com.typesafe.config.{Config, ConfigFactory}
-import krampus.actor.protocol.InitializeQueueListener
+import krampus.actor.protocol.{InitializeQueueListener, QueueListenerInitialized}
 import krampus.entity.CommonGenerators._
 import krampus.queue.RawKafkaMessage
 import net.manub.embeddedkafka.EmbeddedKafka
@@ -20,6 +20,7 @@ import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListenerActorSpecification"))
   with ImplicitSender
@@ -54,9 +55,11 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
 
   private val kafkaPatienceConfig: PatienceConfig =
     PatienceConfig(
-      timeout = scaled(Span(120, Seconds)), //scalastyle:ignore
-      interval = scaled(Span(300, Millis)) //scalastyle:ignore
+      timeout = scaled(Span(240, Seconds)), //scalastyle:ignore
+      interval = scaled(Span(600, Millis)) //scalastyle:ignore
     )
+
+  val actorTimeout = 300 seconds
 
   implicit override val patienceConfig: PatienceConfig = kafkaPatienceConfig
 
@@ -71,6 +74,8 @@ class KafkaListenerActorSpecification() extends TestKit(ActorSystem("KafkaListen
 
       val actor = system.actorOf(KafkaListenerActor.props(cnf, process))
       actor ! InitializeQueueListener
+
+      expectMsg(actorTimeout, QueueListenerInitialized)
 
       val futures = ListBuffer.empty[Future[RecordMetadata]]
       forAll(rawKafkaMessageGenerator) { case (rawMessage, _) =>

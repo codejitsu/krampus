@@ -3,9 +3,9 @@
 package krampus.processor.actor
 
 import krampus.processor.util.AppConfig
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import krampus.actor.{AvroConverterActor, KafkaListenerActor}
-import krampus.actor.protocol.{InitializeQueueListener, MessageConverted, QueueListenerInitialized, StartStreamProcessor}
+import krampus.actor.protocol._
 import krampus.entity.WikiEdit
 import krampus.queue.RawKafkaMessage
 
@@ -21,11 +21,16 @@ class StreamProcessorActor(appConfig: AppConfig, onMessage: WikiEdit => Unit) ex
 
   override def receive: Receive = {
     case StartStreamProcessor =>
+      val sndr = sender()
       log.debug("Start initializing kafka listener.")
       kafkaListener ! InitializeQueueListener
+      context.become(converter(sndr))
+  }
 
+  def converter(back: ActorRef): Receive = {
     case QueueListenerInitialized =>
       log.debug("Kafka listener initialized.")
+      back ! StreamProcessorInitialized
 
     case MessageConverted(msg) =>
       log.debug(s"Message converted: $msg")
