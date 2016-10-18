@@ -16,7 +16,7 @@ object Versions {
   val AkkaStreamsVer          = "2.0.2" //
   val AkkaVer                 = "2.4.11"
   val AkkaSlf4jVer            = "2.4.11"
-  val Jackson4sVer            = "3.2.11"
+  val Jackson4sVer            = "3.4.1"
 
   val AvroVer                 = "1.7.7"
 
