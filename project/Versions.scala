@@ -18,7 +18,7 @@ object Versions {
   val AkkaSlf4jVer            = "2.4.11"
   val Jackson4sVer            = "3.4.1"
 
-  val AvroVer                 = "1.7.7"
+  val AvroVer                 = "1.8.1"
 
   val KafkaClientsVer         = "0.8.2.2"
   val EmbeddedKafkaVer        = "0.6.1"
