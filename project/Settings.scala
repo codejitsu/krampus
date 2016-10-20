@@ -46,7 +46,8 @@ object Settings extends Build {
     resolvers ++= Seq(
       Resolver.bintrayRepo("websudos", "oss-releases"),
       "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
-    )
+    ),
+    resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
   )
 
   lazy val commonSettings = defaultSettings ++ sbtavro.SbtAvro.avroSettings

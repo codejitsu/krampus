@@ -92,6 +92,7 @@ object Dependencies {
     val sparkCassandraConnector = "com.datastax.spark"   %% "spark-cassandra-connector" % SparkCassandraVer
 
     val guava =               "com.google.guava"          % "guava"                   % GuavaVer
+    val scalastic = "org.scalactic"                      %% "scalactic"               % ScalasticVer
   }
 
   object TestDeps {
@@ -107,7 +108,7 @@ object Dependencies {
 
   /** Module deps */
 
-  val krampusCommon = Seq(config, joda, jodaConvert, avro, akka, akkaLogger, akkaStreams, reactiveKafka) ++ test
+  val krampusCommon = Seq(config, joda, jodaConvert, avro, akka, akkaLogger, akkaStreams, reactiveKafka, scalastic) ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
   val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback)
