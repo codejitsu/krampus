@@ -47,7 +47,7 @@ class CassandraFacadeActorSpecification extends TestKit(ActorSystem("CassandraFa
       } yield retrieve
 
       whenReady(chainAfter) { result =>
-        result shouldBe defined
+        result.isDefined shouldBe true
         result.value shouldBe wikiEdit
       }
     }

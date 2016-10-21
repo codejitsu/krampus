@@ -21,7 +21,7 @@ class WikiEditCassandraSpecification extends EmbeddedCassandraSuite with Matcher
       } yield retrieve
 
       whenReady(chain) { result =>
-        result shouldBe defined
+        result.isDefined shouldBe true
         result.value shouldBe wikiEdit
       }
     }
