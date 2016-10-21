@@ -74,7 +74,6 @@ object Dependencies {
     val akkaLogger    = "com.typesafe.akka"              %% "akka-slf4j"               % AkkaSlf4jVer
     val jackson       = "org.json4s"                     %% "json4s-jackson"           % Jackson4sVer
     val avro          = "org.apache.avro"                 % "avro"                     % AvroVer
-    val kafkaClients  = "org.apache.kafka"                % "kafka-clients"            % KafkaClientsVer
     val reactiveKafka = "com.softwaremill.reactivekafka" %% "reactive-kafka-core"      % ReactiveKafkaVer excludeAll
       (ExclusionRule(organization = "com.typesafe.akka"))
 
@@ -110,8 +109,8 @@ object Dependencies {
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro, akka, akkaLogger, akkaStreams, reactiveKafka, scalastic) ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
-  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, kafkaClients, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
-  val krampusProducer = Seq(config, akka, akkaStreams, jackson, kafkaClients, reactiveKafka, logging, logback)
+  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
+  val krampusProducer = Seq(config, akka, akkaStreams, jackson, reactiveKafka, logging, logback)
   val krampusScoreApp = Seq(config, akka, akkaStreams,
     reactiveKafka excludeAll (ExclusionRule("org.slf4j", "log4j-over-slf4j")), logging, logback, sparkCore, sparkMl)
   val krampusSparkApp = Seq(config,
