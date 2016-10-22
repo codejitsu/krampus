@@ -2,6 +2,7 @@
 
 package krampus.producer.stdin
 
+import akka.NotUsed
 import akka.stream.scaladsl.Source
 import krampus.producer.WikiProducer
 
@@ -10,7 +11,7 @@ object StdinProducer extends WikiProducer {
     sys.exit(run(args))
   }
 
-  override def source(args: Array[String]): Source[String, Unit] = {
+  override def source(args: Array[String]): Source[String, NotUsed] = {
     import scala.io.{Source => ioSource}
 
     val source = ioSource.stdin

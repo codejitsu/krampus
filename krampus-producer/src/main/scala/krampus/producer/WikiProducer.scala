@@ -7,8 +7,9 @@ import java.net.URL
 import java.util.UUID
 import java.util.concurrent.Executors
 
+import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.{ClosedShape, ActorMaterializer}
+import akka.stream.{ActorMaterializer, ClosedShape}
 import akka.stream.scaladsl._
 import com.softwaremill.react.kafka.{ProducerProperties, ReactiveKafka}
 import com.typesafe.config.{Config, ConfigFactory}
@@ -93,9 +94,9 @@ abstract class WikiProducer extends LazyLogging {
   def input(args: Array[String]): String = args.head
   def logElements(config: Config): Int = config.getInt("krampus.producer.log.elements")
 
-  def source(args: Array[String]): Source[String, Unit]
+  def source(args: Array[String]): Source[String, NotUsed]
 
-  def parseJson(config: Config)(implicit ec: ExecutionContext): Flow[String, Option[WikiEdit], Unit] =
+  def parseJson(config: Config)(implicit ec: ExecutionContext): Flow[String, Option[WikiEdit], NotUsed] =
     Flow[String].mapAsync(config.getInt("krampus.producer.json.parallelizm"))(line => Future(parseItem(line))).collect {
       case Success(e) => Some(e)
       case Failure(f) => {
@@ -144,12 +145,12 @@ abstract class WikiProducer extends LazyLogging {
     case (c, _) => c + 1
   }
 
-  def writeToKafka(): Flow[(CharSequence, Array[Byte]), Unit, Unit] =
+  def writeToKafka(): Flow[(CharSequence, Array[Byte]), Unit, NotUsed] =
     Flow[(CharSequence, Array[Byte])].map {
       case _ => ()
     }
 
-  def avro: Flow[Option[WikiEdit], Option[WikiEditAvro], Unit] =
+  def avro: Flow[Option[WikiEdit], Option[WikiEditAvro], NotUsed] =
     Flow[Option[WikiEdit]].map { entryOpt =>
       entryOpt.map { entry =>
         import entry._
@@ -177,7 +178,7 @@ abstract class WikiProducer extends LazyLogging {
       }
     }
 
-  def serialize: Flow[Option[WikiEditAvro], Option[(CharSequence, Array[Byte])], Unit] =
+  def serialize: Flow[Option[WikiEditAvro], Option[(CharSequence, Array[Byte])], NotUsed] =
     Flow[Option[WikiEditAvro]].map { avroValOpt =>
       avroValOpt.map { avroVal =>
         val out = new ByteArrayOutputStream()

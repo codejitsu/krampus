@@ -2,6 +2,7 @@
 
 package krampus.processor
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, ClosedShape}
 import akka.stream.scaladsl._
@@ -121,7 +122,7 @@ class StreamingCassandra(config: AppConfig) extends LazyLogging with ProductionC
   //TODO remove duplicates
   def fromAvro(entryAvro: WikiEditAvro): WikiEdit = WikiEdit(entryAvro)
 
-  def storeCassandra: Flow[(WikiEdit, KafkaMessage[Array[Byte]]), KafkaMessage[Array[Byte]], Unit] =
+  def storeCassandra: Flow[(WikiEdit, KafkaMessage[Array[Byte]]), KafkaMessage[Array[Byte]], NotUsed] =
     Flow[(WikiEdit, KafkaMessage[Array[Byte]])].mapAsync(config.parallelism) { msg =>
       dao.store(msg._1) map { (_, msg._2) }
     }.withAttributes(supervisionStrategy(restartingDecider)).collect {
