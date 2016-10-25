@@ -2,7 +2,7 @@
 
 package krampus.entity
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone}
 import org.scalacheck.{Prop, Properties}
 
 class WikiEditSpecification extends Properties("WikiEdit") {
@@ -97,7 +97,7 @@ class WikiEditSpecification extends Properties("WikiEdit") {
   property("constructor: timestamp") = forAll(wikiEditAvroGenerator) { avroEntry =>
     val converted = WikiEdit(avroEntry)
 
-    converted.timestamp == new DateTime(avroEntry.getTimestamp.toString)
+    converted.timestamp == new DateTime(avroEntry.getTimestamp.toString, DateTimeZone.UTC)
   }
 
   property("constructor: user") = forAll(wikiEditAvroGenerator) { avroEntry =>
