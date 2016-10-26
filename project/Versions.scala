@@ -33,8 +33,8 @@ object Versions {
 
   val PhantomVer              = "1.29.4"
 
-  val SparkVer                = "2.0.0" // *
-  val SparkMlVer              = "2.0.0" // *
-  val SparkCassandraVer       = "2.0.0-M1" // *
-  val GuavaVer                = "19.0" // *
+  val SparkVer                = "2.0.1"
+  val SparkMlVer              = SparkVer
+  val SparkCassandraVer       = "2.0.0-M3"
+  val GuavaVer                = "19.0"
 }
