@@ -11,7 +11,7 @@ object ProjectBuild extends Build {
     id = "root",
     base = file("."),
     settings = parentSettings,
-    aggregate = Seq(krampusCommon, krampusMetrics, krampusProcessor, krampusProducer, krampusScoreApp, krampusSparkApp,
+    aggregate = Seq(krampusCommon, krampusSource, krampusMetrics, krampusProcessor, krampusProducer, krampusScoreApp, krampusSparkApp,
       krampusWebApp)
   )
 
@@ -19,6 +19,12 @@ object ProjectBuild extends Build {
     id = "krampus-common",
     base = file("./krampus-common"),
     settings = commonSettings ++ Seq(libraryDependencies ++= Dependencies.krampusCommon)
+  )
+
+  lazy val krampusSource = Project(
+    id = "krampus-source",
+    base = file("./krampus-source"),
+    settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusSource)
   )
 
   lazy val krampusMetrics = Project(
@@ -91,6 +97,14 @@ object Dependencies {
 
     val guava =               "com.google.guava"          % "guava"                   % GuavaVer
     val scalastic = "org.scalactic"                      %% "scalactic"               % ScalasticVer
+
+    val scalaUtil =  "com.metamx" %% "scala-util" % "1.11.3" exclude("log4j", "log4j") force()
+    val ircApi = "com.ircclouds.irc" % "irc-api" % "1.0-0014"
+    val scalatest2 = "org.scalatest" %% "scalatest" % "2.2.5" % "test"
+    val junit = "junit" % "junit" % "4.11" % "test"
+    val junitInterface = "com.novocode" % "junit-interface" % "0.11-RC1" % "test"
+    val logbackCore2 = "ch.qos.logback" % "logback-core" % "1.1.2" % "test"
+    val logbackClassic2 = "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
   }
 
   object TestDeps {
@@ -107,6 +121,7 @@ object Dependencies {
   /** Module deps */
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro, akka, akkaLogger, akkaStreams, reactiveKafka, scalastic) ++ test
+  val krampusSource = Seq(scalaUtil, ircApi, scalatest2, junit, junitInterface, logbackCore2, logbackClassic2)
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
   val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, reactiveKafka, logging, logback)
