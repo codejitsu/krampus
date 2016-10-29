@@ -96,12 +96,12 @@ object Dependencies {
     val sparkCassandraConnector = "com.datastax.spark"   %% "spark-cassandra-connector" % SparkCassandraVer
 
     val guava =               "com.google.guava"          % "guava"                   % GuavaVer
-    val scalastic = "org.scalactic"                      %% "scalactic"               % ScalasticVer
+    val scalastic =           "org.scalactic"            %% "scalactic"               % ScalasticVer
 
-    val scalaUtil =  "com.metamx" %% "scala-util" % "1.11.3" exclude("log4j", "log4j") force()
-    val ircApi = "com.ircclouds.irc" % "irc-api" % "1.0-0014"
-    val logbackCore2 = "ch.qos.logback" % "logback-core" % "1.1.2" % "test"
-    val logbackClassic2 = "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
+    val scalaUtil =           "com.metamx"               %% "scala-util"              % "1.11.3" exclude("log4j", "log4j") force()
+    val ircApi =              "com.ircclouds.irc"         % "irc-api"                 % "1.0-0014"
+//    val logbackCore2 = "ch.qos.logback" % "logback-core" % "1.1.2" % "test"
+//    val logbackClassic2 = "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
   }
 
   object TestDeps {
@@ -121,7 +121,7 @@ object Dependencies {
   /** Module deps */
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro, akka, akkaLogger, akkaStreams, reactiveKafka, scalastic) ++ test
-  val krampusSource = Seq(scalaUtil, ircApi, logbackCore2, logbackClassic2) ++ testJunit ++ test
+  val krampusSource = Seq(scalaUtil, ircApi, logback) ++ testJunit ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
   val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, reactiveKafka, logging, logback)
