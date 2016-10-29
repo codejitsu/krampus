@@ -13,6 +13,8 @@ object Versions {
   val ScalaTestVer            = "3.0.0"
   val ScalaCheckVer           = "1.13.2"
   val ScalasticVer            = "3.0.0"
+  val JunitVer                = "4.11"
+  val JunitIntVer             = "0.11-RC1"
 
   val AkkaVer                 = "2.4.11"
   val AkkaSlf4jVer            = AkkaVer

@@ -100,9 +100,6 @@ object Dependencies {
 
     val scalaUtil =  "com.metamx" %% "scala-util" % "1.11.3" exclude("log4j", "log4j") force()
     val ircApi = "com.ircclouds.irc" % "irc-api" % "1.0-0014"
-    val scalatest2 = "org.scalatest" %% "scalatest" % "2.2.5" % "test"
-    val junit = "junit" % "junit" % "4.11" % "test"
-    val junitInterface = "com.novocode" % "junit-interface" % "0.11-RC1" % "test"
     val logbackCore2 = "ch.qos.logback" % "logback-core" % "1.1.2" % "test"
     val logbackClassic2 = "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
   }
@@ -112,16 +109,19 @@ object Dependencies {
     val scalacheck    = "org.scalacheck"          %% "scalacheck"               % ScalaCheckVer     % Test
     val akkatest      = "com.typesafe.akka"       %% "akka-testkit"             % AkkaVer           % Test
     val embeddedKafka = "net.manub"               %% "scalatest-embedded-kafka" % EmbeddedKafkaVer  % Test
+    val junit         = "junit"                    % "junit"                    % JunitVer          % Test
+    val junitInt      = "com.novocode"             % "junit-interface"          % JunitIntVer       % Test
   }
 
   import CompileDeps._
 
   val test = Seq(TestDeps.scalatest, TestDeps.scalacheck, TestDeps.akkatest, TestDeps.embeddedKafka)
+  val testJunit = Seq(TestDeps.junit, TestDeps.junitInt)
 
   /** Module deps */
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro, akka, akkaLogger, akkaStreams, reactiveKafka, scalastic) ++ test
-  val krampusSource = Seq(scalaUtil, ircApi, scalatest2, junit, junitInterface, logbackCore2, logbackClassic2)
+  val krampusSource = Seq(scalaUtil, ircApi, logbackCore2, logbackClassic2) ++ testJunit ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
   val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, reactiveKafka, logging, logback)

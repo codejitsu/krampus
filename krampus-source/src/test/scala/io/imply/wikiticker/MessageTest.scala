@@ -17,10 +17,9 @@
 package io.imply.wikiticker
 
 import org.joda.time.DateTime
-import org.scalatest.FunSuite
-import org.scalatest.ShouldMatchers
+import org.scalatest.{FunSuite, Matchers}
 
-class MessageTest extends FunSuite with ShouldMatchers
+class MessageTest extends FunSuite with Matchers
 {
   test("fromIrcMessage: Main namespace, all flags, added") {
     val message = Message.fromIrcMessage(
