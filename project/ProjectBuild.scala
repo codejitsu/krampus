@@ -98,10 +98,8 @@ object Dependencies {
     val guava =               "com.google.guava"          % "guava"                   % GuavaVer
     val scalastic =           "org.scalactic"            %% "scalactic"               % ScalasticVer
 
-    val scalaUtil =           "com.metamx"               %% "scala-util"              % "1.11.3" exclude("log4j", "log4j") force()
-    val ircApi =              "com.ircclouds.irc"         % "irc-api"                 % "1.0-0014"
-//    val logbackCore2 = "ch.qos.logback" % "logback-core" % "1.1.2" % "test"
-//    val logbackClassic2 = "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
+    val scalaUtil =           "com.metamx"               %% "scala-util"              % ScalaUtilVer exclude("log4j", "log4j") force()
+    val ircApi =              "com.ircclouds.irc"         % "irc-api"                 % IrcApiVer
   }
 
   object TestDeps {

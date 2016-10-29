@@ -16,6 +16,9 @@ object Versions {
   val JunitVer                = "4.11"
   val JunitIntVer             = "0.11-RC1"
 
+  val ScalaUtilVer            = "1.11.3"
+  val IrcApiVer               = "1.0-0014"
+
   val AkkaVer                 = "2.4.11"
   val AkkaSlf4jVer            = AkkaVer
   val Jackson4sVer            = "3.4.1"
