@@ -3,6 +3,7 @@
 import play.sbt.PlayScala
 import sbt._
 import sbt.Keys._
+import sbtdocker.DockerPlugin
 
 object ProjectBuild extends Build {
   import Settings._
@@ -25,7 +26,7 @@ object ProjectBuild extends Build {
     id = "krampus-source",
     base = file("./krampus-source"),
     settings = defaultSettings ++ krampusSourceSettings ++ Seq(libraryDependencies ++= Dependencies.krampusSource)
-  )
+  ).enablePlugins(DockerPlugin)
 
   lazy val krampusMetrics = Project(
     id = "krampus-metrics-aggregator",

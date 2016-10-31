@@ -113,7 +113,7 @@ object Settings extends Build {
       case PathList(xs@_*) if xs.last == "io.netty.versions.properties" => MergeStrategy.rename
       case other => (assemblyMergeStrategy in assembly).value(other)
     },
-    
+
     // publish to artifacts directory
     publishArtifact in(Compile, packageDoc) := false,
 
