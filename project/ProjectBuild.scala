@@ -24,7 +24,7 @@ object ProjectBuild extends Build {
   lazy val krampusSource = Project(
     id = "krampus-source",
     base = file("./krampus-source"),
-    settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusSource)
+    settings = defaultSettings ++ krampusSourceSettings ++ Seq(libraryDependencies ++= Dependencies.krampusSource)
   )
 
   lazy val krampusMetrics = Project(

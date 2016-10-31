@@ -104,4 +104,21 @@ object Settings extends Build {
       ShadeRule.rename("com.google.**" -> "shadeio.@1").inAll
     )
   )
+
+  lazy val krampusSourceSettings = Seq(
+    mainClass in assembly := Some("io.imply.wikiticker.ConsoleTicker"),
+
+    // Resolve duplicates for Sbt Assembly
+    assemblyMergeStrategy in assembly := {
+      case PathList(xs@_*) if xs.last == "io.netty.versions.properties" => MergeStrategy.rename
+      case other => (assemblyMergeStrategy in assembly).value(other)
+    },
+    
+    // publish to artifacts directory
+    publishArtifact in(Compile, packageDoc) := false,
+
+    publishTo := Some(Resolver.file("file", new File("artifacts"))),
+
+    cleanFiles <+= baseDirectory { base => base / "artifacts" }
+  )
 }
