@@ -25,64 +25,17 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintStream
 
+import com.typesafe.config.ConfigFactory
+import scala.collection.JavaConverters._
+
 object ConsoleTicker extends Logging
 {
   def main(args: Array[String]) {
-    val defaultWikipedias = Seq(
-      "en",
-      "sv",
-      "de",
-      "nl",
-      "fr",
-      "war",
-      "ru",
-      "ceb",
-      "it",
-      "es",
-      "vi",
-      "pl",
-      "ja",
-      "pt",
-      "zh",
-      "uk",
-      "ca",
-      "fa",
-      "sh",
-      "no",
-      "ar",
-      "fi",
-      "id",
-      "ro",
-      "hu",
-      "cs",
-      "ko",
-      "sr",
-      "ms",
-      "tr",
-      "min",
-      "eo",
-      "kk",
-      "eu",
-      "da",
-      "bg",
-      "sk",
-      "hy",
-      "he",
-      "lt",
-      "hr",
-      "sl",
-      "et",
-      "uz",
-      "gl",
-      "nn",
-      "la",
-      "vo",
-      "simple",
-      "el",
-      "ce",
-      "hi",
-      "be"
-    )
+    lazy val config = ConfigFactory
+      .parseFile(new File(s"${sys.env.getOrElse("APP_CONF", ".")}/boot-configuration.conf"))
+      .withFallback(ConfigFactory.load())
+
+    val defaultWikipedias = config.getStringList("irc.channels").asScala
 
     val flags = new Flags("wikiticker-console")
     val out = flags("out", "-", "write to file")
@@ -101,7 +54,6 @@ object ConsoleTicker extends Logging
         outStream.println(Jackson.generate(message.toMap))
       }
     }
-
 
     val ticker = new IrcTicker(
       "irc.wikimedia.org",

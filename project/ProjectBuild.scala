@@ -120,7 +120,7 @@ object Dependencies {
   /** Module deps */
 
   val krampusCommon = Seq(config, joda, jodaConvert, avro, akka, akkaLogger, akkaStreams, reactiveKafka, scalastic) ++ test
-  val krampusSource = Seq(scalaUtil, ircApi, logback) ++ testJunit ++ test
+  val krampusSource = Seq(config, scalaUtil, ircApi, logback) ++ testJunit ++ test
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
   val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, reactiveKafka, logging, logback)
