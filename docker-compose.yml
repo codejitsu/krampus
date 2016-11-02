@@ -1,0 +1,29 @@
+version: '2'
+
+########### COMPONENTS ###########
+
+services:
+    krampus-source:
+        image: codejitsu/krampus-source:0.1-SNAPSHOT
+        expose:
+            - "80"
+            - "8080"
+            - "9000"
+        ports:
+            - "8080:80"
+        stdin_open: true
+        restart: always
+        networks:
+            dockernet:
+                ipv4_address: 172.16.2.11
+
+######## SETUP ########
+
+networks:
+    dockernet:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+            - subnet: 172.16.2.0/24
+              gateway: 172.16.2.1
