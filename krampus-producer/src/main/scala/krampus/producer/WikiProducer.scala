@@ -2,7 +2,7 @@
 
 package krampus.producer
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayOutputStream, File}
 import java.net.URL
 import java.util.UUID
 import java.util.concurrent.Executors
@@ -31,7 +31,9 @@ import scala.util.{Failure, Success, Try}
   * Abstract wikipedia entry producer.
   */
 abstract class WikiProducer extends LazyLogging {
-  val config = ConfigFactory.load()
+  lazy val config = ConfigFactory
+    .parseFile(new File(s"${sys.env.getOrElse("APP_CONF", ".")}/boot-configuration.conf"))
+    .withFallback(ConfigFactory.load())
 
   logger.info(config.toString)
 

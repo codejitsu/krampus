@@ -7,12 +7,16 @@ services:
         image: codejitsu/krampus-source:0.1-SNAPSHOT
         volumes:
             - /tmp/share:/tmp/share
-        expose:
-            - "80"
-            - "8080"
-            - "9000"
-        ports:
-            - "8080:80"
+        stdin_open: true
+        restart: always
+        networks:
+            dockernet:
+                ipv4_address: 172.16.2.10
+
+    krampus-producer:
+        image: codejitsu/krampus-producer:0.1-SNAPSHOT
+        volumes:
+            - /tmp/share:/tmp/share
         stdin_open: true
         restart: always
         networks:

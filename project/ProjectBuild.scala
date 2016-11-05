@@ -43,8 +43,8 @@ object ProjectBuild extends Build {
   lazy val krampusProducer = Project(
     id = "krampus-producer",
     base = file("./krampus-producer"),
-    settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusProducer)
-  ).dependsOn(krampusCommon)
+    settings = defaultSettings ++ krampusProducerSettings ++ Seq(libraryDependencies ++= Dependencies.krampusProducer)
+  ).dependsOn(krampusCommon).enablePlugins(DockerPlugin)
 
   lazy val krampusScoreApp = Project(
     id = "krampus-score-app",

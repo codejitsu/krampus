@@ -20,10 +20,10 @@ APP_OPTS="-d64 \
 
 pipe=/tmp/share/wikisource
 
-trap "rm -f $pipe" EXIT
+while [ ! -p $pipe ]
+do
+  sleep 2
+done
 
-if [[ ! -p $pipe ]]; then
-    mkfifo $pipe
-fi
-
-java ${APP_OPTS} -cp ${APP_BASE}/conf -jar ${APP_BASE}/krampus-source.jar > /tmp/share/wikisource
+cat $pipe
+# java ${APP_OPTS} -cp ${APP_BASE}/conf -jar ${APP_BASE}/krampus-producer.jar
