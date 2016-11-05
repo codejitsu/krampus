@@ -5,6 +5,8 @@ version: '2'
 services:
     krampus-source:
         image: codejitsu/krampus-source:0.1-SNAPSHOT
+        volumes:
+            - /tmp/share:/tmp/share
         expose:
             - "80"
             - "8080"

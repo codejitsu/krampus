@@ -18,4 +18,5 @@ APP_OPTS="-d64 \
           -Dlogger.url=file:///${LOG_CONF}/logback.xml
          "
 
-java ${APP_OPTS} -cp ${APP_BASE}/conf -jar ${APP_BASE}/krampus-source.jar
+mkfifo /tmp/share/pipe
+java ${APP_OPTS} -cp ${APP_BASE}/conf -jar ${APP_BASE}/krampus-source.jar > /tmp/share/pipe
