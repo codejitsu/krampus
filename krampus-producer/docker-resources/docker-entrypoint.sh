@@ -25,5 +25,4 @@ do
   sleep 2
 done
 
-cat $pipe
-# java ${APP_OPTS} -cp ${APP_BASE}/conf -jar ${APP_BASE}/krampus-producer.jar
+java ${APP_OPTS} -cp ${APP_BASE}/conf -jar ${APP_BASE}/krampus-producer.jar < $pipe

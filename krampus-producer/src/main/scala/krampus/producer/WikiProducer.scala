@@ -24,7 +24,9 @@ import org.json4s.JsonAST.{JBool, JInt, JString}
 import org.json4s.jackson.JsonMethods._
 import org.reactivestreams.Subscriber
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -45,43 +47,54 @@ abstract class WikiProducer extends LazyLogging {
   implicit val materializer = ActorMaterializer.create(system)
 
   def run(args: Array[String]): Int = {
+    try {
+      args.map(logger.info(_))
 
-    args.map(logger.info(_))
+      val entries = source(args).via(parseJson(config))
 
+      val graph = GraphDSL.create(count) { implicit builder =>
+        out => {
+          import GraphDSL.Implicits._
 
-    val entries = source(args).via(parseJson(config))
+          val broadcast = builder.add(Broadcast[Option[WikiEdit]](3))
 
-    val graph = GraphDSL.create(count) { implicit builder =>
-      out => {
-        import GraphDSL.Implicits._
+          entries ~> broadcast ~> logEveryNSink(logElements(config))
+          broadcast ~> out
+          broadcast ~> avro ~> serialize.collect {
+            case Some(msg) => msg
+          } ~> Sink.fromSubscriber(kafkaSink(config, new ReactiveKafka()))
 
-        val broadcast = builder.add(Broadcast[Option[WikiEdit]](3))
-
-        entries ~> broadcast ~> logEveryNSink(logElements(config))
-                   broadcast ~> out
-                   broadcast ~> avro ~> serialize.collect {
-                     case Some(msg) => msg
-                   } ~> Sink.fromSubscriber(kafkaSink(config, args, new ReactiveKafka()))
-
-        ClosedShape
+          ClosedShape
+        }
       }
+
+      logger.debug("Running streaming graph...")
+
+      val runFut = RunnableGraph.fromGraph(graph).run()
+
+      runFut.onComplete { res =>
+        res match {
+          case Success(c) => logger.info(s"Completed: $c items processed")
+          case Failure(_) => logger.info("Something went wrong")
+        }
+
+        logger.debug("Terminating system...")
+        system.terminate()
+      }
+
+      Await.result(runFut, Duration.Inf)
+    } catch {
+      case NonFatal(e) => logger.error("Error", e)
     }
 
-    RunnableGraph.fromGraph(graph).run().onComplete { res =>
-      res match {
-        case Success(c) => logger.info(s"Completed: $c items processed")
-        case Failure(_) => logger.info("Something went wrong")
-      }
-      system.terminate()
-    }
+    logger.debug("Before exit...")
 
     0
   }
 
-  def kafkaSink(config: Config, args: Array[String],
-                kafka: ReactiveKafka)(implicit system: ActorSystem): Subscriber[(CharSequence, Array[Byte])] = {
+  def kafkaSink(config: Config, kafka: ReactiveKafka)(implicit system: ActorSystem): Subscriber[(CharSequence, Array[Byte])] = {
     val properties: ProducerProperties[(CharSequence, Array[Byte])] = ProducerProperties(
-      brokerList = args(1),
+      brokerList = config.getString("krampus.producer.kafka.brokers"),
       topic = config.getString("krampus.producer.kafka.topic"),
       clientId = UUID.randomUUID().toString,
       encoder = new Encoder[(CharSequence, Array[Byte])]() {
@@ -100,7 +113,9 @@ abstract class WikiProducer extends LazyLogging {
 
   def parseJson(config: Config)(implicit ec: ExecutionContext): Flow[String, Option[WikiEdit], NotUsed] =
     Flow[String].mapAsync(config.getInt("krampus.producer.json.parallelizm"))(line => Future(parseItem(line))).collect {
-      case Success(e) => Some(e)
+      case Success(e) =>
+        logger.debug(s"Parsed json: $e")
+        Some(e)
       case Failure(f) => {
         logger.error(s"Exception: ${f.getMessage}\n")
         None

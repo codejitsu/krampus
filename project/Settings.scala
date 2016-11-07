@@ -6,10 +6,12 @@ import org.scalastyle.sbt.ScalastylePlugin
 import com.websudos.phantom.sbt.PhantomSbtPlugin
 import sbt._
 import sbt.Keys._
+
 import scala.language.postfixOps
 import sbtassembly.AssemblyPlugin.autoImport._
 import sbtdocker._
 import DockerKeys._
+import sbt.Package.ManifestAttributes
 
 object Settings extends Build {
   lazy val buildSettings = Seq(
@@ -167,6 +169,10 @@ object Settings extends Build {
 
   lazy val krampusProducerSettings = Seq(
     mainClass in assembly := Some("krampus.producer.stdin.StdinProducer"),
+
+    packageOptions in assembly += Package.ManifestAttributes(
+      "Version" -> "0.8.2.2" // this entry is needed by kafka
+    ),
 
     // Resolve duplicates for Sbt Assembly
     assemblyMergeStrategy in assembly := {

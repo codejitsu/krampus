@@ -1,27 +1,48 @@
 version: '2'
 
-########### COMPONENTS ###########
-
 services:
+    ########### CORE #################
+
+    kafka:
+        image: spotify/kafka
+        ports:
+          - "2181:2181"
+          - "9092:9092"
+        environment:
+          ADVERTISED_HOST: 172.18.0.2 # get ip somehow from docker
+          ADVERTISED_PORT: 9092
+       # networks:
+       #     dockernet:
+       #         ipv4_address: 172.16.2.9
+
+    ########### COMPONENTS ###########
+
     krampus-source:
         image: codejitsu/krampus-source:0.1-SNAPSHOT
+        depends_on:
+            - kafka
         volumes:
             - /tmp/share:/tmp/share
         stdin_open: true
         restart: always
-        networks:
-            dockernet:
-                ipv4_address: 172.16.2.10
+       # networks:
+       #     dockernet:
+       #         ipv4_address: 172.16.2.10
 
     krampus-producer:
         image: codejitsu/krampus-producer:0.1-SNAPSHOT
+        depends_on:
+            - kafka
+            - krampus-source
         volumes:
             - /tmp/share:/tmp/share
         stdin_open: true
         restart: always
-        networks:
-            dockernet:
-                ipv4_address: 172.16.2.11
+        links:
+            - kafka
+       # networks:
+       #     dockernet:
+       #         ipv4_address: 172.16.2.11
 
 ######## SETUP ########
 

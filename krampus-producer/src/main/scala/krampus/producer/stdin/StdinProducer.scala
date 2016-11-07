@@ -15,6 +15,9 @@ object StdinProducer extends WikiProducer {
     import scala.io.{Source => ioSource}
 
     val source = ioSource.stdin
+
+    logger.debug("Reading from stdin...")
+
     Source.fromIterator(() => source.getLines())
   }
 }
