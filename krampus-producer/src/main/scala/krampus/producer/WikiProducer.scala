@@ -32,12 +32,13 @@ import scala.util.{Failure, Success, Try}
 /**
   * Abstract wikipedia entry producer.
   */
+//TODO add tests for all producers
 abstract class WikiProducer extends LazyLogging {
   lazy val config = ConfigFactory
     .parseFile(new File(s"${sys.env.getOrElse("APP_CONF", ".")}/boot-configuration.conf"))
     .withFallback(ConfigFactory.load())
 
-  logger.info(config.toString)
+  logger.debug(config.root().render())
 
   implicit val ec = ExecutionContext
       .fromExecutor(Executors.newFixedThreadPool(config.getInt("krampus.producer.json.pool-size")))
@@ -117,7 +118,7 @@ abstract class WikiProducer extends LazyLogging {
         logger.debug(s"Parsed json: $e")
         Some(e)
       case Failure(f) => {
-        logger.error(s"Exception: ${f.getMessage}\n")
+        logger.debug(s"Exception: ${f.getMessage}\n")
         None
       }
     }
