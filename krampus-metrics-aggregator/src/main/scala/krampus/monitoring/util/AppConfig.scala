@@ -2,15 +2,18 @@
 
 package krampus.monitoring.util
 
+import java.io.File
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.config.{ConfigFactory, Config}
+import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.concurrent.duration.FiniteDuration
 
+//TODO move it to commons
 class AppConfig() {
-
-  lazy val config: Config = ConfigFactory.load()
+  lazy val config = ConfigFactory
+    .parseFile(new File(s"${sys.env.getOrElse("APP_CONF", ".")}/boot-configuration.conf"))
+    .withFallback(ConfigFactory.load())
 
   lazy val kafkaConfig: Config = config.getConfig("krampus.metrics-aggregator-app.kafka")
   lazy val aggregationConfig = config.getConfig("krampus.metrics-aggregator-app.aggregation")
