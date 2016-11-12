@@ -9,6 +9,11 @@ services:
             file: base-containers.yml
             service: kafka-base
 
+    statsd:
+        extends:
+            file: base-containers.yml
+            service: grafana-base
+
     ########### COMPONENTS ###########
 
     krampus-source:
@@ -36,7 +41,7 @@ services:
         image: codejitsu/krampus-metrics-aggregator:0.1-SNAPSHOT
         depends_on:
             - kafka
-            #- statsd
+            - statsd
         links:
             - kafka:kafka
         restart: always
