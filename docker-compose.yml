@@ -14,7 +14,7 @@ services:
             file: base-containers.yml
             service: grafana-base
         volumes:
-            - ./compose-resources/grafana:/opt/grafana/public/dashboards/
+            - ./compose-resources/grafana/dashboards:/src/dashboards/
 
     ########### COMPONENTS ###########
 
