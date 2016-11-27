@@ -9,12 +9,24 @@ services:
             file: base-containers.yml
             service: kafka-base
 
+    #TODO rename statsd -> grafana
     statsd:
         extends:
             file: base-containers.yml
             service: grafana-base
+        #volumes:
+        #    - ./compose-resources/grafana/dashboards:/src/dashboards/
+
+    # initializes grafana and dies.
+    statsd-init:
+        image: kamon/grafana_graphite
         volumes:
-            - ./compose-resources/grafana/dashboards:/src/dashboards/
+            - ./compose-resources/grafana/init:/init/scripts/
+        command: bash /init/scripts/grafana-init.sh
+        links:
+            - statsd:statsd
+        depends_on:
+            - statsd
 
     ########### COMPONENTS ###########
 
