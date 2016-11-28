@@ -14,8 +14,9 @@ services:
         extends:
             file: base-containers.yml
             service: grafana-base
-        #volumes:
-        #    - ./compose-resources/grafana/dashboards:/src/dashboards/
+        volumes:
+            - ./compose-resources/grafana/conf:/opt/grafana/conf/
+            - ./compose-resources/grafana/dashboards:/src/dashboards/
 
     # initializes grafana and dies.
     statsd-init:
