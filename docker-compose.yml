@@ -9,8 +9,7 @@ services:
             file: base-containers.yml
             service: kafka-base
 
-    #TODO rename statsd -> grafana
-    statsd:
+    grafana:
         extends:
             file: base-containers.yml
             service: grafana-base
@@ -19,15 +18,15 @@ services:
             - ./compose-resources/grafana/dashboards:/src/dashboards/
 
     # initializes grafana and dies.
-    statsd-init:
+    grafana-init:
         image: kamon/grafana_graphite
         volumes:
             - ./compose-resources/grafana/init:/init/scripts/
         command: bash /init/scripts/grafana-init.sh
         links:
-            - statsd:statsd
+            - grafana:grafana
         depends_on:
-            - statsd
+            - grafana
 
     ########### COMPONENTS ###########
 
@@ -56,7 +55,7 @@ services:
         image: codejitsu/krampus-metrics-aggregator:0.1-SNAPSHOT
         depends_on:
             - kafka
-            - statsd
+            - grafana
         links:
             - kafka:kafka
         restart: always
