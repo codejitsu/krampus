@@ -12,7 +12,7 @@ services:
         restart: always
 
     grafana-base:
-        image: kamon/grafana_graphite
+        image: kamon/grafana_graphite:3.0
         ports:
           - "80:80"
           - "81:81"
