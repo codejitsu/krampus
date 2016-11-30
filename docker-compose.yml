@@ -14,14 +14,14 @@ services:
             file: base-containers.yml
             service: grafana-base
         volumes:
-            - ./compose-resources/grafana/conf:/opt/grafana/conf/
-            - ./compose-resources/grafana/dashboards:/src/dashboards/
+            - ./compose-resources/grafana/conf:/opt/grafana/conf/:ro
+            - ./compose-resources/grafana/dashboards:/src/dashboards/:ro
 
     # initializes grafana and dies.
     grafana-init:
         image: kamon/grafana_graphite
         volumes:
-            - ./compose-resources/grafana/init:/init/scripts/
+            - ./compose-resources/grafana/init:/init/scripts/:ro
         command: bash /init/scripts/grafana-init.sh
         links:
             - grafana:grafana
@@ -35,6 +35,7 @@ services:
         depends_on:
             - kafka
         volumes:
+        #TODO make source/producer communication via shared container somehow.
             - /tmp/share:/tmp/share
         stdin_open: true
         restart: always
