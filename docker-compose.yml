@@ -19,6 +19,7 @@ services:
 
     # initializes grafana and dies.
     grafana-init:
+        #TODO use some lightweight container for this
         image: kamon/grafana_graphite
         volumes:
             - ./compose-resources/grafana/init:/init/scripts/:ro
