@@ -57,7 +57,7 @@ services:
         image: codejitsu/krampus-metrics-aggregator:0.1-SNAPSHOT
         depends_on:
             - kafka
-            - grafana
+            - grafana-init
         links:
             - kafka:kafka
         restart: always
