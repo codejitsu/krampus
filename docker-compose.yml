@@ -19,8 +19,7 @@ services:
 
     # initializes grafana and dies.
     grafana-init:
-        #TODO use some lightweight container for this
-        image: kamon/grafana_graphite
+        image: tutum/curl
         volumes:
             - ./compose-resources/grafana/init:/init/scripts/:ro
         command: bash /init/scripts/grafana-init.sh
