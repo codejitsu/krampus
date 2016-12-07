@@ -3,7 +3,6 @@ version: '2'
 services:
     ########### CORE #################
 
-    #TODO add 3 kafka node cluster
     kafka:
         extends:
             file: base-containers.yml
