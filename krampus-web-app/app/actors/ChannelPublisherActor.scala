@@ -1,4 +1,4 @@
-// Copyright (C) 2016, codejitsu.
+// Copyright (C) 2017, codejitsu.
 
 package actors
 
