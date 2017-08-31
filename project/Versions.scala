@@ -25,7 +25,7 @@ object Versions {
 
   val AvroVer                 = "1.8.1"
 
-  val EmbeddedKafkaVer        = "0.8.1"
+  val EmbeddedKafkaVer        = "0.5.0-kafka08"
   val ReactiveKafkaVer        = "0.8.3" //TODO -> 0.9.0
 
   val LogbackVer              = "1.1.7"

@@ -1,7 +1,7 @@
 // Copyright (C) 2016, codejitsu.
 
 import play.sbt.PlayScala
-import sbt._
+import sbt.{ExclusionRule, _}
 import sbt.Keys._
 import sbtdocker.DockerPlugin
 
@@ -108,6 +108,7 @@ object Dependencies {
     val scalacheck    = "org.scalacheck"          %% "scalacheck"               % ScalaCheckVer     % Test
     val akkatest      = "com.typesafe.akka"       %% "akka-testkit"             % AkkaVer           % Test
     val embeddedKafka = "net.manub"               %% "scalatest-embedded-kafka" % EmbeddedKafkaVer  % Test
+
     val junit         = "junit"                    % "junit"                    % JunitVer          % Test
     val junitInt      = "com.novocode"             % "junit-interface"          % JunitIntVer       % Test
   }
@@ -115,7 +116,9 @@ object Dependencies {
   import CompileDeps._
 
   val testBase = Seq(TestDeps.scalatest, TestDeps.scalacheck)
-  val testAll = testBase ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
+  val testAkka = Seq(TestDeps.akkatest)
+  val testKafka = Seq(TestDeps.embeddedKafka)
+  val testAll = testBase ++ testAkka ++ testKafka
   val testJunit = Seq(TestDeps.junit, TestDeps.junitInt)
 
   /** Module deps */
