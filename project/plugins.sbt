@@ -48,4 +48,4 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-mocha" % "1.0.0")
 
 addSbtPlugin("com.websudos" %% "phantom-sbt" % "1.22.0")
 
-addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.0")
+addSbtPlugin("com.artima.supersafe" %% "sbtplugin" % "1.1.0")
