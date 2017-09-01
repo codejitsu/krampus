@@ -38,7 +38,7 @@ Currently Akka based pipeline is the only implementation of this system (see bel
 Krampus works as follows:
 
 * _krampus-source_ component reads all the Wikipedia recent changes channel and writes the data to the shared channel.
-* _krampus-producer_ simply makes 'tail -f' on this shared channel, reads the data, converts Wikipedia data to the Avro binary message and pushes these messages to the Kafka topic 'wikidata'.
+* _krampus-producer_ simply makes 'tail -f' on this shared channel, reads the data, converts Wikipedia data to [Avro](https://avro.apache.org/) binary messages and pushes these messages to the [Apache Kafka](https://kafka.apache.org/) topic 'wikidata'.
 * _krampus-metrics-aggregator_ reads all the data from the 'wikidata' Kafka topic, makes aggregations (counters) and writes the stats to the graphite.
 
 After start you should see log lines like this in your terminal:
