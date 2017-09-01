@@ -41,9 +41,22 @@ Krampus works as follows:
 * _krampus-producer_ simply makes 'tail -f' on this shared channel, reads the data, converts Wikipedia data to the Avro binary message and pushes these messages to the Kafka topic 'wikidata'.
 * _krampus-metrics-aggregator_ reads all the data from the 'wikidata' Kafka topic, makes aggregations (counters) and writes the stats to the graphite.
 
+After start you should see log lines like this in your terminal:
+
+![Terminal](https://raw.githubusercontent.com/codejitsu/krampus/master/doc/img/command-line.png)
+
 # Important URLs
 
 * [localhost:81](http://localhost:81) - this is your Graphite instance
 
-![alt text](https://raw.githubusercontent.com/codejitsu/krampus/master/doc/img/graphite.png)
+![Graphite](https://raw.githubusercontent.com/codejitsu/krampus/master/doc/img/graphite.png)
    
+* [localhost:80](http://localhost:80) - this is your Grafana instance.
+    * Login/password: admin/admin
+    * Select _Krampus_ Dashboard
+    
+      ![Grafana](https://raw.githubusercontent.com/codejitsu/krampus/master/doc/img/grafana.png)
+      
+    * You should see something like this:
+    
+      ![Grafana](https://raw.githubusercontent.com/codejitsu/krampus/master/doc/img/grafana-dashboard.png)
