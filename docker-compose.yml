@@ -18,7 +18,7 @@ services:
 
     # initializes grafana and dies.
     grafana-init:
-        image: tutum/curl
+        image: tutum/curl:trusty
         volumes:
             - ./compose-resources/grafana/init:/init/scripts/:ro
         command: bash /init/scripts/grafana-init.sh
