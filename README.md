@@ -1,7 +1,11 @@
-# krampus
+# Krampus
 
 This is an experimental stream processing system to test different big data technologies. The current version is built in 
 Scala and [Akka](https://github.com/akka/akka). 
+
+# Data source
+
+Wikipedia recent changes IRC channels for different countries - https://meta.wikimedia.org/wiki/IRC/Channels#Raw_feeds
 
 # Tech stack
 
