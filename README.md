@@ -1,6 +1,6 @@
 # Krampus
 
-This is an experimental stream processing system to test different big data technologies. The current version is built in 
+This is an experimental stream processing system to test different big data technologies. The current version is built using 
 Scala and [Akka](https://github.com/akka/akka). 
 
 # Data source
@@ -40,6 +40,7 @@ Krampus works as follows:
 * _krampus-source_ component reads all the Wikipedia recent changes channel and writes the data to the shared channel.
 * _krampus-producer_ simply makes 'tail -f' on this shared channel, reads the data, converts Wikipedia data to [Avro](https://avro.apache.org/) binary messages and pushes these messages to the [Apache Kafka](https://kafka.apache.org/) topic 'wikidata'.
 * _krampus-metrics-aggregator_ reads all the data from the 'wikidata' Kafka topic, makes aggregations (counters) and writes the stats to the graphite.
+* _krampus-processor_ reads all entries from the 'wikidata' Kafka topic and stores every message to Cassandra (this data will be consumed later by the ML module).
 
 After start you should see log lines like this in your terminal:
 
