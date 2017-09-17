@@ -18,3 +18,7 @@ services:
           - "81:81"
           - "8125:8125/udp"
           - "8126:8126"
+        restart: always
+
+    cassandra-base:
+        image: cassandra:3.7

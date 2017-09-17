@@ -27,6 +27,63 @@ services:
         depends_on:
             - grafana
 
+    # 3 node cassandra cluster
+    cassandra-seed:
+        extends:
+            file: base-containers.yml
+            service: cassandra-base
+        container_name: cassandra-seed-node
+        ports:
+          - "9042:9042"   # Native transport
+          - "7199:7199"   # JMX
+          - "9160:9160"   # Thrift clients
+        restart: always
+
+    cassandra-node-1:
+        extends:
+            file: base-containers.yml
+            service: cassandra-base
+        volumes:
+            - ./compose-resources/cassandra/scripts:/init/scripts/:ro
+        command: bash /init/scripts/cassandra-wait-60.sh
+        environment:
+          - "CASSANDRA_SEEDS=cassandra-seed-node"
+        depends_on:
+          - cassandra-seed
+        links:
+          - cassandra-seed:cassandra-seed
+
+    cassandra-node-2:
+        extends:
+            file: base-containers.yml
+            service: cassandra-base
+        volumes:
+            - ./compose-resources/cassandra/scripts:/init/scripts/:ro
+        command: bash /init/scripts/cassandra-wait-90.sh
+        environment:
+          - "CASSANDRA_SEEDS=cassandra-seed-node"
+        depends_on:
+          - cassandra-node-1
+        links:
+          - cassandra-node-1:cassandra-node-1
+          - cassandra-seed:cassandra-seed
+
+    # init cassandra schema and die
+    cassandra-init:
+        extends:
+            file: base-containers.yml
+            service: cassandra-base
+        volumes:
+            - ./compose-resources/cassandra/scripts:/init/scripts/:ro
+            - ./compose-resources/cassandra/schema:/init/schema/:ro
+        command: bash /init/scripts/cassandra-schema.sh
+        environment:
+          - "CASSANDRA_SEEDS=cassandra-seed-node"
+        depends_on:
+          - cassandra-seed
+        links:
+          - cassandra-seed:cassandra-seed
+
     ########### COMPONENTS ###########
 
     krampus-source:
