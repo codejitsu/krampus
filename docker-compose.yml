@@ -81,6 +81,8 @@ services:
           - "CASSANDRA_SEEDS=cassandra-seed-node"
         depends_on:
           - cassandra-seed
+          - cassandra-node-1
+          - cassandra-node-2
         links:
           - cassandra-seed:cassandra-seed
 
@@ -115,4 +117,14 @@ services:
             - grafana-init
         links:
             - kafka:kafka
+        restart: always
+
+    krampus-processor:
+        image: codejitsu/krampus-processor:0.1-SNAPSHOT
+        depends_on:
+            - kafka
+            - cassandra-init
+        links:
+            - kafka:kafka
+            - cassandra-seed:cassandra-seed
         restart: always

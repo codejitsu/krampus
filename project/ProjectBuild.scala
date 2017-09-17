@@ -37,8 +37,8 @@ object ProjectBuild extends Build {
   lazy val krampusProcessor = Project(
     id = "krampus-processor",
     base = file("./krampus-processor"),
-    settings = defaultSettings ++ phantomSettings ++ Seq(libraryDependencies ++= Dependencies.krampusProcessor)
-  ).dependsOn(krampusCommon % "compile->compile;test->test")
+    settings = defaultSettings ++ phantomSettings ++ krampusProcessorSettings ++ Seq(libraryDependencies ++= Dependencies.krampusProcessor)
+  ).dependsOn(krampusCommon % "compile->compile;test->test").enablePlugins(DockerPlugin)
 
   lazy val krampusProducer = Project(
     id = "krampus-producer",
@@ -126,7 +126,8 @@ object Dependencies {
   val krampusCommon = Seq(config, joda, jodaConvert, avro, akka, akkaLogger, akkaStreams, reactiveKafka, scalastic) ++ testAll
   val krampusSource = Seq(config, scalaUtil, ircApi, logback) ++ testBase
   val krampusMetrics = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback)
-  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, phantom) ++ Seq(TestDeps.akkatest, TestDeps.embeddedKafka)
+  val krampusProcessor = Seq(config, akka, akkaStreams, reactiveKafka, logging, logback, phantom) ++
+    Seq(TestDeps.akkatest, TestDeps.embeddedKafka, TestDeps.scalatest)
   val krampusProducer = Seq(config, akka, akkaStreams, jackson, reactiveKafka, logging, logback)
   val krampusScoreApp = Seq(config, akka, akkaStreams,
     reactiveKafka excludeAll (ExclusionRule("org.slf4j", "log4j-over-slf4j")), logging, logback, sparkCore, sparkMl)
