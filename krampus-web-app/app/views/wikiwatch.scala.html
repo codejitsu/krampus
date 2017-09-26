@@ -5,16 +5,17 @@
 <html>
 <head>
     <title>@title</title>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))">
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+    <link rel="stylesheet" media="screen" href="/assets/stylesheets/main.css">
+    <link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png">
 
-    <script type='text/javascript' src='@routes.Assets.at("lib/angular/angular.min.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/angular-websocket/angular-websocket.min.js")'></script>
-    <script type='text/javascript' src="@routes.WebJarAssets.at(WebJarAssets.locate("angular-route.min.js"))"></script>
-    <script type='text/javascript' src="@routes.Assets.at("javascripts/app.js")"></script>
-    <script type='text/javascript' src="@routes.Assets.at("javascripts/services.js")"></script>
-    <script type='text/javascript' src="@routes.Assets.at("javascripts/controllers.js")"></script>
+    <link rel="stylesheet" media="screen" href="/assets/lib/bootstrap/css/bootstrap.min.css">
+    <script type='text/javascript' src="/assets/lib/angular/angular.min.js"></script>
+    <script type='text/javascript' src="/assets/lib/angular-websocket/angular-websocket.min.js"></script>
+    <script type='text/javascript' src="/assets/lib/angularjs/angular-route.min.js"></script>
+
+    <script type='text/javascript' src="/assets/javascripts/app.js"></script>
+    <script type='text/javascript' src="/assets/javascripts/services.js"></script>
+    <script type='text/javascript' src="/assets/javascripts/controllers.js"></script>
 </head>
 <body ng-app="wikiWatch">
     <div ng-view></div>
