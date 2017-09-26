@@ -16,6 +16,7 @@ import krampus.queue.RawKafkaMessage
 import utils.AppConfig
 
 import scala.concurrent.duration._
+import scala.util.Try
 
 trait ApplicationActors
 
@@ -37,14 +38,16 @@ class KafkaProcessorActors @Inject()(system: ActorSystem) extends ApplicationAct
     }
   ).commitInterval(1200 milliseconds).readFromEndOfStream()
 
-  private[this] val publisher: PublisherWithCommitSink[Array[Byte]] =
-    reactiveKafka.consumeWithOffsetSink(consumerProperties)(system)
+  private[this] val publisherTry: Try[PublisherWithCommitSink[Array[Byte]]] =
+    Try(reactiveKafka.consumeWithOffsetSink(consumerProperties)(system))
 
   private[this] val channelPublisher = system.actorOf(ChannelPublisherActor.props())
 
-  Source.fromPublisher(publisher.publisher)
-    .map(processMessage)
-    .to(publisher.offsetCommitSink).run()
+  publisherTry.foreach { publisher =>
+    Source.fromPublisher(publisher.publisher)
+      .map(processMessage)
+      .to(publisher.offsetCommitSink).run()
+  }
 
   private def processMessage(msg: KafkaMessage[Array[Byte]]) = {
     channelPublisher ! RawKafkaMessage(msg.key(), msg.message())
