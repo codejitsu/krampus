@@ -11,6 +11,8 @@ import scala.language.postfixOps
 import sbtassembly.AssemblyPlugin.autoImport._
 import sbtdocker._
 import DockerKeys._
+import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
+import play.sbt.Play
 import sbt.Package.ManifestAttributes
 
 object Settings extends Build {
@@ -54,7 +56,10 @@ object Settings extends Build {
     resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
   )
 
-  lazy val commonSettings = defaultSettings ++ sbtavro.SbtAvro.avroSettings
+  lazy val commonSettings = defaultSettings ++ sbtavro.SbtAvro.avroSettings ++ Seq(
+    publishArtifact in(Compile, packageDoc) := false,
+    sources in (Compile, doc) := Seq.empty
+  )
 
   val tests = inConfig(Test)(Defaults.testTasks) ++ inConfig(IntegrationTest)(Defaults.itSettings)
 
@@ -334,6 +339,73 @@ object Settings extends Build {
         copy(artifact, artifactTargetPath)
         copy(dockerResourcesDir, dockerResourcesTargetPath)
         copy(baseDir / "src" / "main" / "resources" / "logback.xml", logConfTarget)
+        //Symlink the service jar to a non version specific name
+        run("ln", "-sf", s"$artifactTargetPath", s"$artifactTargetPath_ln")
+        entryPoint(s"${dockerResourcesTargetPath}docker-entrypoint.sh")
+      }
+    },
+
+    buildOptions in docker := BuildOptions(cache = false),
+
+    imageNames in docker := Seq(
+      ImageName(
+        namespace = Some(organization.value),
+        repository = name.value,
+        // We parse the IMAGE_TAG env var which allows us to override the tag at build time
+        tag = Some(sys.props.getOrElse("IMAGE_TAG", default = version.value))
+      )
+    )
+  )
+
+lazy val krampusWebAppSettings = Seq(
+    mainClass in assembly := Some("play.core.server.ProdServerStart"),
+
+    packageOptions in assembly += Package.ManifestAttributes(
+      "Version" -> "0.8.2.2" // this entry is needed by kafka
+    ),
+
+    // Resolve duplicates for Sbt Assembly
+    assemblyMergeStrategy in assembly := {
+      case PathList(xs@_*) if xs.last == "io.netty.versions.properties" => MergeStrategy.rename
+      case other => (assemblyMergeStrategy in assembly).value(other)
+    },
+
+    // publish to artifacts directory
+    publishArtifact in(Compile, packageDoc) := false,
+    sources in (Compile, doc) := Seq.empty,
+
+    publishTo := Some(Resolver.file("file", new File("artifacts"))),
+
+    cleanFiles <+= baseDirectory { base => base / "artifacts" },
+
+    docker <<= docker.dependsOn(dist in Universal),
+
+    dockerfile in docker := {
+      val baseDir = baseDirectory.value
+      val artifact: File = assembly.value
+
+      val imageAppBaseDir = "/app"
+      val artifactTargetPath = s"$imageAppBaseDir/${artifact.name}"
+      val artifactTargetPath_ln = s"$imageAppBaseDir/${name.value}.jar"
+
+      val dockerResourcesDir = baseDir / "docker-resources"
+      val dockerResourcesTargetPath = s"$imageAppBaseDir/"
+
+      val appConfTarget = s"$imageAppBaseDir/conf/application"
+      val logConfTarget = s"$imageAppBaseDir/conf/logging"
+
+      val webAppPort = 9000
+
+      new Dockerfile {
+        from("openjdk:8-jre")
+        maintainer("codejitsu")
+        expose(webAppPort)
+        env("APP_BASE", s"$imageAppBaseDir")
+        env("APP_CONF", s"$appConfTarget")
+        env("LOG_CONF", s"$logConfTarget")
+        copy(artifact, artifactTargetPath)
+        copy(dockerResourcesDir, dockerResourcesTargetPath)
+        copy(baseDir / "conf" / "logback.xml", logConfTarget)
         //Symlink the service jar to a non version specific name
         run("ln", "-sf", s"$artifactTargetPath", s"$artifactTargetPath_ln")
         entryPoint(s"${dockerResourcesTargetPath}docker-entrypoint.sh")

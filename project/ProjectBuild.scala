@@ -61,8 +61,8 @@ object ProjectBuild extends Build {
   lazy val krampusWebApp = Project(
     id = "krampus-web-app",
     base = file("./krampus-web-app"),
-    settings = defaultSettings ++ Seq(libraryDependencies ++= Dependencies.krampusWebApp)
-  ).enablePlugins(PlayScala).dependsOn(krampusCommon)
+    settings = defaultSettings ++ krampusWebAppSettings ++ Seq(libraryDependencies ++= Dependencies.krampusWebApp)
+  ).enablePlugins(PlayScala).dependsOn(krampusCommon).enablePlugins(DockerPlugin)
 }
 
 object Dependencies {
