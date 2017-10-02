@@ -92,6 +92,7 @@ services:
         image: codejitsu/krampus-source:0.1-SNAPSHOT
         depends_on:
             - kafka
+            - cassandra-init
         volumes:
         #TODO make source/producer communication via shared container somehow.
             - /tmp/share:/tmp/share
@@ -115,6 +116,7 @@ services:
         depends_on:
             - kafka
             - grafana-init
+            - krampus-producer
         links:
             - kafka:kafka
         restart: always
@@ -124,6 +126,7 @@ services:
         depends_on:
             - kafka
             - cassandra-init
+            - krampus-producer
         links:
             - kafka:kafka
             - cassandra-seed:cassandra-seed
