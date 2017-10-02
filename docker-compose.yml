@@ -128,3 +128,13 @@ services:
             - kafka:kafka
             - cassandra-seed:cassandra-seed
         restart: always
+
+    krampus-web-app:
+        image: codejitsu/krampus-web-app:0.1-SNAPSHOT
+        ports:
+            - "9000:9000"
+        depends_on:
+            - kafka
+        links:
+            - kafka:kafka
+        restart: always

@@ -382,17 +382,15 @@ lazy val krampusWebAppSettings = Seq(
 
     dockerfile in docker := {
       val baseDir = baseDirectory.value
-      val artifact: File = assembly.value
+      val artifact: File = dist.value
 
       val imageAppBaseDir = "/app"
       val artifactTargetPath = s"$imageAppBaseDir/${artifact.name}"
-      val artifactTargetPath_ln = s"$imageAppBaseDir/${name.value}.jar"
+      val artifactTargetPath_ln = s"$imageAppBaseDir/${name.value}.zip"
+      val artifactTargetFolderPath_ln = s"$imageAppBaseDir/${name.value}"
 
       val dockerResourcesDir = baseDir / "docker-resources"
       val dockerResourcesTargetPath = s"$imageAppBaseDir/"
-
-      val appConfTarget = s"$imageAppBaseDir/conf/application"
-      val logConfTarget = s"$imageAppBaseDir/conf/logging"
 
       val webAppPort = 9000
 
@@ -401,13 +399,11 @@ lazy val krampusWebAppSettings = Seq(
         maintainer("codejitsu")
         expose(webAppPort)
         env("APP_BASE", s"$imageAppBaseDir")
-        env("APP_CONF", s"$appConfTarget")
-        env("LOG_CONF", s"$logConfTarget")
         copy(artifact, artifactTargetPath)
         copy(dockerResourcesDir, dockerResourcesTargetPath)
-        copy(baseDir / "conf" / "logback.xml", logConfTarget)
         //Symlink the service jar to a non version specific name
         run("ln", "-sf", s"$artifactTargetPath", s"$artifactTargetPath_ln")
+        run("ln", "-sf", s"${artifactTargetPath.dropRight(4)}", s"$artifactTargetFolderPath_ln")
         entryPoint(s"${dockerResourcesTargetPath}docker-entrypoint.sh")
       }
     },
